@@ -5,13 +5,13 @@ from __future__ import print_function
 import click
 
 from prompt_toolkit.contrib.shortcuts import get_input
-from prompt_toolkit.history import History
 from prompt_toolkit.contrib.completers import WordCompleter
 from pygments.style import Style
 from pygments.token import Token
 from pygments.styles.default import DefaultStyle
 
 from .client import DockerClient
+from .client import DockerClientException
 
 
 class DocumentStyle(Style):
@@ -42,14 +42,14 @@ class DockerCli(object):
         Run the main loop
         :return:
         """
-        history = History()
 
         while True:
             try:
                 text = get_input(
                     "dockercli> ",
                     completer=self.keyword_completer,
-                    style=DocumentStyle
+                    style=DocumentStyle,
+                    history_filename='.dockercli_history'
                 )
 
                 # Ctrl + C was pressed
@@ -58,6 +58,9 @@ class DockerCli(object):
 
                 output = self.handler.handle_input(text)
                 click.echo_via_pager('\n'.join(output))
+
+            except DockerClientException as ex:
+                click.echo(ex.message, color='red')
 
             except EOFError:
                 break

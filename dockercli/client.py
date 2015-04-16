@@ -7,7 +7,29 @@ import sys
 from docker import Client
 from docker.utils import kwargs_from_env
 from tabulate import tabulate
+from requests.exceptions import ConnectionError
 
+
+class DockerClientException(Exception):
+
+    def __init__(self, inner_exception):
+        self.inner_exception = inner_exception
+        self.message = """There was a "Permission denied" error while calling Docker API.
+Please try the following:
+
+  # Add a docker group if it does not exist yet
+  sudo groupadd docker
+
+  # Add the connected user "${USER}" to the docker group.
+  # Change the user name to match your preferred user.
+  sudo gpasswd -a ${USER} docker
+
+  # Restart the Docker daemon.
+  # If you are in Ubuntu 14.04, use docker.io instead of docker
+  sudo service docker restart
+
+You may need to reboot the machine.
+"""
 
 class DockerClient(object):
 
@@ -46,11 +68,14 @@ class DockerClient(object):
         Print out the version. Equivalent of docker version.
         :return: iterable
         """
-        verdict = self.instance.version()
-        result = []
-        for k, v in verdict.iteritems():
-            result.append((k, v))
-        return [tabulate(result)]
+        try:
+            verdict = self.instance.version()
+            result = []
+            for k, v in verdict.iteritems():
+                result.append((k, v))
+            return [tabulate(result)]
+        except ConnectionError as ex:
+            raise DockerClientException(ex)
 
     def containers(self):
         """

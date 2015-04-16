@@ -12,7 +12,8 @@ config = {
     'author_email': 'i[dot]chernyavska[at]gmail[dot]com.',
     'version': '0.1',
     'install_requires': [
-        'prompt_toolkit',
+        'pygments',
+        'prompt-toolkit',
         'docker-py',
         'tabulate',
         'click'
