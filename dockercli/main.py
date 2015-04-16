@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import os
 import click
 
 from prompt_toolkit.contrib.shortcuts import get_input
@@ -15,6 +16,10 @@ from .client import DockerClientException
 
 
 class DocumentStyle(Style):
+    """
+    Encapsulates visual styles for the CLI.
+    TODO: move to a config file.
+    """
     styles = {
         Token.Menu.Completions.Completion.Current: 'bg:#00aaaa #000000',
         Token.Menu.Completions.Completion: 'bg:#008888 #ffffff',
@@ -23,7 +28,15 @@ class DocumentStyle(Style):
     }
     styles.update(DefaultStyle.styles)
 
+
 class DockerCli(object):
+    """
+    The CLI implementation.
+    """
+
+    keyword_completer = None
+    handler = None
+    saved_less_opts = None
 
     def __init__(self):
 
@@ -37,6 +50,34 @@ class DockerCli(object):
             ignore_case=False)
 
         self.handler = DockerClient()
+
+        self.saved_less_opts = self.set_less_opts()
+
+    def set_less_opts(self):
+        """
+        Set the "less" options and save the old settings.
+
+        What we're setting:
+          -F:
+            --quit-if-one-screen: Quit if entire file fits on first screen.
+          -R:
+            --raw-control-chars: Output "raw" control characters.
+          -X:
+            --no-init: Don't use termcap keypad init/deinit strings.
+            --no-keypad: Don't use termcap init/deinit strings.
+            This also disables launching "less" in an alternate screen.
+
+        :return: string with old options
+        """
+        opts = os.environ.get('LESS', '')
+        os.environ['LESS'] = '-RXF'
+        return opts
+
+    def revert_less_opts(self):
+        """
+        Restore the previous "less" options.
+        """
+        os.environ['LESS'] = self.saved_less_opts
 
     def run_cli(self):
         """
@@ -61,11 +102,17 @@ class DockerCli(object):
                 click.echo_via_pager('\n'.join(output))
 
             except DockerClientException as ex:
-                click.echo(ex.message, color='red')
+                click.secho(ex.message, fg='red')
 
             except EOFError:
+                # exit out of the CLI
                 break
 
+            except Exception as ex:
+                click.secho(ex.message, fg='red')
+                break
+
+        self.revert_less_opts()
         print('Goodbye!')
 
 def cli():
