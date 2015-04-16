@@ -14,10 +14,10 @@ class DockerClientException(Exception):
 
     def __init__(self, inner_exception):
         self.inner_exception = inner_exception
-        self.message = """There was a "Permission denied" error while calling Docker API.
-Please try the following:
+        self.message = """You don't have the necessary permissions to call Docker API.
+Try the following:
 
-  # Add a docker group if it does not exist yet
+  # Add a docker group if it does not exist yet.
   sudo groupadd docker
 
   # Add the connected user "${USER}" to the docker group.
@@ -39,11 +39,12 @@ class DockerClient(object):
         """
 
         self.handlers = {
-            'version': self.version,
-            'ps': self.containers,
-            'images': self.not_implemented,
-            'run': self.not_implemented,
-            'stop': self.not_implemented
+            'help': (self.help, "Help on available commands."),
+            'version': (self.version, "Equivalent of 'docker version'."),
+            'ps': (self.containers, "Equivalent of 'docker ps'."),
+            'images': (self.not_implemented, "Equivalent of 'docker images'."),
+            'run': (self.not_implemented, "Equivalent of 'docker run'."),
+            'stop': (self.not_implemented, "Equivalent of 'docker stop'.")
         }
 
         if sys.platform.startswith('darwin') or sys.platform.startswith('win32'):
@@ -55,6 +56,15 @@ class DockerClient(object):
         else:
             # unix-based
             self.instance = Client(base_url='unix://var/run/docker.sock')
+
+    def help(self):
+        """
+        Collect and return help docstrings for all commands.
+        :return: iterable
+        """
+        help_rows = [(key, self.handlers[key][1])
+                     for key in sorted(self.handlers.keys())]
+        return [tabulate(help_rows)]
 
     def not_implemented(self):
         """
@@ -96,6 +106,6 @@ class DockerClient(object):
         cmd = text.split(' ')[0] if text else ''
 
         if cmd in self.handlers:
-            return self.handlers[cmd]()
+            return self.handlers[cmd][0]()
         else:
-            return self.not_implemented()
+            return self.help()

@@ -28,7 +28,8 @@ class DockerCli(object):
     def __init__(self):
 
         self.keyword_completer = WordCompleter(
-            ['version',
+            ['help',
+             'version',
              'ps',
              'images',
              'run',
