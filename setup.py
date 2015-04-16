@@ -12,7 +12,10 @@ config = {
     'author_email': 'i[dot]chernyavska[at]gmail[dot]com.',
     'version': '0.1',
     'install_requires': [
-        'prompt_toolkit'
+        'prompt_toolkit',
+        'docker-py',
+        'tabulate',
+        'click'
     ],
     'entry_points': {
         'console_scripts': 'dockercli = dockercli.main:cli'
