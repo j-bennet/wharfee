@@ -5,8 +5,11 @@ from __future__ import print_function
 import os
 import click
 
-from prompt_toolkit.contrib.shortcuts import get_input
+from prompt_toolkit import AbortAction, Exit
 from prompt_toolkit.contrib.completers import WordCompleter
+from prompt_toolkit.contrib.shortcuts import create_cli
+from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.history import FileHistory
 from pygments.style import Style
 from pygments.token import Token
 from pygments.styles.default import DefaultStyle
@@ -85,26 +88,24 @@ class DockerCli(object):
         :return:
         """
 
+        cli = create_cli(
+            'dockercli> ',
+            style=DocumentStyle,
+            completer=self.keyword_completer,
+            history_filename=os.path.expanduser('~/.dockercli-history'))
+
         while True:
             try:
-                text = get_input(
-                    "dockercli> ",
-                    completer=self.keyword_completer,
-                    style=DocumentStyle,
-                    history_filename='.dockercli_history'
-                )
+                document = cli.read_input(
+                    on_exit=AbortAction.RAISE_EXCEPTION)
 
-                # Ctrl + C was pressed
-                if text is None:
-                    break
-
-                output = self.handler.handle_input(text)
+                output = self.handler.handle_input(document.text)
                 click.echo_via_pager('\n'.join(output))
 
             except DockerClientException as ex:
                 click.secho(ex.message, fg='red')
 
-            except EOFError:
+            except Exit:
                 # exit out of the CLI
                 break
 
