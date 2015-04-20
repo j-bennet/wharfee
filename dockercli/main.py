@@ -5,11 +5,15 @@ from __future__ import print_function
 import os
 import click
 
-from prompt_toolkit import AbortAction, Exit
-from prompt_toolkit.contrib.completers import WordCompleter
-from prompt_toolkit.contrib.shortcuts import create_cli
+from prompt_toolkit import AbortAction
+from prompt_toolkit import Exit
+from prompt_toolkit import CommandLineInterface
 from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.contrib.completers import WordCompleter
+from prompt_toolkit.contrib.shortcuts import create_default_layout
+from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.history import FileHistory
+from prompt_toolkit.keys import Keys
 from pygments.style import Style
 from pygments.token import Token
 from pygments.styles.default import DefaultStyle
@@ -82,22 +86,72 @@ class DockerCli(object):
         """
         os.environ['LESS'] = self.saved_less_opts
 
+    def get_toolbar_items(self, cli):
+        """
+        Return bottom menu items
+        :param cli:
+        :return: list of Token.Toolbar
+        """
+        return [
+            (Token.Toolbar.Status, ' [F2] Help '),
+            (Token.Toolbar.Status, ' [F10] Exit ')
+        ]
+
+    def get_key_manager(self):
+        """
+        Create and initialize keybinding manager
+        :return: KeyBindingManager
+        """
+        manager = KeyBindingManager()
+
+        @manager.registry.add_binding(Keys.F2)
+        def _(event):
+            """
+            When F2 has been pressed, fill in the "help" command.
+            """
+            event.cli.current_buffer.insert_text("help")
+
+        @manager.registry.add_binding(Keys.F10)
+        def _(event):
+            """
+            When F10 has been pressed, quit.
+            """
+            # Unused parameters for linter.
+            _ = event
+            raise Exit()
+
+        return manager
+
     def run_cli(self):
         """
         Run the main loop
-        :return:
         """
 
-        cli = create_cli(
-            'dockercli> ',
-            style=DocumentStyle,
+        history = FileHistory(os.path.expanduser('~/.dockercli-history'))
+
+        layout = create_default_layout(
+            message='dockercli> ',
+            reserve_space_for_menu=True,
+            get_bottom_toolbar_tokens=self.get_toolbar_items)
+
+        buffer = Buffer(
+            history=history,
             completer=self.keyword_completer,
-            history_filename=os.path.expanduser('~/.dockercli-history'))
+        )
+
+        manager = self.get_key_manager()
+
+        cli = CommandLineInterface(
+            layout=layout,
+            buffer=buffer,
+            key_bindings_registry=manager.registry,
+            style=DocumentStyle)
 
         while True:
             try:
                 document = cli.read_input(
-                    on_exit=AbortAction.RAISE_EXCEPTION)
+                    on_exit=AbortAction.RAISE_EXCEPTION
+                )
 
                 output = self.handler.handle_input(document.text)
                 click.echo_via_pager('\n'.join(output))
