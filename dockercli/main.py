@@ -20,6 +20,7 @@ from pygments.styles.default import DefaultStyle
 
 from .client import DockerClient
 from .client import DockerClientException
+from .completer import DockerCompleter
 
 
 class DocumentStyle(Style):
@@ -46,18 +47,13 @@ class DockerCli(object):
     saved_less_opts = None
 
     def __init__(self):
+        """
+        Initialize class members.
+        Should read the config here at some point.
+        """
 
-        self.keyword_completer = WordCompleter(
-            ['help',
-             'version',
-             'ps',
-             'images',
-             'run',
-             'stop'],
-            ignore_case=False)
-
+        self.completer = DockerCompleter()
         self.handler = DockerClient()
-
         self.saved_less_opts = self.set_less_opts()
 
     def set_less_opts(self):
@@ -136,7 +132,7 @@ class DockerCli(object):
 
         buffer = Buffer(
             history=history,
-            completer=self.keyword_completer,
+            completer=self.completer,
         )
 
         manager = self.get_key_manager()
