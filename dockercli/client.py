@@ -2,8 +2,11 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import re
 import sys
 
+from optparse import OptionParser
+from optparse import make_option
 from docker import Client
 from docker.utils import kwargs_from_env
 from tabulate import tabulate
@@ -31,7 +34,21 @@ Try the following:
 You may need to reboot the machine.
 """
 
+
 class DockerClient(object):
+
+    options = {
+        'ps': [
+            make_option("-a", "--all", action="store_true", dest="all",
+                        help='Show all containers. Only running containers are shown by default.'),
+            make_option("-q", "--quiet", action="store_true", dest="quiet",
+                        help='Only display numeric IDs.'),
+            make_option("-l", "--latest", action="store_true", dest="latest",
+                        help='Show only the latest created container, include non-running ones.'),
+            make_option("-s", "--size", action="store_true", dest="latest",
+                        help='Display total file sizes.'),
+        ]
+    }
 
     def __init__(self):
         """
@@ -87,12 +104,12 @@ class DockerClient(object):
         except ConnectionError as ex:
             raise DockerClientException(ex)
 
-    def containers(self):
+    def containers(self, *args, **kwargs):
         """
         Print out the list of containers. Equivalent of docker ps.
         :return: iterable
         """
-        csdict = self.instance.containers()
+        csdict = self.instance.containers(**kwargs)
         return [tabulate([csdict])]
 
     def handle_input(self, text):
@@ -103,9 +120,19 @@ class DockerClient(object):
         :return: iterable
         """
 
-        cmd = text.split(' ')[0] if text else ''
+        tokens = re.split('\s+', text) if text else ['']
+        cmd = tokens[0]
+        params = tokens[1:] if len(tokens) > 1 else None
 
-        if cmd in self.handlers:
-            return self.handlers[cmd][0]()
+        if cmd and cmd in self.handlers:
+            handler = self.handlers[cmd][0]
+
+            if params and cmd in self.options:
+                parser = OptionParser()
+                parser.add_options(self.options[cmd])
+                popts, pargs = parser.parse_args()
+                return handler(*pargs, **vars(popts))
+            else:
+                return handler()
         else:
             return self.help()

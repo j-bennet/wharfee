@@ -9,7 +9,6 @@ from prompt_toolkit import AbortAction
 from prompt_toolkit import Exit
 from prompt_toolkit import CommandLineInterface
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.contrib.completers import WordCompleter
 from prompt_toolkit.contrib.shortcuts import create_default_layout
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.history import FileHistory
@@ -132,7 +131,7 @@ class DockerCli(object):
 
         buffer = Buffer(
             history=history,
-            completer=self.completer,
+            completer=self.completer
         )
 
         manager = self.get_key_manager()
@@ -159,17 +158,18 @@ class DockerCli(object):
                 # exit out of the CLI
                 break
 
-            except Exception as ex:
-                click.secho(ex.message, fg='red')
-                break
+            #except Exception as ex:
+            #    click.secho(ex.message, fg='red')
+            #    break
 
         self.revert_less_opts()
         print('Goodbye!')
 
+
+@click.command()
 def cli():
     """
     Create and call the CLI
-    :return:
     """
     dockercli = DockerCli()
     dockercli.run_cli()

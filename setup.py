@@ -16,7 +16,8 @@ config = {
         'prompt-toolkit',
         'docker-py',
         'tabulate',
-        'click'
+        'click',
+        'optparse'
     ],
     'entry_points': {
         'console_scripts': 'dockercli = dockercli.main:cli'
