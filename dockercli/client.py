@@ -107,7 +107,7 @@ class DockerClient(object):
 
         csdict = self.instance.containers(**kwargs)
         if len(csdict) > 0:
-            return [tabulate([csdict])]
+            return [tabulate(csdict, headers='keys')]
         else:
             return ['There are no containers to list.']
 
@@ -134,6 +134,8 @@ class DockerClient(object):
                 if popts['help']:
                     return [parser.format_help()]
                 else:
+                    if 'help' in popts:
+                        del popts['help']
                     return handler(*pargs, **popts)
             else:
                 return handler(None, None)

@@ -38,15 +38,21 @@ class DockerCompleter(Completer):
         _ = complete_event
 
         word_before_cursor = document.get_word_before_cursor(WORD=True)
+        first_word = DockerCompleter.first_word(document.text).lower()
+        word_count = DockerCompleter.get_word_count(document.text)
 
         completions = []
 
         if word_before_cursor:
-            completions = DockerCompleter.find_matches(
-                word_before_cursor,
-                self.all_completions)
+            if word_count > 1:
+                completions = DockerCompleter.find_command_matches(
+                    first_word,
+                    word_before_cursor)
+            else:
+                completions = DockerCompleter.find_matches(
+                    word_before_cursor,
+                    self.all_completions)
         else:
-            first_word = DockerCompleter.first_word(document.text).lower()
             if first_word:
                 completions = DockerCompleter.find_command_matches(first_word)
 
@@ -80,6 +86,19 @@ class DockerCompleter(Completer):
             for item in sorted(collection):
                 if item.startswith(text):
                     yield Completion(item, -len(text))
+
+    @staticmethod
+    def get_word_count(text):
+        """
+        Find count of words.
+        :param text:
+        :return: int
+        """
+        if text is not None:
+            text = text.strip()
+            words = re.split('\s+', text)
+            return len(words)
+        return 0
 
     @staticmethod
     def first_word(text):
