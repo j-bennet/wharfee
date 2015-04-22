@@ -6,12 +6,12 @@ import re
 import sys
 
 from optparse import OptionParser
-from optparse import make_option
 from docker import Client
 from docker.utils import kwargs_from_env
 from tabulate import tabulate
 from requests.exceptions import ConnectionError
 
+from .options import COMMAND_OPTIONS
 
 class DockerClientException(Exception):
 
@@ -37,19 +37,6 @@ You may need to reboot the machine.
 
 class DockerClient(object):
 
-    options = {
-        'ps': [
-            make_option("-a", "--all", action="store_true", dest="all",
-                        help='Show all containers. Only running containers are shown by default.'),
-            make_option("-q", "--quiet", action="store_true", dest="quiet",
-                        help='Only display numeric IDs.'),
-            make_option("-l", "--latest", action="store_true", dest="latest",
-                        help='Show only the latest created container, include non-running ones.'),
-            make_option("-s", "--size", action="store_true", dest="latest",
-                        help='Display total file sizes.'),
-        ]
-    }
-
     def __init__(self):
         """
         Initialize the Docker wrapper.
@@ -64,10 +51,12 @@ class DockerClient(object):
             'stop': (self.not_implemented, "Equivalent of 'docker stop'.")
         }
 
-        if sys.platform.startswith('darwin') or sys.platform.startswith('win32'):
+        if sys.platform.startswith('darwin') \
+                or sys.platform.startswith('win32'):
             # mac or win
             kwargs = kwargs_from_env()
-            # hack from here: http://docker-py.readthedocs.org/en/latest/boot2docker/
+            # hack from here:
+            # http://docker-py.readthedocs.org/en/latest/boot2docker/
             kwargs['tls'].assert_hostname = False
             self.instance = Client(**kwargs)
         else:
@@ -110,7 +99,10 @@ class DockerClient(object):
         :return: iterable
         """
         csdict = self.instance.containers(**kwargs)
-        return [tabulate([csdict])]
+        if len(csdict) > 0:
+            return [tabulate([csdict])]
+        else:
+            return ['There are no containers to list.']
 
     def handle_input(self, text):
         """
@@ -127,9 +119,9 @@ class DockerClient(object):
         if cmd and cmd in self.handlers:
             handler = self.handlers[cmd][0]
 
-            if params and cmd in self.options:
+            if params and cmd in COMMAND_OPTIONS:
                 parser = OptionParser()
-                parser.add_options(self.options[cmd])
+                parser.add_options(COMMAND_OPTIONS[cmd])
                 popts, pargs = parser.parse_args()
                 return handler(*pargs, **vars(popts))
             else:

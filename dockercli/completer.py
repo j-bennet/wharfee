@@ -1,7 +1,7 @@
 
 import re
 from prompt_toolkit.completion import Completer, Completion
-
+from .options import COMMAND_OPTIONS
 
 class DockerCompleter(Completer):
     """
@@ -38,8 +38,33 @@ class DockerCompleter(Completer):
         _ = complete_event
 
         word_before_cursor = document.get_word_before_cursor(WORD=True)
-        completions = DockerCompleter.find_matches(word_before_cursor, self.all_completions)
+
+        completions = []
+
+        if word_before_cursor:
+            completions = DockerCompleter.find_matches(
+                word_before_cursor,
+                self.all_completions)
+        else:
+            first_word = DockerCompleter.first_word(document.text).lower()
+            if first_word:
+                completions = DockerCompleter.find_command_matches(first_word)
+
         return completions
+
+    @staticmethod
+    def find_command_matches(command, word=''):
+        """
+        Find all matches in context of the given command.
+        :param command: string: command keyword (such as "ps", "images")
+        :param word: string: word currently being typed
+        :return: iterable
+        """
+        if command in COMMAND_OPTIONS:
+            for opt in COMMAND_OPTIONS[command]:
+                suggestion = opt.get_opt_string()
+                if suggestion.startswith(word) or not word:
+                    yield Completion(suggestion, -len(word))
 
     @staticmethod
     def find_matches(text, collection):
@@ -55,6 +80,20 @@ class DockerCompleter(Completer):
             for item in sorted(collection):
                 if item.startswith(text):
                     yield Completion(item, -len(text))
+
+    @staticmethod
+    def first_word(text):
+        """
+        Find first word in a sentence
+        :param text:
+        :return:
+        """
+        if text is not None:
+            text = text.strip()
+            word = re.split('\s+', text)[0]
+            word = word.strip()
+            return word
+        return ''
 
     @staticmethod
     def last_word(text):
