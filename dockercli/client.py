@@ -63,27 +63,32 @@ class DockerClient(object):
             # unix-based
             self.instance = Client(base_url='unix://var/run/docker.sock')
 
-    def help(self):
+    def help(self, *args, **kwargs):
         """
         Collect and return help docstrings for all commands.
         :return: iterable
         """
+        _, _ = args, kwargs
+
         help_rows = [(key, self.handlers[key][1])
                      for key in sorted(self.handlers.keys())]
         return [tabulate(help_rows)]
 
-    def not_implemented(self):
+    def not_implemented(self, *args, **kwargs):
         """
         Placeholder for commands to be implemented.
         :return: iterable
         """
+        _, _ = args, kwargs
         return ['Not implemented.']
 
-    def version(self):
+    def version(self, *args, **kwargs):
         """
         Print out the version. Equivalent of docker version.
         :return: iterable
         """
+        _, _ = args, kwargs
+
         try:
             verdict = self.instance.version()
             result = []
@@ -98,6 +103,8 @@ class DockerClient(object):
         Print out the list of containers. Equivalent of docker ps.
         :return: iterable
         """
+        _ = args
+
         csdict = self.instance.containers(**kwargs)
         if len(csdict) > 0:
             return [tabulate([csdict])]
@@ -120,11 +127,15 @@ class DockerClient(object):
             handler = self.handlers[cmd][0]
 
             if params and cmd in COMMAND_OPTIONS:
-                parser = OptionParser()
+                parser = OptionParser(prog=cmd, add_help_option=False)
                 parser.add_options(COMMAND_OPTIONS[cmd])
-                popts, pargs = parser.parse_args()
-                return handler(*pargs, **vars(popts))
+                popts, pargs = parser.parse_args(params)
+                popts = vars(popts)
+                if popts['help']:
+                    return [parser.format_help()]
+                else:
+                    return handler(*pargs, **popts)
             else:
-                return handler()
+                return handler(None, None)
         else:
-            return self.help()
+            return self.help(None, None)

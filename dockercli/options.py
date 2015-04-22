@@ -3,6 +3,8 @@ from optparse import make_option
 
 COMMAND_OPTIONS = {
     'ps': [
+        make_option("-h", "--help", action="store_true", dest="help",
+                    help='Display help for this command.'),
         make_option("-a", "--all", action="store_true", dest="all",
                     help='Show all containers. '
                          'Only running containers are shown by default.'),
