@@ -66,9 +66,8 @@ class DockerCompleter(Completer):
         """
         if command in COMMAND_OPTIONS:
             for opt in COMMAND_OPTIONS[command]:
-                suggestion = opt.get_opt_string()
-                if suggestion.startswith(word) or not word:
-                    yield Completion(suggestion, -len(word))
+                if opt.long.startswith(word) or not word:
+                    yield Completion(opt.long, -len(word))
 
     @staticmethod
     def find_matches(text, collection):

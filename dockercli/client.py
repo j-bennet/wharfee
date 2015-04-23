@@ -128,7 +128,8 @@ class DockerClient(object):
 
             if params and cmd in COMMAND_OPTIONS:
                 parser = OptionParser(prog=cmd, add_help_option=False)
-                parser.add_options(COMMAND_OPTIONS[cmd])
+                for opt in COMMAND_OPTIONS[cmd]:
+                    parser.add_option(opt.get_option())
                 popts, pargs = parser.parse_args(params)
                 popts = vars(popts)
                 if popts['help']:
