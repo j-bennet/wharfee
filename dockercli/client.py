@@ -109,11 +109,32 @@ class DockerClient(object):
         if 'trunc' in kwargs and kwargs['trunc'] is None:
             kwargs['trunc'] = True
 
-        csdict = self.instance.containers(**kwargs)
+        csdict = self.truncate_rows(self.instance.containers(**kwargs))
         if len(csdict) > 0:
             return [tabulate(csdict, headers='keys')]
         else:
             return ['There are no containers to list.']
+
+    def truncate_rows(self, rows, length=25):
+        """
+        Truncate every string value in a dictionary up to a certain length.
+        :param rows: iterable of dictionaries
+        :param length: int
+        :return:
+        """
+
+        def trimto(str):
+            if isinstance(str, basestring):
+                return str[:length+1]
+            return str
+
+        result = []
+        for row in rows:
+            if isinstance(row, dict):
+                result.append({k: trimto(v) for k, v in row.iteritems()})
+            else:
+                result.append(row)
+        return result
 
     def handle_input(self, text):
         """
