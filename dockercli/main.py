@@ -9,6 +9,7 @@ from prompt_toolkit import AbortAction
 from prompt_toolkit import CommandLineInterface
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.contrib.shortcuts import create_default_layout
+from prompt_toolkit.contrib.shortcuts import create_eventloop
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.keys import Keys
@@ -134,8 +135,10 @@ class DockerCli(object):
         )
 
         manager = self.get_key_manager()
+        eventloop = create_eventloop()
 
-        cl = CommandLineInterface(
+        dcli = CommandLineInterface(
+            eventloop,
             layout=layout,
             buffer=buffer,
             key_bindings_registry=manager.registry,
@@ -144,7 +147,7 @@ class DockerCli(object):
 
         while True:
             try:
-                document = cl.read_input()
+                document = dcli.read_input()
 
                 output = self.handler.handle_input(document.text)
                 click.echo_via_pager('\n'.join(output))

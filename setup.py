@@ -12,11 +12,11 @@ setup(
     author_email='i[dot]chernyavska[at]gmail[dot]com.',
     version='0.1',
     install_requires=[
-        'pygments',
-        'prompt-toolkit',
-        'docker-py',
-        'tabulate',
-        'click'
+        'pygments>=2.0.2',
+        'prompt-toolkit==0.32',
+        'docker-py>=1.1.0',
+        'tabulate>=0.7.5',
+        'click>=4.0'
     ],
     extras_require={
         'testing': ['pytest', 'mock'],
