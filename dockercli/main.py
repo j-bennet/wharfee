@@ -6,7 +6,6 @@ import os
 import click
 
 from prompt_toolkit import AbortAction
-from prompt_toolkit import Exit
 from prompt_toolkit import CommandLineInterface
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.contrib.shortcuts import create_default_layout
@@ -113,7 +112,7 @@ class DockerCli(object):
             """
             # Unused parameters for linter.
             _ = event
-            raise Exit()
+            raise EOFError
 
         return manager
 
@@ -136,17 +135,16 @@ class DockerCli(object):
 
         manager = self.get_key_manager()
 
-        cli = CommandLineInterface(
+        cl = CommandLineInterface(
             layout=layout,
             buffer=buffer,
             key_bindings_registry=manager.registry,
-            style=DocumentStyle)
+            style=DocumentStyle,
+            on_exit=AbortAction.RAISE_EXCEPTION)
 
         while True:
             try:
-                document = cli.read_input(
-                    on_exit=AbortAction.RAISE_EXCEPTION
-                )
+                document = cl.read_input()
 
                 output = self.handler.handle_input(document.text)
                 click.echo_via_pager('\n'.join(output))
@@ -154,7 +152,7 @@ class DockerCli(object):
             except DockerClientException as ex:
                 click.secho(ex.message, fg='red')
 
-            except Exit:
+            except EOFError:
                 # exit out of the CLI
                 break
 

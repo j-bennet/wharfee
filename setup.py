@@ -18,6 +18,9 @@ setup(
         'tabulate',
         'click'
     ],
+    extras_require={
+        'testing': ['pytest', 'mock'],
+    },
     entry_points={
         'console_scripts': 'dockercli = dockercli.main:cli'
     },

@@ -3,6 +3,7 @@ import re
 from prompt_toolkit.completion import Completer, Completion
 from .options import COMMAND_OPTIONS
 
+
 class DockerCompleter(Completer):
     """
     Completer for Docker commands and parameters.
@@ -41,20 +42,17 @@ class DockerCompleter(Completer):
         first_word = DockerCompleter.first_word(document.text).lower()
         word_count = DockerCompleter.get_word_count(document.text)
 
-        completions = []
+        in_command = (word_count > 1) or \
+                     ((not word_before_cursor) and first_word)
 
-        if word_before_cursor:
-            if word_count > 1:
-                completions = DockerCompleter.find_command_matches(
-                    first_word,
-                    word_before_cursor)
-            else:
-                completions = DockerCompleter.find_matches(
-                    word_before_cursor,
-                    self.all_completions)
+        if in_command:
+            completions = DockerCompleter.find_command_matches(
+                first_word,
+                word_before_cursor)
         else:
-            if first_word:
-                completions = DockerCompleter.find_command_matches(first_word)
+            completions = DockerCompleter.find_matches(
+                word_before_cursor,
+                self.all_completions)
 
         return completions
 
@@ -82,10 +80,9 @@ class DockerCompleter(Completer):
         """
         text = DockerCompleter.last_word(text).lower()
 
-        if text:
-            for item in sorted(collection):
-                if item.startswith(text):
-                    yield Completion(item, -len(text))
+        for item in sorted(collection):
+            if item.startswith(text) or (not text):
+                yield Completion(item, -len(text))
 
     @staticmethod
     def get_word_count(text):
