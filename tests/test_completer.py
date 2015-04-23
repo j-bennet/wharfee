@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
+
 import pytest
 from prompt_toolkit.completion import Completion
 from prompt_toolkit.document import Document
+from dockercli.options import COMMAND_OPTIONS
 
 
 @pytest.fixture
@@ -47,14 +49,26 @@ def test_options_completion(completer, complete_event):
     """
     After command name, suggest command options.
     """
-    _test_options_completion(
-        completer, complete_event, 'ps ', ['--help', '--all', '--quiet', '--latest', '--size'], 0)
+
+    ps_opts = _get_command_option_names('ps')
 
     _test_options_completion(
-        completer, complete_event, 'ps --', ['--help', '--all', '--quiet', '--latest', '--size'], -2)
+        completer, complete_event, 'ps ', ps_opts, 0)
+
+    _test_options_completion(
+        completer, complete_event, 'ps --', [n for n in ps_opts if n.startswith('--')], -2)
 
     _test_options_completion(
         completer, complete_event, 'ps --h', ['--help'], -3)
+
+
+def _get_command_option_names(command):
+    """
+    Helper method to get all option names for command.
+    :param command: string
+    :return: list
+    """
+    return [opt.name for opt in COMMAND_OPTIONS[command]]
 
 
 def _test_command_completion(completer, complete_event, command, expected):

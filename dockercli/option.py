@@ -11,8 +11,9 @@ class CommandOption(object):
 
     TYPE_FILEPATH = 1
     TYPE_BOOLEAN = 2
-    TYPE_CONTAINER = 3
-    TYPE_IMAGE = 4
+    TYPE_NUMERIC = 3
+    TYPE_CONTAINER = 4
+    TYPE_IMAGE = 5
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -26,12 +27,19 @@ class CommandOption(object):
         if option_type not in [
             CommandOption.TYPE_FILEPATH,
             CommandOption.TYPE_BOOLEAN,
+            CommandOption.TYPE_NUMERIC,
             CommandOption.TYPE_CONTAINER,
             CommandOption.TYPE_IMAGE
         ]:
             raise ValueError("Incorrect option_type.", option_type)
 
-        arguments = [short_name, long_name] if long_name else [short_name]
+        if long_name and short_name:
+            arguments = [short_name, long_name]
+        elif long_name:
+            arguments = [long_name]
+        else:
+            arguments = [short_name]
+
         self.option_type = option_type
         self.short_name = short_name
         self.long_name = long_name
@@ -45,17 +53,9 @@ class CommandOption(object):
         return self.option
 
     @property
-    def short(self):
+    def name(self):
         """
         Getter for short name
         :return: string
         """
-        return self.short_name
-
-    @property
-    def long(self):
-        """
-        Getter for long name
-        :return: string
-        """
-        return self.long_name
+        return self.long_name if self.long_name else self.short_name

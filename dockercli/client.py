@@ -105,6 +105,10 @@ class DockerClient(object):
         """
         _ = args
 
+        # Truncate by default.
+        if 'trunc' in kwargs and kwargs['trunc'] is None:
+            kwargs['trunc'] = True
+
         csdict = self.instance.containers(**kwargs)
         if len(csdict) > 0:
             return [tabulate(csdict, headers='keys')]

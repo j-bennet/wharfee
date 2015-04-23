@@ -66,8 +66,8 @@ class DockerCompleter(Completer):
         """
         if command in COMMAND_OPTIONS:
             for opt in COMMAND_OPTIONS[command]:
-                if opt.long.startswith(word) or not word:
-                    yield Completion(opt.long, -len(word))
+                if opt.name.startswith(word) or not word:
+                    yield Completion(opt.name, -len(word))
 
     @staticmethod
     def find_matches(text, collection):
