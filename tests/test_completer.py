@@ -62,6 +62,28 @@ def test_options_completion(completer, complete_event):
         completer, complete_event, 'ps --h', ['--help'], -3)
 
 
+def test_options_completion_exclusion(completer, complete_event):
+    """
+    After command name, do not suggest options that are already set.
+    """
+
+    ps_opts = _get_command_option_names('ps')
+
+    _test_options_completion(
+        completer,
+        complete_event,
+        'ps --all ',
+        [n for n in ps_opts if n != '--all'],
+        0)
+
+    _test_options_completion(
+        completer,
+        complete_event,
+        'ps --all --quiet ',
+        [n for n in ps_opts if n not in ['--all', '--quiet']],
+        0)
+
+
 def _get_command_option_names(command):
     """
     Helper method to get all option names for command.

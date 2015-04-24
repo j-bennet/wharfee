@@ -42,16 +42,18 @@ class DockerCompleter(Completer):
         _ = complete_event
 
         word_before_cursor = document.get_word_before_cursor(WORD=True)
-        first_word = DockerCompleter.first_word(document.text).lower()
-        word_count = DockerCompleter.get_word_count(document.text)
+        first_word = DockerCompleter.first_token(document.text).lower()
+        words = DockerCompleter.get_tokens(document.text)
 
-        in_command = (word_count > 1) or \
+        in_command = (len(words) > 1) or \
                      ((not word_before_cursor) and first_word)
 
         if in_command:
+            params = words[1:] if (len(words) > 1) else []
             completions = DockerCompleter.find_command_matches(
                 first_word,
-                word_before_cursor)
+                word_before_cursor,
+                params)
         else:
             completions = DockerCompleter.find_matches(
                 word_before_cursor,
@@ -60,17 +62,22 @@ class DockerCompleter(Completer):
         return completions
 
     @staticmethod
-    def find_command_matches(command, word=''):
+    def find_command_matches(command, word='', params=None):
         """
         Find all matches in context of the given command.
         :param command: string: command keyword (such as "ps", "images")
         :param word: string: word currently being typed
         :return: iterable
         """
+
+        params = set(params) if params else set([])
+
         if command in COMMAND_OPTIONS:
             for opt in COMMAND_OPTIONS[command]:
-                if opt.name.startswith(word) or not word:
-                    yield Completion(opt.name, -len(word))
+                # Do not offer options that user already set.
+                if opt.name not in params:
+                    if opt.name.startswith(word) or not word:
+                        yield Completion(opt.name, -len(word))
 
     @staticmethod
     def find_matches(text, collection):
@@ -80,27 +87,27 @@ class DockerCompleter(Completer):
         :param collection: collection to suggest from
         :return: iterable
         """
-        text = DockerCompleter.last_word(text).lower()
+        text = DockerCompleter.last_token(text).lower()
 
         for item in sorted(collection):
             if item.startswith(text) or (not text):
                 yield Completion(item, -len(text))
 
     @staticmethod
-    def get_word_count(text):
+    def get_tokens(text):
         """
-        Find count of words.
+        Parse out all tokens.
         :param text:
         :return: int
         """
         if text is not None:
             text = text.strip()
             words = re.split('\s+', text)
-            return len(words)
-        return 0
+            return words
+        return []
 
     @staticmethod
-    def first_word(text):
+    def first_token(text):
         """
         Find first word in a sentence
         :param text:
@@ -114,7 +121,7 @@ class DockerCompleter(Completer):
         return ''
 
     @staticmethod
-    def last_word(text):
+    def last_token(text):
         """
         Find last word in a sentence
         :param text:
