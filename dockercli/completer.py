@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 
 import re
 from prompt_toolkit.completion import Completer, Completion
@@ -20,12 +21,14 @@ class DockerCompleter(Completer):
 
     RE_WHITESPACE = re.compile('\s+')
 
-    def __init__(self):
+    def __init__(self, containers=None, images=None):
         """
         Initialize the completer
         :return:
         """
         self.all_completions = set(self.commands)
+        self.containers = set(containers) if containers else set()
+        self.images = set(images) if images else set()
 
     def get_completions(self, document, complete_event):
         """

@@ -5,13 +5,12 @@ from __future__ import print_function
 import re
 import sys
 
-from optparse import OptionParser
 from docker import Client
 from docker.utils import kwargs_from_env
 from tabulate import tabulate
 from requests.exceptions import ConnectionError
 
-from .options import COMMAND_OPTIONS
+from .options import parse_command_options
 
 class DockerClientException(Exception):
 
@@ -151,12 +150,8 @@ class DockerClient(object):
         if cmd and cmd in self.handlers:
             handler = self.handlers[cmd][0]
 
-            if params and cmd in COMMAND_OPTIONS:
-                parser = OptionParser(prog=cmd, add_help_option=False)
-                for opt in COMMAND_OPTIONS[cmd]:
-                    parser.add_option(opt.get_option())
-                popts, pargs = parser.parse_args(params)
-                popts = vars(popts)
+            if params:
+                parser, pargs, popts = parse_command_options(cmd, params)
                 if popts['help']:
                     return [parser.format_help()]
                 else:

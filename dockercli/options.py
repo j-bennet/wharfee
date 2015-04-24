@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+from optparse import OptionParser
 from .option import CommandOption
 
 
@@ -47,3 +50,17 @@ COMMAND_OPTIONS = {
     ]
 }
 
+
+def parse_command_options(cmd, params):
+    """
+    Parse options for a given command.
+    :param cmd: string: command name
+    :param params: list: all tokens after command name
+    :return: parser, args, opts
+    """
+    parser = OptionParser(prog=cmd, add_help_option=False)
+    for opt in COMMAND_OPTIONS[cmd]:
+        parser.add_option(opt.get_option())
+    popts, pargs = parser.parse_args(params)
+    popts = vars(popts)
+    return parser, pargs, popts
