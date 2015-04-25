@@ -5,7 +5,7 @@ from __future__ import print_function
 import re
 import sys
 
-from docker import Client
+from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
 from tabulate import tabulate
 from requests.exceptions import ConnectionError
@@ -57,10 +57,11 @@ class DockerClient(object):
             # hack from here:
             # http://docker-py.readthedocs.org/en/latest/boot2docker/
             kwargs['tls'].assert_hostname = False
-            self.instance = Client(**kwargs)
+            self.instance = AutoVersionClient(**kwargs)
         else:
             # unix-based
-            self.instance = Client(base_url='unix://var/run/docker.sock')
+            self.instance = AutoVersionClient(
+                base_url='unix://var/run/docker.sock')
 
     def help(self, *args, **kwargs):
         """
