@@ -20,6 +20,7 @@ from pygments.styles.default import DefaultStyle
 from .client import DockerClient
 from .client import DockerClientException
 from .completer import DockerCompleter
+from .lexer import CommandLexer
 
 
 class DocumentStyle(Style):
@@ -127,11 +128,12 @@ class DockerCli(object):
         layout = create_default_layout(
             message='dockercli> ',
             reserve_space_for_menu=True,
+            lexer=CommandLexer,
             get_bottom_toolbar_tokens=self.get_toolbar_items)
 
         buffer = Buffer(
             history=history,
-            completer=self.completer
+            completer=self.completer,
         )
 
         manager = self.get_key_manager()
