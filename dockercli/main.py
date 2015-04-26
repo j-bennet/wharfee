@@ -18,7 +18,8 @@ from pygments.token import Token
 from pygments.styles.default import DefaultStyle
 
 from .client import DockerClient
-from .client import DockerClientException
+from .client import DockerPermissionException
+from .client import DockerSslException
 from .completer import DockerCompleter
 from .lexer import CommandLexer
 
@@ -55,6 +56,7 @@ class DockerCli(object):
         self.completer = DockerCompleter()
         self.handler = DockerClient()
         self.saved_less_opts = self.set_less_opts()
+
 
     def set_less_opts(self):
         """
@@ -154,7 +156,7 @@ class DockerCli(object):
                 output = self.handler.handle_input(document.text)
                 click.echo_via_pager('\n'.join(output))
 
-            except DockerClientException as ex:
+            except DockerPermissionException as ex:
                 click.secho(ex.message, fg='red')
 
             except EOFError:
@@ -174,8 +176,11 @@ def cli():
     """
     Create and call the CLI
     """
-    dockercli = DockerCli()
-    dockercli.run_cli()
+    try:
+        dockercli = DockerCli()
+        dockercli.run_cli()
+    except DockerSslException as ex:
+        click.secho(ex.message, fg='red')
 
 if __name__ == "__main__":
     cli()
