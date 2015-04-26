@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
-import re
 import sys
 
 from docker import AutoVersionClient
@@ -129,8 +128,7 @@ class DockerClient(object):
         :param text: user input
         :return: iterable
         """
-
-        tokens = re.split('\s+', text) if text else ['']
+        tokens = text.strip().split() if text else ['']
         cmd = tokens[0]
         params = tokens[1:] if len(tokens) > 1 else None
 

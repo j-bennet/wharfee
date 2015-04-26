@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import re
 from prompt_toolkit.completion import Completer, Completion
 from .options import COMMAND_OPTIONS
 
@@ -18,8 +17,6 @@ class DockerCompleter(Completer):
         'run',
         'stop'
     ]
-
-    RE_WHITESPACE = re.compile('\s+')
 
     def __init__(self, containers=None, images=None):
         """
@@ -102,7 +99,7 @@ class DockerCompleter(Completer):
         """
         if text is not None:
             text = text.strip()
-            words = re.split('\s+', text)
+            words = text.split()
             return words
         return []
 
@@ -115,7 +112,7 @@ class DockerCompleter(Completer):
         """
         if text is not None:
             text = text.strip()
-            word = re.split('\s+', text)[0]
+            word = text.split()[0]
             word = word.strip()
             return word
         return ''
@@ -129,7 +126,7 @@ class DockerCompleter(Completer):
         """
         if text is not None:
             text = text.strip()
-            word = re.split('\s+', text)[-1]
+            word = text.split()[-1]
             word = word.strip()
             return word
         return ''
