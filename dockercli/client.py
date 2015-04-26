@@ -6,7 +6,6 @@ import sys
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
-from tabulate import tabulate
 from docker.errors import DockerException
 from requests.exceptions import ConnectionError
 
@@ -14,6 +13,13 @@ from .options import parse_command_options
 
 
 class DockerClient(object):
+    """
+    This client is a "translator" between docker-py API and
+    the standard docker command line. We need one because docker-py
+    does not use the same naming for command names and their parameters.
+    For example, "docker ps" is named "containers", "-n" parameter
+    is named "limit", some parameters are not implemented at all, etc.
+    """
 
     def __init__(self):
         """
@@ -48,83 +54,15 @@ class DockerClient(object):
             self.instance = AutoVersionClient(
                 base_url='unix://var/run/docker.sock')
 
-    def help(self, *args, **kwargs):
-        """
-        Collect and return help docstrings for all commands.
-        :return: iterable
-        """
-        _, _ = args, kwargs
-
-        help_rows = [(key, self.handlers[key][1])
-                     for key in sorted(self.handlers.keys())]
-        return [tabulate(help_rows)]
-
-    def not_implemented(self, *args, **kwargs):
-        """
-        Placeholder for commands to be implemented.
-        :return: iterable
-        """
-        _, _ = args, kwargs
-        return ['Not implemented.']
-
-    def version(self, *args, **kwargs):
-        """
-        Print out the version. Equivalent of docker version.
-        :return: iterable
-        """
-        _, _ = args, kwargs
-
-        try:
-            verdict = self.instance.version()
-            result = []
-            for k, v in verdict.iteritems():
-                result.append((k, v))
-            return [tabulate(result)]
-        except ConnectionError as ex:
-            raise DockerPermissionException(ex)
-
-    def containers(self, *args, **kwargs):
-        """
-        Print out the list of containers. Equivalent of docker ps.
-        :return: iterable
-        """
-        _ = args
-
-        # Truncate by default.
-        if 'trunc' in kwargs and kwargs['trunc'] is None:
-            kwargs['trunc'] = True
-
-        csdict = self.truncate_rows(self.instance.containers(**kwargs))
-        if len(csdict) > 0:
-            return [tabulate(csdict, headers='keys')]
-        else:
-            return ['There are no containers to list.']
-
-    def truncate_rows(self, rows, length=25):
-        """
-        Truncate every string value in a dictionary up to a certain length.
-        :param rows: iterable of dictionaries
-        :param length: int
-        :return:
-        """
-
-        def trimto(str):
-            if isinstance(str, basestring):
-                return str[:length+1]
-            return str
-
-        result = []
-        for row in rows:
-            if isinstance(row, dict):
-                result.append({k: trimto(v) for k, v in row.iteritems()})
-            else:
-                result.append(row)
-        return result
-
     def handle_input(self, text):
         """
         Parse the command, run it via the client, and return
-        some iterable output to print out.
+        some iterable output to print out. This will parse options
+        and arguments out of the command line and into parameters
+        consistent with docker-py naming. It is designed to be the
+        only really public method of the client. Other methods
+        are just pass-through methods that delegate commands
+        to docker-py.
         :param text: user input
         :return: iterable
         """
@@ -136,17 +74,70 @@ class DockerClient(object):
             handler = self.handlers[cmd][0]
 
             if params:
-                parser, pargs, popts = parse_command_options(cmd, params)
-                if popts['help']:
-                    return [parser.format_help()]
-                else:
-                    if 'help' in popts:
-                        del popts['help']
-                    return handler(*pargs, **popts)
+                try:
+                    parser, pargs, popts = parse_command_options(cmd, params)
+                    if popts['help']:
+                        return [parser.format_help()]
+                    else:
+                        if 'help' in popts:
+                            del popts['help']
+                        return handler(*pargs, **popts)
+                except Exception as ex:
+                    return [ex.message]
             else:
                 return handler(None, None)
         else:
             return self.help(None, None)
+
+    def help(self, *args, **kwargs):
+        """
+        Collect and return help docstrings for all commands.
+        :return: list of tuples
+        """
+        _, _ = args, kwargs
+
+        help_rows = [(key, self.handlers[key][1])
+                     for key in self.handlers.keys()]
+        return help_rows
+
+    def not_implemented(self, *args, **kwargs):
+        """
+        Placeholder for commands to be implemented.
+        :return: iterable
+        """
+        _, _ = args, kwargs
+        return ['Not implemented.']
+
+    def version(self, *args, **kwargs):
+        """
+        Return the version. Equivalent of docker version.
+        :return: list of tuples
+        """
+        _, _ = args, kwargs
+
+        try:
+            verdict = self.instance.version()
+            result = [(k, verdict[k]) for k in sorted(verdict.keys())]
+            return result
+        except ConnectionError as ex:
+            raise DockerPermissionException(ex)
+
+    def containers(self, *args, **kwargs):
+        """
+        Return the list of containers. Equivalent of docker ps.
+        :return: list of dicts
+        """
+        _ = args
+
+        # Truncate by default.
+        if 'trunc' in kwargs and kwargs['trunc'] is None:
+            kwargs['trunc'] = True
+
+        csdict = self.instance.containers(**kwargs)
+        if len(csdict) > 0:
+            return csdict
+        else:
+            return ['There are no containers to list.']
 
 
 class DockerPermissionException(Exception):

@@ -58,9 +58,24 @@ def parse_command_options(cmd, params):
     :param params: list: all tokens after command name
     :return: parser, args, opts
     """
-    parser = OptionParser(prog=cmd, add_help_option=False)
+    parser = OptParser(prog=cmd, add_help_option=False)
     for opt in COMMAND_OPTIONS[cmd]:
         parser.add_option(opt.get_option())
     popts, pargs = parser.parse_args(params)
     popts = vars(popts)
     return parser, pargs, popts
+
+
+class OptParser(OptionParser):
+    """
+    Wrapper around optparse's OptionParser.
+    Overrides
+    """
+    def error(self, msg):
+        """error(msg : string)
+
+        Print a usage message incorporating 'msg' to stderr and exit.
+        If you override this in a subclass, it should not return -- it
+        should either exit or raise an exception.
+        """
+        raise Exception("Error parsing options: {0}".format(msg))

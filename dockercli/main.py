@@ -22,7 +22,7 @@ from .client import DockerPermissionException
 from .client import DockerSslException
 from .completer import DockerCompleter
 from .lexer import CommandLexer
-
+from .formatter import format_data
 
 class DocumentStyle(Style):
     """
@@ -152,9 +152,9 @@ class DockerCli(object):
         while True:
             try:
                 document = dcli.read_input()
-
                 output = self.handler.handle_input(document.text)
-                click.echo_via_pager('\n'.join(output))
+                lines = format_data(output)
+                click.echo_via_pager('\n'.join(lines))
 
             except DockerPermissionException as ex:
                 click.secho(ex.message, fg='red')
