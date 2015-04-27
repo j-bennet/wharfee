@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from prompt_toolkit.completion import Completer, Completion
 from .options import COMMAND_OPTIONS
+from .options import find_option
 
 
 class DockerCompleter(Completer):
@@ -25,6 +26,20 @@ class DockerCompleter(Completer):
         """
         self.all_completions = set(self.commands)
         self.containers = set(containers) if containers else set()
+        self.images = set(images) if images else set()
+
+    def set_containers(self, containers):
+        """
+        Setter for list of available containers.
+        :param containers: list
+        """
+        self.containers = set(containers) if containers else set()
+
+    def set_images(self, images):
+        """
+        Setter for list of available images.
+        :param images: list
+        """
         self.images = set(images) if images else set()
 
     def get_completions(self, document, complete_event):
@@ -81,10 +96,10 @@ class DockerCompleter(Completer):
         """
 
         params = set(params) if params else set([])
+        current_opt = find_option(command, prev) if prev else None
 
         if command in COMMAND_OPTIONS:
-            if prev and prev in COMMAND_OPTIONS[command] and \
-                    COMMAND_OPTIONS[command][prev].is_type_container():
+            if current_opt and current_opt.is_type_container():
                 for container_name in containers:
                     if container_name.startswith(word) or not word:
                         yield Completion(container_name, -len(word))
@@ -131,9 +146,10 @@ class DockerCompleter(Completer):
         """
         if text is not None:
             text = text.strip()
-            word = text.split()[0]
-            word = word.strip()
-            return word
+            if len(text) > 0:
+                word = text.split()[0]
+                word = word.strip()
+                return word
         return ''
 
     @staticmethod
@@ -145,7 +161,8 @@ class DockerCompleter(Completer):
         """
         if text is not None:
             text = text.strip()
-            word = text.split()[-1]
-            word = word.strip()
-            return word
+            if len(text) > 0:
+                word = text.split()[-1]
+                word = word.strip()
+                return word
         return ''

@@ -84,6 +84,24 @@ def test_options_completion_exclusion(completer, complete_event):
         0)
 
 
+def test_options_container_completion(completer, complete_event):
+    """
+    Suggest container names in relevant options (ps --before)
+    """
+    container_names = ['newton', 'tesla', 'einstein']
+    image_names = ['ubuntu', 'ubuntu:12.04', 'ubuntu:14.04']
+
+    completer.set_containers(container_names)
+    completer.set_images(image_names)
+
+    _test_options_completion(
+        completer,
+        complete_event,
+        'ps --before ',
+        container_names,
+        0
+    )
+
 def _get_command_option_names(command):
     """
     Helper method to get all option names for command.

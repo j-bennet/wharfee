@@ -51,6 +51,20 @@ COMMAND_OPTIONS = {
 }
 
 
+def find_option(command, name):
+    """
+    Helper method to find command option by its name.
+    :param command: string
+    :param name: string
+    :return: CommandOption
+    """
+    if command in COMMAND_OPTIONS:
+        for opt in COMMAND_OPTIONS[command]:
+            if opt.name == name:
+                return opt
+    return None
+
+
 def parse_command_options(cmd, params):
     """
     Parse options for a given command.
