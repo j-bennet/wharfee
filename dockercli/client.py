@@ -135,6 +135,13 @@ class DockerClient(object):
 
         csdict = self.instance.containers(**kwargs)
         if len(csdict) > 0:
+
+            # Container names start with /.
+            # Let's strip this for readability.
+            for i in range(len(csdict)):
+                csdict[i]['Names'] = map(
+                    lambda x: x.lstrip('/'), csdict[i]['Names'])
+
             return csdict
         else:
             return ['There are no containers to list.']

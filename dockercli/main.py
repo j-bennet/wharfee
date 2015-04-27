@@ -53,8 +53,9 @@ class DockerCli(object):
         Should read the config here at some point.
         """
 
-        self.completer = DockerCompleter()
         self.handler = DockerClient()
+        self.completer = DockerCompleter()
+        self.set_completer_options()
         self.saved_less_opts = self.set_less_opts()
 
 
@@ -120,6 +121,18 @@ class DockerCli(object):
 
         return manager
 
+    def set_completer_options(self):
+        """
+        Set image and container names in Completer.
+        Re-read them every time we run a command, because
+        things might have changed.
+        """
+        cs = self.handler.containers(all=True)
+        containers = [name for c in cs for name in c['Names']]
+        self.completer.set_containers(containers)
+        # TODO: not implemented
+        # imdict = self.handler.images()
+
     def run_cli(self):
         """
         Run the main loop
@@ -152,6 +165,7 @@ class DockerCli(object):
         while True:
             try:
                 document = dcli.read_input()
+                self.set_completer_options()
                 output = self.handler.handle_input(document.text)
                 lines = format_data(output)
                 click.echo_via_pager('\n'.join(lines))
