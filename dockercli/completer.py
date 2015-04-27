@@ -46,11 +46,20 @@ class DockerCompleter(Completer):
                      ((not word_before_cursor) and first_word)
 
         if in_command:
+            previous_start = document.find_start_of_previous_word(WORD=True)
+            previous_word = ''
+            if previous_start:
+                previous_word = document.text_before_cursor[previous_start:]
+                previous_word = previous_word.strip().split()[0]
+
             params = words[1:] if (len(words) > 1) else []
             completions = DockerCompleter.find_command_matches(
                 first_word,
                 word_before_cursor,
-                params)
+                previous_word,
+                params,
+                self.containers,
+                self.images)
         else:
             completions = DockerCompleter.find_matches(
                 word_before_cursor,
@@ -59,22 +68,32 @@ class DockerCompleter(Completer):
         return completions
 
     @staticmethod
-    def find_command_matches(command, word='', params=None):
+    def find_command_matches(command, word='', prev='', params=None, containers=None, images=None):
         """
         Find all matches in context of the given command.
         :param command: string: command keyword (such as "ps", "images")
         :param word: string: word currently being typed
+        :param prev: string: previous word
+        :param params: list of command parameters
+        :param containers: list of containers
+        :param images: list of images
         :return: iterable
         """
 
         params = set(params) if params else set([])
 
         if command in COMMAND_OPTIONS:
-            for opt in COMMAND_OPTIONS[command]:
-                # Do not offer options that user already set.
-                if opt.name not in params:
-                    if opt.name.startswith(word) or not word:
-                        yield Completion(opt.name, -len(word))
+            if prev and prev in COMMAND_OPTIONS[command] and \
+                    COMMAND_OPTIONS[command][prev].is_type_container():
+                for container_name in containers:
+                    if container_name.startswith(word) or not word:
+                        yield Completion(container_name, -len(word))
+            else:
+                for opt in COMMAND_OPTIONS[command]:
+                    # Do not offer options that user already set.
+                    if opt.name not in params:
+                        if opt.name.startswith(word) or not word:
+                            yield Completion(opt.name, -len(word))
 
     @staticmethod
     def find_matches(text, collection):

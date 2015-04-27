@@ -52,6 +52,13 @@ class CommandOption(object):
         """
         return self.option
 
+    def is_type_container(self):
+        """
+        Should this option suggest container name?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_CONTAINER
+
     @property
     def name(self):
         """
