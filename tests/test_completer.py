@@ -89,7 +89,7 @@ def test_options_container_completion(completer, complete_event):
     """
     Suggest container names in relevant options (ps --before)
     """
-    container_names = ['newton', 'tesla', 'einstein']
+    container_names = ['newton', 'tesla', 'einstein', 'edison']
     image_names = ['ubuntu', 'ubuntu:12.04', 'ubuntu:14.04']
 
     completer.set_containers(container_names)
@@ -102,6 +102,21 @@ def test_options_container_completion(completer, complete_event):
         container_names,
         0
     )
+    _test_options_completion(
+        completer,
+        complete_event,
+        'ps --before e',
+        filter(lambda x: x.startswith('e'), container_names),
+        -1
+    )
+    _test_options_completion(
+        completer,
+        complete_event,
+        'ps --before ei',
+        filter(lambda x: x.startswith('ei'), container_names),
+        -2
+    )
+
 
 def _get_command_option_names(command):
     """

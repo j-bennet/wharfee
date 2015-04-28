@@ -53,8 +53,12 @@ class DockerCompleter(Completer):
                      ((not word_before_cursor) and first_word)
 
         if in_command:
-            previous_start = document.find_start_of_previous_word(WORD=True)
             previous_word = ''
+            previous_start = document.find_start_of_previous_word(WORD=True)
+
+            if previous_start == -len(word_before_cursor):
+                previous_start = document.find_start_of_previous_word(WORD=True, count=2)
+
             if previous_start:
                 previous_word = document.text_before_cursor[previous_start:]
                 previous_word = previous_word.strip().split()[0]
