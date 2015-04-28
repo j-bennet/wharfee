@@ -122,7 +122,7 @@ def _test_command_completion(completer, complete_event, command, expected):
     result = set(completer.get_completions(
         Document(text=command, cursor_position=position),
         complete_event))
-    assert result == {Completion(expected, -len(command))}
+    assert result == set([Completion(expected, -len(command))])
 
 
 def _test_options_completion(completer, complete_event, command, expected, expected_pos):
