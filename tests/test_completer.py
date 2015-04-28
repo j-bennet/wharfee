@@ -4,6 +4,7 @@ import pytest
 from prompt_toolkit.completion import Completion
 from prompt_toolkit.document import Document
 from dockercli.options import COMMAND_OPTIONS
+from dockercli.options import COMMAND_NAMES
 
 
 @pytest.fixture
@@ -27,7 +28,7 @@ def test_empty_string_completion(completer, complete_event):
     result = set(completer.get_completions(
         Document(text=text, cursor_position=position),
         complete_event))
-    assert result == set(map(Completion, completer.commands))
+    assert result == set(map(Completion, COMMAND_NAMES))
 
 
 def test_matching_command_completion(completer, complete_event):

@@ -3,6 +3,14 @@ from __future__ import unicode_literals
 from optparse import OptionParser
 from .option import CommandOption
 
+COMMAND_NAMES = [
+    'help',
+    'version',
+    'ps',
+    'images',
+    'run',
+    'stop'
+]
 
 COMMAND_OPTIONS = {
     'ps': [

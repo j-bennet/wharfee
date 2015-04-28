@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from prompt_toolkit.completion import Completer, Completion
 from .options import COMMAND_OPTIONS
+from .options import COMMAND_NAMES
 from .options import find_option
 
 
@@ -10,21 +11,12 @@ class DockerCompleter(Completer):
     Completer for Docker commands and parameters.
     """
 
-    commands = [
-        'help',
-        'version',
-        'ps',
-        'images',
-        'run',
-        'stop'
-    ]
-
     def __init__(self, containers=None, images=None):
         """
         Initialize the completer
         :return:
         """
-        self.all_completions = set(self.commands)
+        self.all_completions = set(COMMAND_NAMES)
         self.containers = set(containers) if containers else set()
         self.images = set(images) if images else set()
 
