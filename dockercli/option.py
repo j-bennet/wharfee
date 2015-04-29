@@ -59,6 +59,13 @@ class CommandOption(object):
         """
         return self.option_type == CommandOption.TYPE_CONTAINER
 
+    def is_type_image(self):
+        """
+        Should this option suggest image name?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_IMAGE
+
     @property
     def name(self):
         """

@@ -130,8 +130,16 @@ class DockerCli(object):
         cs = self.handler.containers(all=True)
         containers = [name for c in cs for name in c['Names']]
         self.completer.set_containers(containers)
-        # TODO: not implemented
-        # imdict = self.handler.images()
+
+        def parse_image_name(tag):
+            if ':' in tag:
+                return tag.split(':', 2)[0]
+            return tag
+
+        ims = self.handler.images()
+        images = [parse_image_name(name) for im in ims
+                  for name in im['RepoTags']]
+        self.completer.set_images(images)
 
     def run_cli(self):
         """

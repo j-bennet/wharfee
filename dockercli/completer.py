@@ -99,6 +99,10 @@ class DockerCompleter(Completer):
                 for container_name in containers:
                     if container_name.startswith(word) or not word:
                         yield Completion(container_name, -len(word))
+            elif current_opt and current_opt.is_type_image():
+                for image_name in images:
+                    if image_name.startswith(word) or not word:
+                        yield Completion(image_name, -len(word))
             else:
                 for opt in COMMAND_OPTIONS[command]:
                     # Do not offer options that user already set.

@@ -90,10 +90,8 @@ def test_options_container_completion(completer, complete_event):
     Suggest container names in relevant options (ps --before)
     """
     container_names = ['newton', 'tesla', 'einstein', 'edison']
-    image_names = ['ubuntu', 'ubuntu:12.04', 'ubuntu:14.04']
 
     completer.set_containers(container_names)
-    completer.set_images(image_names)
 
     _test_options_completion(
         completer,
@@ -115,6 +113,23 @@ def test_options_container_completion(completer, complete_event):
         'ps --before ei',
         filter(lambda x: x.startswith('ei'), container_names),
         -2
+    )
+
+
+def test_options_image_completion(completer, complete_event):
+    """
+    Suggest image names in relevant options (images --filter)
+    """
+    image_names = ['ubuntu', 'hello-world', 'postgres', 'nginx']
+
+    completer.set_images(image_names)
+
+    _test_options_completion(
+        completer,
+        complete_event,
+        'images --filter ',
+        image_names,
+        0
     )
 
 

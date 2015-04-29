@@ -30,7 +30,7 @@ class DockerClient(object):
             'help': (self.help, "Help on available commands."),
             'version': (self.version, "Equivalent of 'docker version'."),
             'ps': (self.containers, "Equivalent of 'docker ps'."),
-            'images': (self.not_implemented, "Equivalent of 'docker images'."),
+            'images': (self.images, "Equivalent of 'docker images'."),
             'run': (self.not_implemented, "Equivalent of 'docker run'."),
             'stop': (self.not_implemented, "Equivalent of 'docker stop'.")
         }
@@ -136,15 +136,29 @@ class DockerClient(object):
         csdict = self.instance.containers(**kwargs)
         if len(csdict) > 0:
 
-            # Container names start with /.
-            # Let's strip this for readability.
-            for i in range(len(csdict)):
-                csdict[i]['Names'] = map(
-                    lambda x: x.lstrip('/'), csdict[i]['Names'])
+            if 'quiet' not in kwargs or not kwargs['quiet']:
+                # Container names start with /.
+                # Let's strip this for readability.
+                for i in range(len(csdict)):
+                    csdict[i]['Names'] = map(
+                        lambda x: x.lstrip('/'), csdict[i]['Names'])
 
             return csdict
         else:
             return ['There are no containers to list.']
+
+    def images(self, *args, **kwargs):
+        """
+        Return the list of images. Equivalent of docker images.
+        :return: list of dicts
+        """
+        _ = args
+
+        result = self.instance.images(**kwargs)
+        if len(result) > 0:
+            return result
+        else:
+            return ['There are no images to list.']
 
 
 class DockerPermissionException(Exception):
