@@ -9,7 +9,8 @@ COMMAND_NAMES = [
     'ps',
     'images',
     'run',
-    'stop'
+    'stop',
+    'info'
 ]
 
 COMMAND_OPTIONS = {

@@ -32,7 +32,8 @@ class DockerClient(object):
             'ps': (self.containers, "Equivalent of 'docker ps'."),
             'images': (self.images, "Equivalent of 'docker images'."),
             'run': (self.not_implemented, "Equivalent of 'docker run'."),
-            'stop': (self.not_implemented, "Equivalent of 'docker stop'.")
+            'stop': (self.not_implemented, "Equivalent of 'docker stop'."),
+            'info': (self.info, "Equivalent of 'docker info'.")
         }
 
         if sys.platform.startswith('darwin') \
@@ -121,6 +122,17 @@ class DockerClient(object):
             return result
         except ConnectionError as ex:
             raise DockerPermissionException(ex)
+
+    def info(self, *args, **kwargs):
+        """
+        Return the system info. Equivalent of docker info.
+        :return: list of tuples
+        """
+        _, _ = args, kwargs
+
+        rdict = self.instance.info()
+        result = [(k, rdict[k]) for k in sorted(rdict.keys())]
+        return result
 
     def containers(self, *args, **kwargs):
         """
