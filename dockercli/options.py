@@ -13,6 +13,10 @@ COMMAND_NAMES = [
     'info'
 ]
 
+COMMAND_USAGE = {
+    'run': 'run [OPTIONS] IMAGE [COMMAND] [ARG...]'
+}
+
 COMMAND_OPTIONS = {
     'ps': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--all',
@@ -75,6 +79,12 @@ COMMAND_OPTIONS = {
                       action='store_true',
                       dest='quiet',
                       help='Only show numeric IDs.')
+    ],
+    'run': [
+        CommandOption(CommandOption.TYPE_CONTAINER, '--name',
+                      action='store',
+                      dest='name',
+                      help='Assign a name to the container.'),
     ]
 }
 

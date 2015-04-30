@@ -159,6 +159,25 @@ class DockerClient(object):
         else:
             return ['There are no containers to list.']
 
+    def run(self, *args, **kwargs):
+        """
+        Create and start a container. Equivalent of docker run.
+        :param args:
+        :param kwargs:
+        :return: TODO
+        """
+        result = self.instance.create_container(*args, **kwargs)
+
+        # TODO: in progress
+        # docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+        if result:
+            if "Warnings" in result and result['Warnings']:
+                return [result['Warnings']]
+            if "Id" in result and result['Id']:
+                return [result['Id']]
+        return ['There was a problem running the container.']
+
     def images(self, *args, **kwargs):
         """
         Return the list of images. Equivalent of docker images.
