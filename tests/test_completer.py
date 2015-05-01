@@ -35,15 +35,15 @@ def test_matching_command_completion(completer, complete_event):
     """
     Beginning of the command should suggest the command.
     """
-    _test_command_completion(completer, complete_event, 'h', 'help')
-    _test_command_completion(completer, complete_event, 'he', 'help')
-    _test_command_completion(completer, complete_event, 'hel', 'help')
-    _test_command_completion(completer, complete_event, 'help', 'help')
+    _test_command_completion(completer, complete_event, 'h', ['help'])
+    _test_command_completion(completer, complete_event, 'he', ['help'])
+    _test_command_completion(completer, complete_event, 'hel', ['help'])
+    _test_command_completion(completer, complete_event, 'help', ['help'])
 
-    _test_command_completion(completer, complete_event, 'i', 'images')
-    _test_command_completion(completer, complete_event, 'im', 'images')
-    _test_command_completion(completer, complete_event, 'ima', 'images')
-    _test_command_completion(completer, complete_event, 'imag', 'images')
+    _test_command_completion(completer, complete_event, 'i', ['images', 'info'])
+    _test_command_completion(completer, complete_event, 'im', ['images'])
+    _test_command_completion(completer, complete_event, 'ima', ['images'])
+    _test_command_completion(completer, complete_event, 'imag', ['images'])
 
 
 def test_options_completion(completer, complete_event):
@@ -146,13 +146,16 @@ def _test_command_completion(completer, complete_event, command, expected):
     """
     Helper method to test command suggestions.
     :param command: string: text that user started typing
-    :param expected: string: expected completion
+    :param expected: list: expected completions
     """
     position = len(command)
     result = set(completer.get_completions(
         Document(text=command, cursor_position=position),
         complete_event))
-    assert result == set([Completion(expected, -len(command))])
+
+    expected = set(map(lambda t: Completion(t, -len(command)), expected))
+
+    assert result == expected
 
 
 def _test_options_completion(completer, complete_event, command, expected, expected_pos):

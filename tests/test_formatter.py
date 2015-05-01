@@ -22,6 +22,7 @@ def test_help_data_formatting():
     print('\n')
     print('\n'.join(formatted))
 
+
 def test_info_data_formatting():
     """
     Test complex structure formatting

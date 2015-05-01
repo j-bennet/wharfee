@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from optparse import OptionParser
+from argparse import ArgumentParser
 from .option import CommandOption
 
 COMMAND_NAMES = [
@@ -12,10 +12,6 @@ COMMAND_NAMES = [
     'stop',
     'info'
 ]
-
-COMMAND_USAGE = {
-    'run': 'run [OPTIONS] IMAGE [COMMAND] [ARG...]'
-}
 
 COMMAND_OPTIONS = {
     'ps': [
@@ -110,18 +106,18 @@ def parse_command_options(cmd, params):
     :param params: list: all tokens after command name
     :return: parser, args, opts
     """
-    parser = OptParser(prog=cmd, add_help_option=False)
+    parser = OptParser(prog=cmd, add_help=False)
     for opt in COMMAND_OPTIONS[cmd]:
-        parser.add_option(opt.get_option())
-    popts, pargs = parser.parse_args(params)
+        parser.add_argument(*opt.args, **opt.kwargs)
+    popts = parser.parse_args(params)
     popts = vars(popts)
-    return parser, pargs, popts
+    return parser, popts
 
 
-class OptParser(OptionParser):
+class OptParser(ArgumentParser):
     """
-    Wrapper around optparse's OptionParser.
-    Overrides
+    Wrapper around ArgumentParser.
+    Overrides error method to throw an exception.
     """
     def error(self, msg):
         """error(msg : string)

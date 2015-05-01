@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from optparse import make_option
-
 
 class CommandOption(object):
     """
@@ -21,7 +19,7 @@ class CommandOption(object):
         :param option_type: int: one the type constants from above
         :param short_name: string: short name to create optparse's Option
         :param long_name: string: long name to create optparse's Option
-        :param kwargs: keyword args to create optparse's Option
+        :param kwargs: keyword args
         :return:
         """
         if option_type not in [
@@ -43,14 +41,8 @@ class CommandOption(object):
         self.option_type = option_type
         self.short_name = short_name
         self.long_name = long_name
-        self.option = make_option(*arguments, **kwargs)
-
-    def get_option(self):
-        """
-        Getter for optparse's Option
-        :return: Option
-        """
-        return self.option
+        self.args = arguments
+        self.kwargs = kwargs
 
     def is_type_container(self):
         """
