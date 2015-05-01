@@ -3,6 +3,14 @@ Helper functions to format output for CLI.
 """
 from tabulate import tabulate
 
+# Python 3 has no 'basestring' or 'long' type we're checking for.
+try:
+    unicode
+except NameError:
+    # Python 3
+    basestring = unicode = str
+    long = int
+
 
 def format_data(data):
     """
@@ -112,7 +120,10 @@ def truncate_rows(rows, length=25):
     result = []
     for row in rows:
         if isinstance(row, dict):
-            result.append({k: trimto(v) for k, v in row.iteritems()})
+            updated = {}
+            for k, v in row.iteritems():
+                updated[k] = trimto(v)
+            result.append(updated)
         elif isinstance(row, basestring):
             result.append((trimto(row),))
         else:
