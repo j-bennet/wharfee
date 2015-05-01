@@ -19,8 +19,11 @@ def format_data(data):
     """
     if isinstance(data, list) and len(data) > 1:
         if isinstance(data[0], tuple):
-            text = tabulate(data)
-            return text.split('\n')
+            if is_plain_lists(data):
+                text = tabulate(data)
+                return text.split('\n')
+            else:
+                return format_struct(data, spaces=2)
         elif isinstance(data[0], dict):
             data = flatten_rows(data)
             data = truncate_rows(data)
@@ -41,17 +44,20 @@ def format_struct(data, spaces=1, indent=0, lines=None):
     if isinstance(data, dict):
         data = [(k, data[k]) for k in sorted(data.keys())]
 
-    def add_item_to_line(current_item, current_line, is_last_item):
+    def add_item_to_line(current_item, current_line, is_last_item, current_list):
         """ Helper to add item to end of line """
-        current_indent = ' ' * indent
-        current_line = current_indent + \
-                       current_line + \
-                       '{0}'.format(current_item)
+        if len(current_line) == 0:
+            current_indent = ' ' * (indent * spaces)
+            current_line = current_indent
+
+        current_line += '{0}'.format(current_item)
+
         if is_last_item:
-            lines.append(current_line)
+            current_list.append(current_line)
+            current_line = ''
         else:
             current_line += ': '
-        return current_line
+        return current_line, current_list
 
     for row in data:
         line = ''
@@ -60,19 +66,29 @@ def format_struct(data, spaces=1, indent=0, lines=None):
             if isinstance(row[i], dict):
                 lines.append(line)
                 lines = format_struct(row[i], spaces, indent + 1, lines)
-                indent -= 1
             elif isinstance(row[i], list):
                 if is_plain_list(row[i]):
                     item = ', '.join(map(lambda x: '{0}'.format(x), row[i]))
-                    line = add_item_to_line(item, line, i == (l - 1))
+                    line, lines = add_item_to_line(item, line, i == (l - 1), lines)
                 else:
                     lines.append(line)
                     lines = format_struct(row[i], spaces, indent + 1, lines)
-                    indent -= 1
             else:
-                line = add_item_to_line(row[i], line, i == (l - 1))
+                line, lines = add_item_to_line(row[i], line, i == (l - 1), lines)
 
     return lines
+
+
+def is_plain_lists(lst):
+    """
+    Check if all items in list of lists are strings or numbers
+    :param lst:
+    :return: boolean
+    """
+    for x in lst:
+        if not is_plain_list(x):
+            return False
+    return True
 
 
 def is_plain_list(lst):

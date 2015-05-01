@@ -22,6 +22,28 @@ def test_help_data_formatting():
     print('\n')
     print('\n'.join(formatted))
 
+def test_dict_data_formatting():
+    """
+    Test hierarchical data formatting
+    """
+    data = {
+        'name': 'John',
+        'profession': 'Developer',
+        'hobbies': {
+            'active': {
+                'indoor': ['aikido', 'swimming'],
+                'outdoor': ['hunting', 'fishing']
+            },
+            'passive': ['reading', 'painting']
+        }
+    }
+
+    lines = format_struct(data, spaces=2)
+
+    print('\n')
+    for line in lines:
+        print(line)
+
 
 def test_info_data_formatting():
     """

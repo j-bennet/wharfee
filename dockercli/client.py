@@ -95,7 +95,7 @@ class DockerClient(object):
         Collect and return help docstrings for all commands.
         :return: list of tuples
         """
-        _, _ = kwargs
+        _ = kwargs
 
         help_rows = [(key, self.handlers[key][1])
                      for key in self.handlers.keys()]
@@ -106,7 +106,7 @@ class DockerClient(object):
         Placeholder for commands to be implemented.
         :return: iterable
         """
-        _, _ = kwargs
+        _ = kwargs
         return ['Not implemented.']
 
     def version(self, **kwargs):
@@ -114,7 +114,7 @@ class DockerClient(object):
         Return the version. Equivalent of docker version.
         :return: list of tuples
         """
-        _, _ = kwargs
+        _ = kwargs
 
         try:
             verdict = self.instance.version()
@@ -128,7 +128,7 @@ class DockerClient(object):
         Return the system info. Equivalent of docker info.
         :return: list of tuples
         """
-        _, _ = kwargs
+        _ = kwargs
 
         rdict = self.instance.info()
         result = [(k, rdict[k]) for k in sorted(rdict.keys())]
