@@ -3,3 +3,5 @@
 *.egg-info/
 *env/
 .docker*
+.tox/
+dist/
