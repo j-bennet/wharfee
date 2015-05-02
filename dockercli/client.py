@@ -10,6 +10,7 @@ from docker.errors import DockerException
 from requests.exceptions import ConnectionError
 
 from .options import parse_command_options
+from .options import format_command_help
 
 
 class DockerClient(object):
@@ -76,12 +77,10 @@ class DockerClient(object):
 
             if params:
                 try:
-                    parser, popts = parse_command_options(cmd, params)
-                    if popts['help']:
-                        return [parser.format_help()]
+                    if '-h' in tokens or '--help' in tokens:
+                        return [format_command_help(cmd)]
                     else:
-                        if 'help' in popts:
-                            del popts['help']
+                        parser, popts = parse_command_options(cmd, params)
                         return handler(**popts)
                 except Exception as ex:
                     return [ex.message]

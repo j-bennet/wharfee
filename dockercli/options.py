@@ -77,10 +77,17 @@ COMMAND_OPTIONS = {
                       help='Only show numeric IDs.')
     ],
     'run': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_CONTAINER, '--name',
                       action='store',
                       dest='name',
                       help='Assign a name to the container.'),
+        CommandOption(CommandOption.TYPE_IMAGE, 'image',
+                      action='store',
+                      help='Image name to use.'),
     ]
 }
 
@@ -112,6 +119,18 @@ def parse_command_options(cmd, params):
     popts = parser.parse_args(params)
     popts = vars(popts)
     return parser, popts
+
+
+def format_command_help(cmd):
+    """
+    Format help string for the command.
+    :param cmd: string: command name
+    :return: string
+    """
+    parser = OptParser(prog=cmd, add_help=False)
+    for opt in COMMAND_OPTIONS[cmd]:
+        parser.add_argument(*opt.args, **opt.kwargs)
+    return parser.format_help()
 
 
 class OptParser(ArgumentParser):
