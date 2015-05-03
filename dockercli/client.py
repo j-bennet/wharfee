@@ -32,7 +32,7 @@ class DockerClient(object):
             'version': (self.version, "Equivalent of 'docker version'."),
             'ps': (self.containers, "Equivalent of 'docker ps'."),
             'images': (self.images, "Equivalent of 'docker images'."),
-            'run': (self.not_implemented, "Equivalent of 'docker run'."),
+            'run': (self.run, "Equivalent of 'docker run'."),
             'stop': (self.not_implemented, "Equivalent of 'docker stop'."),
             'info': (self.info, "Equivalent of 'docker info'.")
         }
@@ -81,6 +81,8 @@ class DockerClient(object):
                         return [format_command_help(cmd)]
                     else:
                         parser, popts = parse_command_options(cmd, params)
+                        if 'help' in popts:
+                            del popts['help']
                         return handler(**popts)
                 except Exception as ex:
                     return [ex.message]

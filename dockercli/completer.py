@@ -94,27 +94,60 @@ class DockerCompleter(Completer):
         params = set(params) if params else set([])
         current_opt = find_option(command, prev) if prev else None
 
+        add_containers = False
+        add_images = False
+
         if command in COMMAND_OPTIONS:
             if current_opt and current_opt.is_type_container():
-                for container_name in containers:
-                    if container_name.startswith(word) or not word:
-                        yield Completion(container_name, -len(word))
+                for m in DockerCompleter.find_collection_matches(
+                        word, containers):
+                    yield m
             elif current_opt and current_opt.is_type_image():
-                for image_name in images:
-                    if image_name.startswith(word) or not word:
-                        yield Completion(image_name, -len(word))
+                for m in DockerCompleter.find_collection_matches(
+                        word, images):
+                    yield m
             else:
                 for opt in COMMAND_OPTIONS[command]:
                     # Do not offer options that user already set.
                     if opt.name not in params:
-                        if opt.name.startswith(word) or not word:
-                            yield Completion(opt.name, -len(word))
+                        if opt.name.startswith('-'):
+                            if opt.name.startswith(word) or not word:
+                                yield Completion(opt.name, -len(word))
+                        else:
+                            # positional option
+                            if opt.is_type_container():
+                                add_containers = True
+                            elif opt.is_type_image():
+                                add_images = True
+
+                # Also return images and containers if positional options
+                # require them
+                if add_containers:
+                    for m in DockerCompleter.find_collection_matches(
+                            word, containers):
+                        yield m
+                if add_images:
+                    for m in DockerCompleter.find_collection_matches(
+                            word, images):
+                        yield m
+
+    @staticmethod
+    def find_collection_matches(word, lst):
+        """
+        Yield all matching names in list
+        :param lst:
+        :param word:
+        :return:
+        """
+        for name in lst:
+            if name.startswith(word) or not word:
+                yield Completion(name, -len(word))
 
     @staticmethod
     def find_matches(text, collection):
         """
-        Find all matches for the current word
-        :param text: word to complete
+        Find all matches for the current text
+        :param text: text before cursor
         :param collection: collection to suggest from
         :return: iterable
         """
