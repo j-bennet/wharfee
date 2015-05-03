@@ -9,6 +9,7 @@ from docker.utils import kwargs_from_env
 from docker.errors import DockerException
 from requests.exceptions import ConnectionError
 
+from .options import allowed_args
 from .options import parse_command_options
 from .options import format_command_help
 
@@ -33,6 +34,7 @@ class DockerClient(object):
             'ps': (self.containers, "Equivalent of 'docker ps'."),
             'images': (self.images, "Equivalent of 'docker images'."),
             'run': (self.run, "Equivalent of 'docker run'."),
+            'start': (self.start, "Equivalent of 'docker start'."),
             'stop': (self.not_implemented, "Equivalent of 'docker stop'."),
             'info': (self.info, "Equivalent of 'docker info'.")
         }
@@ -163,19 +165,50 @@ class DockerClient(object):
         """
         Create and start a container. Equivalent of docker run.
         :param kwargs:
-        :return: TODO
+        :return: Container ID or iterable output.
         """
-        result = self.instance.create_container(**kwargs)
+        runargs = allowed_args('run', **kwargs)
+        result = self.instance.create_container(**runargs)
 
         # TODO: in progress
         # docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
 
         if result:
             if "Warnings" in result and result['Warnings']:
-                return [result['Warnings']]
+                yield result['Warnings']
             if "Id" in result and result['Id']:
-                return [result['Id']]
-        return ['There was a problem running the container.']
+                start_args = {
+                    'container': result['Id'],
+                    'attach': kwargs['attach']
+                }
+                for line in self.start(**start_args):
+                    yield line
+        yield 'There was a problem running the container.'
+
+    def start(self, **kwargs):
+        """
+        Start a container. Equivalent of docker start.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+        startargs = allowed_args('start', **kwargs)
+        result = self.instance.start(**startargs)
+        if result:
+            yield result
+        elif kwargs['attach']:
+            for line in self.logs(container=kwargs['container'], stream=True):
+                yield line
+        else:
+            yield kwargs['container']
+
+    def logs(self, **kwargs):
+        """
+        Retrieve container logs. Equivalent of docker logs.
+        :param kwargs:
+        :return: Iterable output
+        """
+        for line in self.instance.logs(**kwargs):
+            yield line
 
     def images(self, **kwargs):
         """

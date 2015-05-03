@@ -9,6 +9,7 @@ COMMAND_NAMES = [
     'ps',
     'images',
     'run',
+    'start',
     'stop',
     'info'
 ]
@@ -77,6 +78,12 @@ COMMAND_OPTIONS = {
                       help='Only show numeric IDs.')
     ],
     'run': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--attach',
+                      action='store_true',
+                      dest='attach',
+                      help='Attach container\'s STDOUT and STDERR and ' +
+                           'forward all signals to the process.',
+                      no_match=True),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
                       action='store_true',
                       dest='help',
@@ -87,7 +94,22 @@ COMMAND_OPTIONS = {
                       help='Assign a name to the container.'),
         CommandOption(CommandOption.TYPE_IMAGE, 'image',
                       action='store',
-                      help='Image name to use.'),
+                      help='Image ID or name to use.'),
+    ],
+    'start': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--attach',
+                      action='store_true',
+                      dest='attach',
+                      help='Attach container\'s STDOUT and STDERR and ' +
+                           'forward all signals to the process.',
+                      no_match=True),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
+                      action='store',
+                      help='Container ID or name to use.'),
     ]
 }
 
@@ -104,6 +126,36 @@ def find_option(command, name):
             if opt.name == name:
                 return opt
     return None
+
+
+def allowed_args(cmd, **kwargs):
+    """
+    Return only arguments that the command accepts.
+    :param cmd: string
+    :param kwargs: dict
+    :return: dict
+    """
+    matches = {}
+    available = all_options(cmd)
+    if available:
+        for k in kwargs:
+            if k in available:
+                matches[k] = kwargs[k]
+    return matches
+
+
+def all_options(command):
+    """
+    Helper method to find all command options that docker-py supports.
+    :param command: string
+    :return: set of CommandOption
+    """
+    result = set([])
+    if command in COMMAND_OPTIONS:
+        for opt in COMMAND_OPTIONS[command]:
+            if opt.matches:
+                result.add(opt.dest)
+    return result
 
 
 def parse_command_options(cmd, params):

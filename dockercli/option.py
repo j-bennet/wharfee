@@ -38,6 +38,19 @@ class CommandOption(object):
         else:
             arguments = [short_name]
 
+        if 'no_match' in kwargs and kwargs['no_match']:
+            self.matches = False
+            del kwargs['no_match']
+        else:
+            self.matches = True
+
+        if 'dest' in kwargs:
+            self.dest = kwargs['dest']
+        elif long_name:
+            self.dest = long_name.strip('-')
+        else:
+            self.dest = short_name.strip('-')
+
         self.option_type = option_type
         self.short_name = short_name
         self.long_name = long_name
