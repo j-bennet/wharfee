@@ -39,6 +39,9 @@ class DockerClient(object):
             'info': (self.info, "Equivalent of 'docker info'.")
         }
 
+        self.is_stream = False
+        self.output = None
+
         if sys.platform.startswith('darwin') \
                 or sys.platform.startswith('win32'):
             try:
@@ -74,24 +77,28 @@ class DockerClient(object):
         cmd = tokens[0]
         params = tokens[1:] if len(tokens) > 1 else None
 
+        self.is_stream = False
+
         if cmd and cmd in self.handlers:
             handler = self.handlers[cmd][0]
 
             if params:
                 try:
                     if '-h' in tokens or '--help' in tokens:
-                        return [format_command_help(cmd)]
+                        self.output = [format_command_help(cmd)]
                     else:
                         parser, popts = parse_command_options(cmd, params)
                         if 'help' in popts:
                             del popts['help']
-                        return handler(**popts)
+
+                        self.output = handler(**popts)
+
                 except Exception as ex:
-                    return [ex.message]
+                    self.output = [ex.message]
             else:
-                return handler()
+                self.output = handler()
         else:
-            return self.help()
+            self.output = self.help()
 
     def help(self, **kwargs):
         """
@@ -175,15 +182,14 @@ class DockerClient(object):
 
         if result:
             if "Warnings" in result and result['Warnings']:
-                yield result['Warnings']
+                return [result['Warnings']]
             if "Id" in result and result['Id']:
                 start_args = {
                     'container': result['Id'],
                     'attach': kwargs['attach']
                 }
-                for line in self.start(**start_args):
-                    yield line
-        yield 'There was a problem running the container.'
+                return self.start(**start_args)
+        return ['There was a problem running the container.']
 
     def start(self, **kwargs):
         """
@@ -192,14 +198,33 @@ class DockerClient(object):
         :return: Container ID or iterable output.
         """
         startargs = allowed_args('start', **kwargs)
+
+        attached = None
+        if kwargs['attach']:
+            attached = self.attach(
+                container=kwargs['container'],
+                stream=True,
+                logs=False)
+
         result = self.instance.start(**startargs)
         if result:
-            yield result
-        elif kwargs['attach']:
-            for line in self.logs(container=kwargs['container'], stream=True):
-                yield line
+            return [result]
+        elif attached:
+            self.is_stream = True
+            return attached
         else:
-            yield kwargs['container']
+            return [kwargs['container']]
+
+    def attach(self, **kwargs):
+        """
+        Retrieve container logs, with or without the backlog.
+        Equivalent of docker attach.
+        :param kwargs:
+        :return: Iterable output
+        """
+        self.is_stream = True
+        result = self.instance.attach(**kwargs)
+        return result
 
     def logs(self, **kwargs):
         """
@@ -207,8 +232,8 @@ class DockerClient(object):
         :param kwargs:
         :return: Iterable output
         """
-        for line in self.instance.logs(**kwargs):
-            yield line
+        self.is_stream = True
+        return self.instance.logs(**kwargs)
 
     def images(self, **kwargs):
         """

@@ -174,9 +174,13 @@ class DockerCli(object):
             try:
                 document = dcli.read_input()
                 self.set_completer_options()
-                output = self.handler.handle_input(document.text)
-                lines = format_data(output)
-                click.echo_via_pager('\n'.join(lines))
+                self.handler.handle_input(document.text)
+                if self.handler.is_stream:
+                    for line in self.handler.output:
+                        click.echo(line.strip())
+                else:
+                    lines = format_data(self.handler.output)
+                    click.echo_via_pager('\n'.join(lines))
 
             except DockerPermissionException as ex:
                 click.secho(ex.message, fg='red')
