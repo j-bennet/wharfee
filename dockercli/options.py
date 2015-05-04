@@ -9,6 +9,7 @@ COMMAND_NAMES = [
     'ps',
     'images',
     'run',
+    'rm',
     'start',
     'stop',
     'info'
@@ -78,12 +79,11 @@ COMMAND_OPTIONS = {
                       help='Only show numeric IDs.')
     ],
     'run': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--attach',
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
                       action='store_true',
-                      dest='attach',
-                      help='Attach container\'s STDOUT and STDERR and ' +
-                           'forward all signals to the process.',
-                      no_match=True),
+                      dest='detach',
+                      help='Detached mode: run the container in the ' +
+                           'background and print the new container ID'),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
                       action='store_true',
                       dest='help',
@@ -110,6 +110,16 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_CONTAINER, 'container',
                       action='store',
                       help='Container ID or name to use.'),
+    ],
+    'rm': [
+        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
+                      action='store',
+                      help='Container ID or name to use.',
+                      nargs='+'),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
     ]
 }
 

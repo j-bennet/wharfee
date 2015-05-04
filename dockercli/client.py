@@ -34,6 +34,7 @@ class DockerClient(object):
             'ps': (self.containers, "Equivalent of 'docker ps'."),
             'images': (self.images, "Equivalent of 'docker images'."),
             'run': (self.run, "Equivalent of 'docker run'."),
+            'rm': (self.rm, "Equivalent of 'docker rm'."),
             'start': (self.start, "Equivalent of 'docker start'."),
             'stop': (self.not_implemented, "Equivalent of 'docker stop'."),
             'info': (self.info, "Equivalent of 'docker info'.")
@@ -168,6 +169,23 @@ class DockerClient(object):
         else:
             return ['There are no containers to list.']
 
+    def rm(self, **kwargs):
+        """
+        Remove a container. Equivalent of docker rm.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+
+        result = []
+        containers = kwargs['container']
+        del kwargs['container']
+
+        for container in containers:
+            self.instance.remove_container(container, **kwargs)
+            result.append(container)
+
+        return result
+
     def run(self, **kwargs):
         """
         Create and start a container. Equivalent of docker run.
@@ -177,16 +195,14 @@ class DockerClient(object):
         runargs = allowed_args('run', **kwargs)
         result = self.instance.create_container(**runargs)
 
-        # TODO: in progress
-        # docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
-
         if result:
             if "Warnings" in result and result['Warnings']:
                 return [result['Warnings']]
             if "Id" in result and result['Id']:
+                is_attach = 'detach' not in kwargs or not kwargs['detach']
                 start_args = {
                     'container': result['Id'],
-                    'attach': kwargs['attach']
+                    'attach': is_attach
                 }
                 return self.start(**start_args)
         return ['There was a problem running the container.']

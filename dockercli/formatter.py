@@ -17,7 +17,7 @@ def format_data(data):
     Uses tabulate to format the iterable.
     :return: string (multiline)
     """
-    if isinstance(data, list) and len(data) > 1:
+    if isinstance(data, list) and len(data) > 0:
         if isinstance(data[0], tuple):
             if is_plain_lists(data):
                 text = tabulate(data)
@@ -31,8 +31,11 @@ def format_data(data):
             return text.split('\n')
         elif isinstance(data[0], basestring):
             data = truncate_rows(data)
-            text = tabulate(data)
-            return text.split('\n')
+            if len(data) == 1:
+                return data
+            else:
+                text = tabulate(data)
+                return text.split('\n')
     return data
 
 
@@ -141,7 +144,7 @@ def truncate_rows(rows, length=25):
                 updated[k] = trimto(v)
             result.append(updated)
         elif isinstance(row, basestring):
-            result.append((trimto(row),))
+            result.append(trimto(row))
         else:
             result.append(row)
     return result
