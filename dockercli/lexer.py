@@ -12,7 +12,8 @@ class CommandLexer(RegexLexer):
 
     tokens = {
         'root': [
-            (words(tuple(COMMAND_NAMES), prefix=r'^', suffix=r'\b'), Generic.Strong),
+            (words(tuple(COMMAND_NAMES), prefix=r'^', suffix=r'\b'),
+             Operator.Word),
             (r'--[a-z]+\b', Keyword),
             (r'.*\n', Text),
         ]
