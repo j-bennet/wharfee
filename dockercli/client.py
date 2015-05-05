@@ -35,6 +35,7 @@ class DockerClient(object):
             'images': (self.images, "Equivalent of 'docker images'."),
             'run': (self.run, "Equivalent of 'docker run'."),
             'rm': (self.rm, "Equivalent of 'docker rm'."),
+            'search': (self.search, "Equivalent of 'docker search'."),
             'start': (self.start, "Equivalent of 'docker start'."),
             'stop': (self.not_implemented, "Equivalent of 'docker stop'."),
             'info': (self.info, "Equivalent of 'docker info'.")
@@ -262,6 +263,26 @@ class DockerClient(object):
             return result
         else:
             return ['There are no images to list.']
+
+    def search(self, **kwargs):
+        """
+        Return the list of images matching specified term.
+        Equivalent of docker search.
+        :return: list of dicts
+        """
+
+        result = self.instance.search(**kwargs)
+
+        if len(result) > 0:
+            for res in result:
+                # Make results  more readable, like official CLI does.
+                if 'is_trusted' in res:
+                    res['is_trusted'] = '[OK]' if res['is_trusted'] else ''
+                if 'is_official' in res:
+                    res['is_official'] = '[OK]' if res['is_official'] else ''
+            return result
+        else:
+            return ['No images were found.']
 
 
 class DockerPermissionException(Exception):

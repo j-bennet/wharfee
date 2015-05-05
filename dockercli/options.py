@@ -10,6 +10,7 @@ COMMAND_NAMES = [
     'images',
     'run',
     'rm',
+    'search',
     'start',
     'stop',
     'info'
@@ -120,6 +121,15 @@ COMMAND_OPTIONS = {
                       action='store_true',
                       dest='help',
                       help='Display help for this command.'),
+    ],
+    'search': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_IMAGE, 'term',
+                      action='store',
+                      help='A term to search for.'),
     ]
 }
 

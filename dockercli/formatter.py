@@ -30,10 +30,10 @@ def format_data(data):
             text = tabulate(data, headers='keys')
             return text.split('\n')
         elif isinstance(data[0], basestring):
-            data = truncate_rows(data)
             if len(data) == 1:
                 return data
             else:
+                data = truncate_rows(data)
                 text = tabulate(data)
                 return text.split('\n')
     return data
