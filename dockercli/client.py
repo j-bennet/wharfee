@@ -193,6 +193,12 @@ class DockerClient(object):
         :param kwargs:
         :return: Container ID or iterable output.
         """
+        if 'arg' in kwargs:
+            full_command = [kwargs['command']] if kwargs['command'] else []
+            full_command.extend(kwargs['arg'])
+            kwargs['command'] = full_command
+            del kwargs['arg']
+
         runargs = allowed_args('run', **kwargs)
         result = self.instance.create_container(**runargs)
 
@@ -234,7 +240,9 @@ class DockerClient(object):
 
     def attach(self, **kwargs):
         """
-        Retrieve container logs, with or without the backlog.
+        Attach to container STDOUT and / or STDERR.
+        Docker-py does not allow attaching to STDIN.
+        TODO: look at ways to attach to STDIN
         Equivalent of docker attach.
         :param kwargs:
         :return: Iterable output

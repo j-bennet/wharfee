@@ -12,6 +12,8 @@ class CommandOption(object):
     TYPE_NUMERIC = 3
     TYPE_CONTAINER = 4
     TYPE_IMAGE = 5
+    TYPE_COMMAND = 6
+    TYPE_COMMAND_ARG = 7
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -27,7 +29,9 @@ class CommandOption(object):
             CommandOption.TYPE_BOOLEAN,
             CommandOption.TYPE_NUMERIC,
             CommandOption.TYPE_CONTAINER,
-            CommandOption.TYPE_IMAGE
+            CommandOption.TYPE_IMAGE,
+            CommandOption.TYPE_COMMAND,
+            CommandOption.TYPE_COMMAND_ARG
         ]:
             raise ValueError("Incorrect option_type.", option_type)
 
