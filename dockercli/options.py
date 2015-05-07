@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from argparse import ArgumentParser
+from optparse import OptionParser
 from .option import CommandOption
 
 COMMAND_NAMES = [
@@ -98,12 +98,7 @@ COMMAND_OPTIONS = {
                       help='Image ID or name to use.'),
         CommandOption(CommandOption.TYPE_COMMAND, 'command',
                       action='store',
-                      help='Command to run in a container.',
-                      nargs='?'),
-        CommandOption(CommandOption.TYPE_COMMAND, 'arg',
-                      action='store',
-                      help='Argument(s) of the command to run.',
-                      nargs='*'),
+                      help='Command to run in a container.'),
     ],
     'start': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--attach',
@@ -193,12 +188,13 @@ def parse_command_options(cmd, params):
     :param params: list: all tokens after command name
     :return: parser, args, opts
     """
-    parser = OptParser(prog=cmd, add_help=False)
+    parser = OptParser(prog=cmd, add_help_option=False)
     for opt in COMMAND_OPTIONS[cmd]:
-        parser.add_argument(*opt.args, **opt.kwargs)
-    popts = parser.parse_args(params)
+        if opt.name.startswith('-'):
+            parser.add_option(*opt.args, **opt.kwargs)
+    popts, pargs = parser.parse_args(params)
     popts = vars(popts)
-    return parser, popts
+    return parser, popts, pargs
 
 
 def format_command_help(cmd):
@@ -207,15 +203,26 @@ def format_command_help(cmd):
     :param cmd: string: command name
     :return: string
     """
-    parser = OptParser(prog=cmd, add_help=False)
+    usage = ['cmd']
+
     for opt in COMMAND_OPTIONS[cmd]:
-        parser.add_argument(*opt.args, **opt.kwargs)
+        if not opt.name.startswith('-'):
+            usage.append(opt.name)
+
+    usage = ' '.join(usage)
+
+    parser = OptParser(prog=cmd, add_help_option=False, usage=usage)
+
+    for opt in COMMAND_OPTIONS[cmd]:
+        if opt.name.startswith('-'):
+            parser.add_option(*opt.args, **opt.kwargs)
+
     return parser.format_help()
 
 
-class OptParser(ArgumentParser):
+class OptParser(OptionParser):
     """
-    Wrapper around ArgumentParser.
+    Wrapper around OptionParser.
     Overrides error method to throw an exception.
     """
     def error(self, msg):

@@ -89,11 +89,11 @@ class DockerClient(object):
                     if '-h' in tokens or '--help' in tokens:
                         self.output = [format_command_help(cmd)]
                     else:
-                        parser, popts = parse_command_options(cmd, params)
+                        parser, popts, pargs = parse_command_options(cmd, params)
                         if 'help' in popts:
                             del popts['help']
 
-                        self.output = handler(**popts)
+                        self.output = handler(*pargs, **popts)
 
                 except Exception as ex:
                     self.output = [ex.message]
@@ -102,31 +102,31 @@ class DockerClient(object):
         else:
             self.output = self.help()
 
-    def help(self, **kwargs):
+    def help(self, *args, **kwargs):
         """
         Collect and return help docstrings for all commands.
         :return: list of tuples
         """
-        _ = kwargs
+        _, _ = args, kwargs
 
         help_rows = [(key, self.handlers[key][1])
                      for key in self.handlers.keys()]
         return help_rows
 
-    def not_implemented(self, **kwargs):
+    def not_implemented(self, *args, **kwargs):
         """
         Placeholder for commands to be implemented.
         :return: iterable
         """
-        _ = kwargs
+        _, _ = kwargs
         return ['Not implemented.']
 
-    def version(self, **kwargs):
+    def version(self, *args, **kwargs):
         """
         Return the version. Equivalent of docker version.
         :return: list of tuples
         """
-        _ = kwargs
+        _, _ = kwargs
 
         try:
             verdict = self.instance.version()
@@ -135,22 +135,24 @@ class DockerClient(object):
         except ConnectionError as ex:
             raise DockerPermissionException(ex)
 
-    def info(self, **kwargs):
+    def info(self, *args, **kwargs):
         """
         Return the system info. Equivalent of docker info.
         :return: list of tuples
         """
-        _ = kwargs
+        _, _ = kwargs
 
         rdict = self.instance.info()
         result = [(k, rdict[k]) for k in sorted(rdict.keys())]
         return result
 
-    def containers(self, **kwargs):
+    def containers(self, *args, **kwargs):
         """
         Return the list of containers. Equivalent of docker ps.
         :return: list of dicts
         """
+
+        _ = args
 
         # Truncate by default.
         if 'trunc' in kwargs and kwargs['trunc'] is None:
@@ -170,7 +172,7 @@ class DockerClient(object):
         else:
             return ['There are no containers to list.']
 
-    def rm(self, **kwargs):
+    def rm(self, *args, **kwargs):
         """
         Remove a container. Equivalent of docker rm.
         :param kwargs:
@@ -178,8 +180,7 @@ class DockerClient(object):
         """
 
         result = []
-        containers = kwargs['container']
-        del kwargs['container']
+        containers = args
 
         for container in containers:
             self.instance.remove_container(container, **kwargs)
@@ -187,17 +188,17 @@ class DockerClient(object):
 
         return result
 
-    def run(self, **kwargs):
+    def run(self, *args, **kwargs):
         """
         Create and start a container. Equivalent of docker run.
         :param kwargs:
         :return: Container ID or iterable output.
         """
-        if 'arg' in kwargs:
-            full_command = [kwargs['command']] if kwargs['command'] else []
-            full_command.extend(kwargs['arg'])
-            kwargs['command'] = full_command
-            del kwargs['arg']
+        if not args:
+            return ['Image name is required.']
+
+        kwargs['image'] = args[0]
+        kwargs['command'] = args[1:] if len(args) > 1 else []
 
         runargs = allowed_args('run', **kwargs)
         result = self.instance.create_container(**runargs)
