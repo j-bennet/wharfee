@@ -203,7 +203,7 @@ def format_command_help(cmd):
     :param cmd: string: command name
     :return: string
     """
-    usage = ['cmd']
+    usage = [cmd, '[options]']
 
     for opt in COMMAND_OPTIONS[cmd]:
         if not opt.name.startswith('-'):
