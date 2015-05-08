@@ -58,7 +58,6 @@ class DockerCli(object):
         self.set_completer_options()
         self.saved_less_opts = self.set_less_opts()
 
-
     def set_less_opts(self):
         """
         Set the "less" options and save the old settings.

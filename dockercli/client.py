@@ -6,6 +6,7 @@ import sys
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
+from docker.errors import APIError
 from docker.errors import DockerException
 from requests.exceptions import ConnectionError
 
@@ -95,7 +96,11 @@ class DockerClient(object):
 
                         self.output = handler(*pargs, **popts)
 
+                except APIError as ex:
+                    self.is_stream = False
+                    self.output = [ex.explanation]
                 except Exception as ex:
+                    self.is_stream = False
                     self.output = [ex.message]
             else:
                 self.output = handler()
@@ -224,10 +229,14 @@ class DockerClient(object):
         startargs = allowed_args('start', **kwargs)
 
         attached = None
+
+        import ipdb; ipdb.set_trace()
         if kwargs['attach']:
             attached = self.attach(
                 container=kwargs['container'],
                 stream=True,
+                stdout=True,
+                stderr=False,
                 logs=False)
 
         result = self.instance.start(**startargs)
