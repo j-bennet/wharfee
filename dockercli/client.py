@@ -230,7 +230,6 @@ class DockerClient(object):
 
         attached = None
 
-        import ipdb; ipdb.set_trace()
         if kwargs['attach']:
             attached = self.attach(
                 container=kwargs['container'],
