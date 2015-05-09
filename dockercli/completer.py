@@ -11,13 +11,14 @@ class DockerCompleter(Completer):
     Completer for Docker commands and parameters.
     """
 
-    def __init__(self, containers=None, images=None):
+    def __init__(self, containers=None, running=None, images=None):
         """
         Initialize the completer
         :return:
         """
         self.all_completions = set(COMMAND_NAMES)
         self.containers = set(containers) if containers else set()
+        self.running = set(running) if running else set()
         self.images = set(images) if images else set()
 
     def set_containers(self, containers):
@@ -26,6 +27,13 @@ class DockerCompleter(Completer):
         :param containers: list
         """
         self.containers = set(containers) if containers else set()
+
+    def set_running(self, containers):
+        """
+        Setter for list of running containers.
+        :param containers: list
+        """
+        self.running = set(containers) if containers else set()
 
     def set_images(self, images):
         """
@@ -70,6 +78,7 @@ class DockerCompleter(Completer):
                 previous_word,
                 params,
                 self.containers,
+                self.running,
                 self.images)
         else:
             completions = DockerCompleter.find_matches(
@@ -79,7 +88,8 @@ class DockerCompleter(Completer):
         return completions
 
     @staticmethod
-    def find_command_matches(command, word='', prev='', params=None, containers=None, images=None):
+    def find_command_matches(command, word='', prev='', params=None,
+                             containers=None, running=None, images=None):
         """
         Find all matches in context of the given command.
         :param command: string: command keyword (such as "ps", "images")
@@ -87,6 +97,7 @@ class DockerCompleter(Completer):
         :param prev: string: previous word
         :param params: list of command parameters
         :param containers: list of containers
+        :param running: list of running containers
         :param images: list of images
         :return: iterable
         """
@@ -96,11 +107,16 @@ class DockerCompleter(Completer):
 
         add_containers = False
         add_images = False
+        add_running = False
 
         if command in COMMAND_OPTIONS:
             if current_opt and current_opt.is_type_container():
                 for m in DockerCompleter.find_collection_matches(
                         word, containers):
+                    yield m
+            elif current_opt and current_opt.is_type_running():
+                for m in DockerCompleter.find_collection_matches(
+                        word, running):
                     yield m
             elif current_opt and current_opt.is_type_image():
                 for m in DockerCompleter.find_collection_matches(
@@ -119,12 +135,18 @@ class DockerCompleter(Completer):
                                 add_containers = True
                             elif opt.is_type_image():
                                 add_images = True
+                            elif opt.is_type_running():
+                                add_running = True
 
                 # Also return images and containers if positional options
                 # require them
                 if add_containers:
                     for m in DockerCompleter.find_collection_matches(
                             word, containers):
+                        yield m
+                if add_running:
+                    for m in DockerCompleter.find_collection_matches(
+                            word, running):
                         yield m
                 if add_images:
                     for m in DockerCompleter.find_collection_matches(

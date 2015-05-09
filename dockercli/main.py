@@ -126,9 +126,19 @@ class DockerCli(object):
         Re-read them every time we run a command, because
         things might have changed.
         """
+        containers = []
+        running = []
+        images = []
+
         cs = self.handler.containers(all=True)
-        containers = [name for c in cs for name in c['Names']]
-        self.completer.set_containers(containers)
+        if cs and len(cs) > 0 and isinstance(cs[0], dict):
+            containers = [name for c in cs for name in c['Names']]
+            self.completer.set_containers(containers)
+
+        cs = self.handler.containers()
+        if cs and len(cs) > 0 and isinstance(cs[0], dict):
+            running = [name for c in cs for name in c['Names']]
+            self.completer.set_running(running)
 
         def parse_image_name(tag):
             if ':' in tag:
@@ -136,9 +146,10 @@ class DockerCli(object):
             return tag
 
         ims = self.handler.images()
-        images = [parse_image_name(name) for im in ims
-                  for name in im['RepoTags']]
-        self.completer.set_images(images)
+        if ims and len(ims) > 0 and isinstance(ims[0], dict):
+            images = [parse_image_name(name) for im in ims
+                      for name in im['RepoTags']]
+            self.completer.set_images(images)
 
     def run_cli(self):
         """

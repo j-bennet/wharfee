@@ -13,6 +13,7 @@ COMMAND_NAMES = [
     'search',
     'start',
     'stop',
+    'top',
     'info'
 ]
 
@@ -137,6 +138,24 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_IMAGE, 'term',
                       action='store',
                       help='A term to search for.'),
+    ],
+    'stop': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
+                      action='store',
+                      help='Container ID or name to use.'),
+    ],
+    'top': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
+                      action='store',
+                      help='Container ID or name to use.'),
     ]
 }
 

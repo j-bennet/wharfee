@@ -11,9 +11,10 @@ class CommandOption(object):
     TYPE_BOOLEAN = 2
     TYPE_NUMERIC = 3
     TYPE_CONTAINER = 4
-    TYPE_IMAGE = 5
-    TYPE_COMMAND = 6
-    TYPE_COMMAND_ARG = 7
+    TYPE_CONTAINER_RUN = 5
+    TYPE_IMAGE = 6
+    TYPE_COMMAND = 7
+    TYPE_COMMAND_ARG = 8
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -29,6 +30,7 @@ class CommandOption(object):
             CommandOption.TYPE_BOOLEAN,
             CommandOption.TYPE_NUMERIC,
             CommandOption.TYPE_CONTAINER,
+            CommandOption.TYPE_CONTAINER_RUN,
             CommandOption.TYPE_IMAGE,
             CommandOption.TYPE_COMMAND,
             CommandOption.TYPE_COMMAND_ARG
@@ -67,6 +69,13 @@ class CommandOption(object):
         :return: boolean
         """
         return self.option_type == CommandOption.TYPE_CONTAINER
+
+    def is_type_running(self):
+        """
+        Should this option suggest running container name?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_CONTAINER_RUN
 
     def is_type_image(self):
         """

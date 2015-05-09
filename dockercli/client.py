@@ -39,7 +39,8 @@ class DockerClient(object):
             'rm': (self.rm, "Equivalent of 'docker rm'."),
             'search': (self.search, "Equivalent of 'docker search'."),
             'start': (self.start, "Equivalent of 'docker start'."),
-            'stop': (self.not_implemented, "Equivalent of 'docker stop'."),
+            'stop': (self.stop, "Equivalent of 'docker stop'."),
+            'top': (self.top, "Equivalent of 'docker top'."),
             'info': (self.info, "Equivalent of 'docker info'.")
         }
 
@@ -301,6 +302,28 @@ class DockerClient(object):
             return result
         else:
             return ['No images were found.']
+
+    def stop(self, *args, **kwargs):
+        """
+        Stop a running container. Equivalent of docker stop.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+
+        container = args[0]
+        self.instance.stop(container, **kwargs)
+        return [container]
+
+    def top(self, *args, **kwargs):
+        """
+        Remove a container. Equivalent of docker rm.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+
+        container = args[0]
+        result = self.instance.top(container, **kwargs)
+        return result
 
 
 class DockerPermissionException(Exception):

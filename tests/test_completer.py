@@ -116,6 +116,32 @@ def test_options_container_completion(completer, complete_event):
     )
 
 
+def test_options_container_running_completion(completer, complete_event):
+    """
+    Suggest running container names (top [container])
+    """
+    container_names = ['newton', 'tesla', 'einstein', 'edison']
+    running_names = ['einstein', 'edison']
+
+    completer.set_containers(container_names)
+    completer.set_running(running_names)
+
+    _test_options_completion(
+        completer,
+        complete_event,
+        'top ',
+        running_names + ['--help'],
+        0
+    )
+    _test_options_completion(
+        completer,
+        complete_event,
+        'top e',
+        [n for n in running_names if n.startswith('e')],
+        -1
+    )
+
+
 def test_options_image_completion(completer, complete_event):
     """
     Suggest image names in relevant options (images --filter)
