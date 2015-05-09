@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import sys
+import shlex
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
@@ -76,7 +77,7 @@ class DockerClient(object):
         :param text: user input
         :return: iterable
         """
-        tokens = text.strip().split() if text else ['']
+        tokens = shlex.split(text) if text else ['']
         cmd = tokens[0]
         params = tokens[1:] if len(tokens) > 1 else None
 
