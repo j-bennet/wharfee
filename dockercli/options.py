@@ -103,7 +103,8 @@ COMMAND_OPTIONS = {
                       help='Image ID or name to use.'),
         CommandOption(CommandOption.TYPE_COMMAND, 'command',
                       action='store',
-                      help='Command to run in a container.'),
+                      help='Command to run in a container.',
+                      nargs='*'),
     ],
     'start': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--attach',
@@ -230,7 +231,8 @@ def format_command_help(cmd):
 
     for opt in COMMAND_OPTIONS[cmd]:
         if not opt.name.startswith('-'):
-            usage.append(opt.name)
+            optname = "[{0}]".format(opt.name) if opt.is_optional else opt.name
+            usage.append(optname)
 
     usage = ' '.join(usage)
 

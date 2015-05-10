@@ -57,6 +57,12 @@ class CommandOption(object):
         else:
             self.dest = short_name.strip('-')
 
+        if 'nargs' in kwargs:
+            self.is_optional = (kwargs['nargs'] in ['?', '*'])
+            del kwargs['nargs']
+        else:
+            self.is_optional = False
+
         self.option_type = option_type
         self.short_name = short_name
         self.long_name = long_name
