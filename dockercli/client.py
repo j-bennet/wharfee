@@ -40,6 +40,7 @@ class DockerClient(object):
             'images': (self.images, "Equivalent of 'docker images'."),
             'run': (self.run, "Equivalent of 'docker run'."),
             'rm': (self.rm, "Equivalent of 'docker rm'."),
+            'rmi': (self.rmi, "Equivalent of 'docker rmi'."),
             'search': (self.search, "Equivalent of 'docker search'."),
             'start': (self.start, "Equivalent of 'docker start'."),
             'stop': (self.stop, "Equivalent of 'docker stop'."),
@@ -203,6 +204,26 @@ class DockerClient(object):
         for container in containers:
             self.instance.remove_container(container, **kwargs)
             result.append(container)
+
+        return result
+
+    def rmi(self, *args, **kwargs):
+        """
+        Remove an image. Equivalent of docker rm.
+        :param kwargs:
+        :return: Image name.
+        """
+
+        result = []
+        images = args
+
+        for image in images:
+            try:
+                self.instance.remove_image(image, **kwargs)
+                result.append(image)
+            except APIError as ex:
+                result.append('Could not remove {0}: {1}'.format(
+                    image, ex.explanation))
 
         return result
 
