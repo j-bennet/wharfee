@@ -143,7 +143,7 @@ COMMAND_OPTIONS = {
                       help='Display help for this command.'),
     ],
     'rmi': [
-        CommandOption(CommandOption.TYPE_IMAGE, 'image',
+        CommandOption(CommandOption.TYPE_IMAGE_TAG, 'image',
                       action='store',
                       help='Image name name to remove.',
                       nargs='+'),

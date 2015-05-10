@@ -11,7 +11,7 @@ class DockerCompleter(Completer):
     Completer for Docker commands and parameters.
     """
 
-    def __init__(self, containers=None, running=None, images=None):
+    def __init__(self, containers=None, running=None, images=None, tagged=None):
         """
         Initialize the completer
         :return:
@@ -20,6 +20,7 @@ class DockerCompleter(Completer):
         self.containers = set(containers) if containers else set()
         self.running = set(running) if running else set()
         self.images = set(images) if images else set()
+        self.tagged = set(tagged) if tagged else set()
 
     def set_containers(self, containers):
         """
@@ -41,6 +42,13 @@ class DockerCompleter(Completer):
         :param images: list
         """
         self.images = set(images) if images else set()
+
+    def set_tagged(self, images):
+        """
+        Setter for list of tagged images.
+        :param images: list
+        """
+        self.tagged = set(images) if images else set()
 
     def get_completions(self, document, complete_event):
         """
@@ -79,7 +87,8 @@ class DockerCompleter(Completer):
                 params,
                 self.containers,
                 self.running,
-                self.images)
+                self.images,
+                self.tagged)
         else:
             completions = DockerCompleter.find_matches(
                 word_before_cursor,
@@ -89,7 +98,8 @@ class DockerCompleter(Completer):
 
     @staticmethod
     def find_command_matches(command, word='', prev='', params=None,
-                             containers=None, running=None, images=None):
+                             containers=None, running=None, images=None,
+                             tagged=None):
         """
         Find all matches in context of the given command.
         :param command: string: command keyword (such as "ps", "images")
@@ -99,6 +109,7 @@ class DockerCompleter(Completer):
         :param containers: list of containers
         :param running: list of running containers
         :param images: list of images
+        :param tagged: list of tagged images
         :return: iterable
         """
 
@@ -108,6 +119,7 @@ class DockerCompleter(Completer):
         add_containers = False
         add_images = False
         add_running = False
+        add_tagged = False
 
         if command in COMMAND_OPTIONS:
             if current_opt and current_opt.is_type_container():
@@ -121,6 +133,10 @@ class DockerCompleter(Completer):
             elif current_opt and current_opt.is_type_image():
                 for m in DockerCompleter.find_collection_matches(
                         word, images):
+                    yield m
+            elif current_opt and current_opt.is_type_tagged():
+                for m in DockerCompleter.find_collection_matches(
+                        word, tagged):
                     yield m
             else:
                 for opt in COMMAND_OPTIONS[command]:
@@ -137,6 +153,8 @@ class DockerCompleter(Completer):
                                 add_images = True
                             elif opt.is_type_running():
                                 add_running = True
+                            elif opt.is_type_tagged():
+                                add_tagged = True
 
                 # Also return images and containers if positional options
                 # require them
@@ -152,6 +170,10 @@ class DockerCompleter(Completer):
                     for m in DockerCompleter.find_collection_matches(
                             word, images):
                         yield m
+                if add_tagged:
+                    for m in DockerCompleter.find_collection_matches(
+                            word, tagged):
+                        yield m
 
     @staticmethod
     def find_collection_matches(word, lst):
@@ -161,7 +183,7 @@ class DockerCompleter(Completer):
         :param word:
         :return:
         """
-        for name in lst:
+        for name in sorted(lst):
             if name.startswith(word) or not word:
                 yield Completion(name, -len(word))
 

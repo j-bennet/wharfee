@@ -13,8 +13,9 @@ class CommandOption(object):
     TYPE_CONTAINER = 4
     TYPE_CONTAINER_RUN = 5
     TYPE_IMAGE = 6
-    TYPE_COMMAND = 7
-    TYPE_COMMAND_ARG = 8
+    TYPE_IMAGE_TAG = 7
+    TYPE_COMMAND = 8
+    TYPE_COMMAND_ARG = 9
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -32,6 +33,7 @@ class CommandOption(object):
             CommandOption.TYPE_CONTAINER,
             CommandOption.TYPE_CONTAINER_RUN,
             CommandOption.TYPE_IMAGE,
+            CommandOption.TYPE_IMAGE_TAG,
             CommandOption.TYPE_COMMAND,
             CommandOption.TYPE_COMMAND_ARG
         ]:
@@ -89,6 +91,13 @@ class CommandOption(object):
         :return: boolean
         """
         return self.option_type == CommandOption.TYPE_IMAGE
+
+    def is_type_tagged(self):
+        """
+        Should this option suggest tagged image name?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_IMAGE_TAG
 
     @property
     def name(self):

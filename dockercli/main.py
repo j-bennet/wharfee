@@ -147,9 +147,14 @@ class DockerCli(object):
 
         ims = self.handler.images()
         if ims and len(ims) > 0 and isinstance(ims[0], dict):
-            images = [parse_image_name(name) for im in ims
-                      for name in im['RepoTags']]
+            images = set([])
+            tagged = set([])
+            for im in ims:
+                for name in im['RepoTags']:
+                    images.add(parse_image_name(name))
+                    tagged.add(name)
             self.completer.set_images(images)
+            self.completer.set_tagged(tagged)
 
     def run_cli(self):
         """
