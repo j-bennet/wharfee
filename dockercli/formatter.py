@@ -32,6 +32,8 @@ def format_data(data):
         elif isinstance(data[0], basestring):
             if len(data) == 1:
                 return data
+            elif is_plain_list(data):
+                return data
             else:
                 data = truncate_rows(data)
                 text = tabulate(data)

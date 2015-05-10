@@ -22,6 +22,19 @@ def test_help_data_formatting():
     print('\n')
     print('\n'.join(formatted))
 
+def test_rmi_data_formatting():
+    """
+    Test formatting for list of strings.
+    """
+    data = [
+        "busybox:latest",
+        "busybox:ubuntu-14.04",
+        "busybox:buildroot-2014.02",
+    ]
+    formatted = format_data(data)
+    print('\n')
+    print('\n'.join(formatted))
+
 def test_dict_data_formatting():
     """
     Test hierarchical data formatting
