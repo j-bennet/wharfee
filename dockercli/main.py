@@ -187,7 +187,11 @@ class DockerCli(object):
                 self.handler.handle_input(document.text)
                 if self.handler.is_stream:
                     for line in self.handler.output:
-                        click.echo(line.strip())
+                        if self.handler.stream_formatter:
+                            line = self.handler.stream_formatter(line)
+                        else:
+                            line = line.strip()
+                        click.echo(line)
                 else:
                     lines = format_data(self.handler.output)
                     click.echo_via_pager('\n'.join(lines))

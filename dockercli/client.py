@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import sys
 import shlex
+import json
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
@@ -90,6 +91,7 @@ class DockerClient(object):
         params = tokens[1:] if len(tokens) > 1 else None
 
         self.is_stream = False
+        self.stream_formatter = None
 
         if cmd and cmd in self.handlers:
             handler = self.handlers[cmd][0]
@@ -107,9 +109,11 @@ class DockerClient(object):
 
                 except APIError as ex:
                     self.is_stream = False
+                    self.stream_formatter = None
                     self.output = [ex.explanation]
                 except Exception as ex:
                     self.is_stream = False
+                    self.stream_formatter = None
                     self.output = [ex.message]
             else:
                 self.output = handler()
@@ -343,6 +347,27 @@ class DockerClient(object):
         kwargs['stream'] = True
         result = self.instance.pull(container, **kwargs)
         self.is_stream = True
+
+        def format_line(line):
+            """
+            Format output of "pull".
+            :param line: string
+            :return: string
+            """
+            data = json.loads(line)
+            if 'id' in data and data['id']:
+                if 'progress' in data and data['progress']:
+                    line = "{0} {1}: {1}".format(data['status'],
+                                                 data['id'],
+                                                 data['progress'])
+                else:
+                    line = "{0} {1}".format(data['status'], data['id'])
+            else:
+                line = "{0}".format(data['status'])
+            return line
+
+        self.stream_formatter = format_line
+
         return result
 
 
