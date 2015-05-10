@@ -7,6 +7,7 @@ COMMAND_NAMES = [
     'help',
     'version',
     'ps',
+    'pull',
     'images',
     'run',
     'rm',
@@ -60,6 +61,15 @@ COMMAND_OPTIONS = {
                       dest='since',
                       help='Show only containers created since Id or Name, ' +
                            'include non-running ones.')
+    ],
+    'pull': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_IMAGE, 'image',
+                      action='store',
+                      help='Image name to pull.'),
     ],
     'images': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--all',

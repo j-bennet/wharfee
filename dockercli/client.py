@@ -14,6 +14,7 @@ from requests.exceptions import ConnectionError
 from .options import allowed_args
 from .options import parse_command_options
 from .options import format_command_help
+from .options import COMMAND_NAMES
 
 
 class DockerClient(object):
@@ -34,6 +35,7 @@ class DockerClient(object):
             'help': (self.help, "Help on available commands."),
             'version': (self.version, "Equivalent of 'docker version'."),
             'ps': (self.containers, "Equivalent of 'docker ps'."),
+            'pull': (self.pull, "Equivalent of 'docker pull'."),
             'images': (self.images, "Equivalent of 'docker images'."),
             'run': (self.run, "Equivalent of 'docker run'."),
             'rm': (self.rm, "Equivalent of 'docker rm'."),
@@ -46,6 +48,11 @@ class DockerClient(object):
 
         self.is_stream = False
         self.output = None
+
+        # TODO: add functions to format output returned
+        # by "streamed" commands, since those all return
+        # different output.
+        self.stream_formatter = None
 
         if sys.platform.startswith('darwin') \
                 or sys.platform.startswith('win32'):
@@ -117,7 +124,7 @@ class DockerClient(object):
         _, _ = args, kwargs
 
         help_rows = [(key, self.handlers[key][1])
-                     for key in self.handlers.keys()]
+                     for key in COMMAND_NAMES]
         return help_rows
 
     def not_implemented(self, *args, **kwargs):
@@ -323,6 +330,19 @@ class DockerClient(object):
 
         container = args[0]
         result = self.instance.top(container, **kwargs)
+        return result
+
+    def pull(self, *args, **kwargs):
+        """
+        Pull an image by name. Equivalent of docker pull.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+
+        container = args[0]
+        kwargs['stream'] = True
+        result = self.instance.pull(container, **kwargs)
+        self.is_stream = True
         return result
 
 
