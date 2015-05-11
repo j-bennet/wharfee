@@ -49,12 +49,12 @@ class DockerClient(object):
         }
 
         self.is_stream = False
+        self.stream_formatter = None
         self.output = None
 
-        # TODO: add functions to format output returned
-        # by "streamed" commands, since those all return
-        # different output.
-        self.stream_formatter = None
+        self.is_refresh_containers = False
+        self.is_refresh_running = False
+        self.is_refresh_images = False
 
         if sys.platform.startswith('darwin') \
                 or sys.platform.startswith('win32'):
@@ -87,12 +87,20 @@ class DockerClient(object):
         :param text: user input
         :return: iterable
         """
+
+        def reset_output():
+            """ Set all internals to initial state."""
+            self.is_stream = False
+            self.stream_formatter = None
+            self.is_refresh_containers = False
+            self.is_refresh_running = False
+            self.is_refresh_images = False
+
         tokens = shlex.split(text) if text else ['']
         cmd = tokens[0]
         params = tokens[1:] if len(tokens) > 1 else None
 
-        self.is_stream = False
-        self.stream_formatter = None
+        reset_output()
 
         if cmd and cmd in self.handlers:
             handler = self.handlers[cmd][0]
@@ -109,12 +117,10 @@ class DockerClient(object):
                         self.output = handler(*pargs, **popts)
 
                 except APIError as ex:
-                    self.is_stream = False
-                    self.stream_formatter = None
+                    reset_output()
                     self.output = [ex.explanation]
                 except Exception as ex:
-                    self.is_stream = False
-                    self.stream_formatter = None
+                    reset_output()
                     self.output = [ex.message]
             else:
                 self.output = handler()
@@ -368,6 +374,7 @@ class DockerClient(object):
         kwargs['stream'] = True
         result = self.instance.pull(container, **kwargs)
         self.is_stream = True
+        self.is_refresh_images = True
 
         def format_line(line):
             """
