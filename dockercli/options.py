@@ -151,6 +151,10 @@ COMMAND_OPTIONS = {
                       action='store_true',
                       dest='help',
                       help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '--dangling',
+                      action='store_true',
+                      dest='dangling',
+                      help='Shortcut to remove all dangling images.'),
     ],
     'search': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
