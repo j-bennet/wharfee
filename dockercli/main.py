@@ -120,41 +120,43 @@ class DockerCli(object):
 
         return manager
 
-    def set_completer_options(self):
+    def set_completer_options(self, cons=True, runs=True, imgs=True):
         """
         Set image and container names in Completer.
-        Re-read them every time we run a command, because
-        things might have changed.
+        Re-read if needed after a command.
+        :param cons: boolean: need to refresh containers
+        :param runs: boolean: need to refresh running containers
+        :param imgs: boolean: need to refresh images
         """
-        containers = []
-        running = []
-        images = []
 
-        cs = self.handler.containers(all=True)
-        if cs and len(cs) > 0 and isinstance(cs[0], dict):
-            containers = [name for c in cs for name in c['Names']]
-            self.completer.set_containers(containers)
+        if cons:
+            cs = self.handler.containers(all=True)
+            if cs and len(cs) > 0 and isinstance(cs[0], dict):
+                containers = [name for c in cs for name in c['Names']]
+                self.completer.set_containers(containers)
 
-        cs = self.handler.containers()
-        if cs and len(cs) > 0 and isinstance(cs[0], dict):
-            running = [name for c in cs for name in c['Names']]
-            self.completer.set_running(running)
+        if runs:
+            cs = self.handler.containers()
+            if cs and len(cs) > 0 and isinstance(cs[0], dict):
+                running = [name for c in cs for name in c['Names']]
+                self.completer.set_running(running)
 
-        def parse_image_name(tag):
-            if ':' in tag:
-                return tag.split(':', 2)[0]
-            return tag
+        if imgs:
+            def parse_image_name(tag):
+                if ':' in tag:
+                    return tag.split(':', 2)[0]
+                return tag
 
-        ims = self.handler.images()
-        if ims and len(ims) > 0 and isinstance(ims[0], dict):
-            images = set([])
-            tagged = set([])
-            for im in ims:
-                for name in im['RepoTags']:
-                    images.add(parse_image_name(name))
-                    tagged.add(name)
-            self.completer.set_images(images)
-            self.completer.set_tagged(tagged)
+            ims = self.handler.images()
+            if ims and len(ims) > 0 and isinstance(ims[0], dict):
+                images = set([])
+                tagged = set([])
+                for im in ims:
+                    for name in im['RepoTags']:
+                        images.add(parse_image_name(name))
+                        tagged.add(name)
+                self.completer.set_images(images)
+                self.completer.set_tagged(tagged)
 
     def run_cli(self):
         """
@@ -188,8 +190,8 @@ class DockerCli(object):
         while True:
             try:
                 document = dcli.read_input()
-                self.set_completer_options()
                 self.handler.handle_input(document.text)
+
                 if self.handler.is_stream:
                     for line in self.handler.output:
                         if self.handler.stream_formatter:
@@ -200,6 +202,12 @@ class DockerCli(object):
                 else:
                     lines = format_data(self.handler.output)
                     click.echo_via_pager('\n'.join(lines))
+
+                # After processing the command, refresh the lists of
+                # containers and images as needed
+                self.set_completer_options(self.handler.is_refresh_containers,
+                                           self.handler.is_refresh_running,
+                                           self.handler.is_refresh_images)
 
             except DockerPermissionException as ex:
                 click.secho(ex.message, fg='red')

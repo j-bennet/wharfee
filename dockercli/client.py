@@ -209,6 +209,8 @@ class DockerClient(object):
 
         for container in containers:
             self.instance.remove_container(container, **kwargs)
+            self.is_refresh_containers = True
+            self.is_refresh_running = True
             result.append(container)
 
         return result
@@ -220,18 +222,21 @@ class DockerClient(object):
         :return: Image name.
         """
 
-        result = []
         images = args
 
-        for image in images:
-            try:
-                self.instance.remove_image(image, **kwargs)
-                result.append(image)
-            except APIError as ex:
-                result.append('Could not remove {0}: {1}'.format(
-                    image, ex.explanation))
+        self.is_stream = True
 
-        return result
+        def stream():
+            for image in images:
+                try:
+                    self.instance.remove_image(image, **kwargs)
+                    self.is_refresh_images = True
+                    yield image
+                except APIError as ex:
+                    yield 'Could not remove {0}: {1}'.format(
+                        image, ex.explanation)
+
+        return stream()
 
     def run(self, *args, **kwargs):
         """
@@ -252,6 +257,7 @@ class DockerClient(object):
             if "Warnings" in result and result['Warnings']:
                 return [result['Warnings']]
             if "Id" in result and result['Id']:
+                self.is_refresh_containers = True
                 is_attach = 'detach' not in kwargs or not kwargs['detach']
                 start_args = {
                     'container': result['Id'],
@@ -280,11 +286,14 @@ class DockerClient(object):
 
         result = self.instance.start(**startargs)
         if result:
+            self.is_refresh_running = True
             return [result]
         elif attached:
             self.is_stream = True
+            self.is_refresh_running = True
             return attached
         else:
+            self.is_refresh_running = True
             return [kwargs['container']]
 
     def attach(self, **kwargs):
@@ -350,6 +359,7 @@ class DockerClient(object):
 
         container = args[0]
         self.instance.stop(container, **kwargs)
+        self.is_refresh_running = True
         return [container]
 
     def top(self, *args, **kwargs):
