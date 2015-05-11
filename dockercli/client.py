@@ -34,18 +34,19 @@ class DockerClient(object):
 
         self.handlers = {
             'help': (self.help, "Help on available commands."),
-            'version': (self.version, "Equivalent of 'docker version'."),
-            'ps': (self.containers, "Equivalent of 'docker ps'."),
-            'pull': (self.pull, "Equivalent of 'docker pull'."),
-            'images': (self.images, "Equivalent of 'docker images'."),
-            'run': (self.run, "Equivalent of 'docker run'."),
-            'rm': (self.rm, "Equivalent of 'docker rm'."),
-            'rmi': (self.rmi, "Equivalent of 'docker rmi'."),
-            'search': (self.search, "Equivalent of 'docker search'."),
-            'start': (self.start, "Equivalent of 'docker start'."),
-            'stop': (self.stop, "Equivalent of 'docker stop'."),
-            'top': (self.top, "Equivalent of 'docker top'."),
-            'info': (self.info, "Equivalent of 'docker info'.")
+            'version': (self.version, "Show the Docker version information."),
+            'ps': (self.containers, "List containers."),
+            'pull': (self.pull, "Pull an image or a repository from the " +
+                     "registry."),
+            'images': (self.images, "List images."),
+            'run': (self.run, "Run a command in a new container."),
+            'rm': (self.rm, "Remove one or more containers."),
+            'rmi': (self.rmi, "Remove one or more images."),
+            'search': (self.search, "Search the Docker Hub for images."),
+            'start': (self.start, "Restart a stopped container."),
+            'stop': (self.stop, "Stop a running container."),
+            'top': (self.top, "Display the running processes of a container."),
+            'info': (self.info, "Display system-wide information.")
         }
 
         self.is_stream = False
