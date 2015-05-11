@@ -330,14 +330,19 @@ class DockerClient(object):
         else:
             return ['There are no images to list.']
 
-    def search(self, **kwargs):
+    def search(self, *args, **kwargs):
         """
         Return the list of images matching specified term.
         Equivalent of docker search.
         :return: list of dicts
         """
 
-        result = self.instance.search(**kwargs)
+        _ = kwargs
+
+        if not args or len(args) < 1:
+            return "Search term is required."
+
+        result = self.instance.search(args[0])
 
         if len(result) > 0:
             for res in result:
