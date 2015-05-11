@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import shlex
+
 from prompt_toolkit.completion import Completer, Completion
 from .options import COMMAND_OPTIONS
 from .options import COMMAND_NAMES
@@ -206,11 +208,11 @@ class DockerCompleter(Completer):
         """
         Parse out all tokens.
         :param text:
-        :return: int
+        :return: list
         """
         if text is not None:
             text = text.strip()
-            words = text.split()
+            words = shlex.split(text)
             return words
         return []
 
@@ -224,7 +226,7 @@ class DockerCompleter(Completer):
         if text is not None:
             text = text.strip()
             if len(text) > 0:
-                word = text.split()[0]
+                word = shlex.split(text)[0]
                 word = word.strip()
                 return word
         return ''
@@ -239,7 +241,7 @@ class DockerCompleter(Completer):
         if text is not None:
             text = text.strip()
             if len(text) > 0:
-                word = text.split()[-1]
+                word = shlex.split(text)[-1]
                 word = word.strip()
                 return word
         return ''
