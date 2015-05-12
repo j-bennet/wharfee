@@ -207,7 +207,7 @@ class DockerClient(object):
 
         truncate_output = False
 
-        if 'all_stopped' in kwargs:
+        if 'all_stopped' in kwargs and kwargs['all_stopped']:
             if args and len(args) > 0:
                 return ['Provide either --all-stopped, or container name(s).']
 
@@ -221,9 +221,11 @@ class DockerClient(object):
             containers = [c['Id'] for c in containers]
             truncate_output = True
 
-            del kwargs['all_stopped']
         else:
             containers = args
+
+        if 'all_stopped' in kwargs:
+            del kwargs['all_stopped']
 
         self.is_stream = True
 
@@ -252,7 +254,7 @@ class DockerClient(object):
 
         truncate_output = False
 
-        if 'all_dangling' in kwargs:
+        if 'all_dangling' in kwargs and kwargs['all_dangling']:
             if args and len(args) > 0:
                 return ['Provide either --all-dangling, or image name(s).']
 
@@ -264,9 +266,11 @@ class DockerClient(object):
                 return ['There are no dangling images.']
 
             truncate_output = True
-            del kwargs['all_dangling']
         else:
             images = args
+
+        if 'all_dangling' in kwargs:
+            del kwargs['all_dangling']
 
         self.is_stream = True
 
