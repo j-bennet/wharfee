@@ -298,6 +298,9 @@ class DockerClient(object):
         if not args:
             return ['Image name is required.']
 
+        if kwargs['remove'] and kwargs['detach']:
+            return ['Use either --rm or --detach.']
+
         kwargs['image'] = args[0]
         kwargs['command'] = args[1:] if len(args) > 1 else []
 
@@ -312,7 +315,8 @@ class DockerClient(object):
                 is_attach = 'detach' not in kwargs or not kwargs['detach']
                 start_args = {
                     'container': result['Id'],
-                    'attach': is_attach
+                    'attach': is_attach,
+                    'remove': kwargs['remove']
                 }
                 return self.start(**start_args)
         return ['There was a problem running the container.']
@@ -323,6 +327,10 @@ class DockerClient(object):
         :param kwargs:
         :return: Container ID or iterable output.
         """
+
+        # TODO: yeah actually use it...
+        is_remove = kwargs['remove']
+
         startargs = allowed_args('start', **kwargs)
 
         attached = None

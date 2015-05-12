@@ -116,6 +116,12 @@ COMMAND_OPTIONS = {
                       action='store',
                       help='Command to run in a container.',
                       nargs='*'),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '--rm',
+                      action='store_true',
+                      dest='remove',
+                      help='Remove the container when it exits. ' +
+                      'Can\'t be used with --detach',
+                      no_match=True),
     ],
     'start': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--attach',
