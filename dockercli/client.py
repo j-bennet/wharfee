@@ -205,6 +205,8 @@ class DockerClient(object):
         :return: Container ID or iterable output.
         """
 
+        truncate_output = False
+
         if 'all_stopped' in kwargs:
             if args and len(args) > 0:
                 return ['Provide either --all-stopped, or container name(s).']
@@ -217,6 +219,7 @@ class DockerClient(object):
                 return ['There are no stopped containers.']
 
             containers = [c['Id'] for c in containers]
+            truncate_output = True
 
             del kwargs['all_stopped']
         else:
@@ -230,9 +233,12 @@ class DockerClient(object):
                     self.instance.remove_container(container, **kwargs)
                     self.is_refresh_containers = True
                     self.is_refresh_running = True
-                    yield "{:.10}".format(container)
+                    if truncate_output:
+                        yield "{:.25}".format(container)
+                    else:
+                        yield container
                 except APIError as ex:
-                    yield 'Could not remove {:.10}: {1}'.format(
+                    yield 'Could not remove {:.25}: {1}'.format(
                         container, ex.explanation)
 
         return stream()
@@ -243,6 +249,8 @@ class DockerClient(object):
         :param kwargs:
         :return: Image name.
         """
+
+        truncate_output = False
 
         if 'all_dangling' in kwargs:
             if args and len(args) > 0:
@@ -255,6 +263,7 @@ class DockerClient(object):
             if not images or len(images) == 0:
                 return ['There are no dangling images.']
 
+            truncate_output = True
             del kwargs['all_dangling']
         else:
             images = args
@@ -266,7 +275,10 @@ class DockerClient(object):
                 try:
                     self.instance.remove_image(image, **kwargs)
                     self.is_refresh_images = True
-                    yield image
+                    if truncate_output:
+                        yield "{:.25}".format(image)
+                    else:
+                        yield image
                 except APIError as ex:
                     yield 'Could not remove {0}: {1}'.format(
                         image, ex.explanation)
