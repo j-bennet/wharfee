@@ -242,6 +242,7 @@ def parse_command_options(cmd, params):
     :return: parser, args, opts
     """
     parser = OptParser(prog=cmd, add_help_option=False)
+    parser.disable_interspersed_args()
     for opt in COMMAND_OPTIONS[cmd]:
         if opt.name.startswith('-'):
             parser.add_option(*opt.args, **opt.kwargs)

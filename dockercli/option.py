@@ -61,7 +61,6 @@ class CommandOption(object):
 
         if 'nargs' in kwargs:
             self.is_optional = (kwargs['nargs'] in ['?', '*'])
-            del kwargs['nargs']
         else:
             self.is_optional = False
 
