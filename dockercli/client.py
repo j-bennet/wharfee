@@ -223,9 +223,9 @@ class DockerClient(object):
         :return: Image name.
         """
 
-        if 'dangling' in kwargs:
+        if 'all_dangling' in kwargs:
             if args and len(args) > 0:
-                return ['Provide either --dangling, or image name(s).']
+                return ['Provide either --all-dangling, or image name(s).']
 
             images = self.instance.images(
                 quiet=True,
@@ -234,7 +234,7 @@ class DockerClient(object):
             if not images or len(images) == 0:
                 return ['There are no dangling images.']
 
-            del kwargs['dangling']
+            del kwargs['all_dangling']
         else:
             images = args
 
