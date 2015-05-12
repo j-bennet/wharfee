@@ -16,6 +16,16 @@ Same goes for image names.
 
 ![rmi](screenshots/rmi-images.png)
 
+There are some handy shortcuts too. What was that command ro remove all dangling images? OMG, what was it? docker rmi $(docker ps --all --quiet)? Oh, there you go:
+
+![rmi-dangling](screenshots/rmi-all-dangling.png)
+
+Boom! How about removing all stopped containers?
+
+![rm-stopped](screenshots/rm-all-stopped.png)
+
+Ah, if only everything in life was so easy.
+
 ## What are you using?
 
 * To talk to Docker: [docker-py](https://github.com/docker/docker-py).
@@ -25,4 +35,4 @@ Same goes for image names.
 
 ## Is it perfect?
 
-Not... yet.
+Not... yet. But I believe it can be.
