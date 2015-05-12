@@ -14,7 +14,7 @@ class CommandLexer(RegexLexer):
         'root': [
             (words(tuple(COMMAND_NAMES), prefix=r'^', suffix=r'\b'),
              Operator.Word),
-            (r'--[a-z]+\b', Keyword),
+            (r'--[a-z\-]+\b', Keyword),
             (r'.*\n', Text),
         ]
     }
