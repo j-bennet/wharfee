@@ -141,6 +141,10 @@ COMMAND_OPTIONS = {
                       action='store_true',
                       dest='help',
                       help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '--all-stopped',
+                      action='store_true',
+                      dest='all_stopped',
+                      help='Shortcut to remove all stopped containers.'),
     ],
     'rmi': [
         CommandOption(CommandOption.TYPE_IMAGE_TAG, 'image',

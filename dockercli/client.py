@@ -205,16 +205,37 @@ class DockerClient(object):
         :return: Container ID or iterable output.
         """
 
-        result = []
-        containers = args
+        if 'all_stopped' in kwargs:
+            if args and len(args) > 0:
+                return ['Provide either --all-stopped, or container name(s).']
 
-        for container in containers:
-            self.instance.remove_container(container, **kwargs)
-            self.is_refresh_containers = True
-            self.is_refresh_running = True
-            result.append(container)
+            containers = self.instance.containers(
+                quiet=True,
+                filters={'status': 'exited'})
 
-        return result
+            if not containers or len(containers) == 0:
+                return ['There are no stopped containers.']
+
+            containers = [c['Id'] for c in containers]
+
+            del kwargs['all_stopped']
+        else:
+            containers = args
+
+        self.is_stream = True
+
+        def stream():
+            for container in containers:
+                try:
+                    self.instance.remove_container(container, **kwargs)
+                    self.is_refresh_containers = True
+                    self.is_refresh_running = True
+                    yield "{:.10}".format(container)
+                except APIError as ex:
+                    yield 'Could not remove {:.10}: {1}'.format(
+                        container, ex.explanation)
+
+        return stream()
 
     def rmi(self, *args, **kwargs):
         """
