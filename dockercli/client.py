@@ -52,6 +52,7 @@ class DockerClient(object):
         self.is_stream = False
         self.stream_formatter = None
         self.output = None
+        self.after = None
 
         self.is_refresh_containers = False
         self.is_refresh_running = False
@@ -96,6 +97,7 @@ class DockerClient(object):
             self.is_refresh_containers = False
             self.is_refresh_running = False
             self.is_refresh_images = False
+            self.after = None
 
         tokens = shlex.split(text) if text else ['']
         cmd = tokens[0]
@@ -328,8 +330,19 @@ class DockerClient(object):
         :return: Container ID or iterable output.
         """
 
-        # TODO: yeah actually use it...
-        is_remove = kwargs['remove']
+        if kwargs['remove']:
+            def on_after():
+                try:
+                    self.instance.remove_container(kwargs['container'])
+                    yield "Removed container {:.25} on exit.".format(
+                        kwargs['container'])
+                except APIError as ex:
+                    yield "Error removing {:.25}: {1}.".format(
+                        kwargs['container'],
+                        ex.explanation
+                    )
+
+            self.after = on_after
 
         startargs = allowed_args('start', **kwargs)
 

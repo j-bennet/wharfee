@@ -203,6 +203,10 @@ class DockerCli(object):
                     lines = format_data(self.handler.output)
                     click.echo_via_pager('\n'.join(lines))
 
+                if self.handler.after:
+                    for line in self.handler.after():
+                        click.echo(line)
+
                 # After processing the command, refresh the lists of
                 # containers and images as needed
                 self.set_completer_options(self.handler.is_refresh_containers,
