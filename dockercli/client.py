@@ -242,8 +242,7 @@ class DockerClient(object):
                     else:
                         yield container
                 except APIError as ex:
-                    yield 'Could not remove {:.25}: {1}'.format(
-                        container, ex.explanation)
+                    yield '{0:.25}: {1}'.format(container, ex.explanation)
 
         return stream()
 
@@ -286,8 +285,7 @@ class DockerClient(object):
                     else:
                         yield image
                 except APIError as ex:
-                    yield 'Could not remove {0}: {1}'.format(
-                        image, ex.explanation)
+                    yield '{0:.25}: {1}'.format(image, ex.explanation)
 
         return stream()
 
@@ -332,15 +330,14 @@ class DockerClient(object):
 
         if kwargs['remove']:
             def on_after():
+                container = kwargs['container']
                 try:
-                    self.instance.remove_container(kwargs['container'])
-                    yield "Removed container {:.25} on exit.".format(
-                        kwargs['container'])
+                    self.instance.stop(container)
+                    self.instance.remove_container(container)
+                    yield "Removed container {0:.25} on exit.".format(
+                        container)
                 except APIError as ex:
-                    yield "Error removing {:.25}: {1}.".format(
-                        kwargs['container'],
-                        ex.explanation
-                    )
+                    yield "{0:.25}: {1}.".format(container, ex.explanation)
 
             self.after = on_after
 

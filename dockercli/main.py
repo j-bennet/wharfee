@@ -213,6 +213,13 @@ class DockerCli(object):
                                            self.handler.is_refresh_running,
                                            self.handler.is_refresh_images)
 
+            except KeyboardInterrupt:
+                # user pressed Ctrl + C
+                if self.handler.after:
+                    click.echo('')
+                    for line in self.handler.after():
+                        click.echo(line)
+
             except DockerPermissionException as ex:
                 click.secho(ex.message, fg='red')
 
