@@ -39,6 +39,8 @@ class DockerClient(object):
             'pull': (self.pull, "Pull an image or a repository from the " +
                      "registry."),
             'images': (self.images, "List images."),
+            'inspect': (self.inspect, "Return low-level information on a " +
+                        "container or image."),
             'run': (self.run, "Run a command in a new container."),
             'rm': (self.rm, "Remove one or more containers."),
             'rmi': (self.rmi, "Remove one or more images."),
@@ -49,7 +51,6 @@ class DockerClient(object):
             'info': (self.info, "Display system-wide information.")
         }
 
-        self.is_stream = False
         self.stream_formatter = None
         self.output = None
         self.after = None
@@ -92,7 +93,6 @@ class DockerClient(object):
 
         def reset_output():
             """ Set all internals to initial state."""
-            self.is_stream = False
             self.stream_formatter = None
             self.is_refresh_containers = False
             self.is_refresh_running = False
@@ -122,6 +122,7 @@ class DockerClient(object):
                 except APIError as ex:
                     reset_output()
                     self.output = [ex.explanation]
+
                 except Exception as ex:
                     reset_output()
                     self.output = [ex.message]
@@ -168,11 +169,35 @@ class DockerClient(object):
         Return the system info. Equivalent of docker info.
         :return: list of tuples
         """
-        _, _ = kwargs
+        _, _ = args, kwargs
 
         rdict = self.instance.info()
         result = [(k, rdict[k]) for k in sorted(rdict.keys())]
         return result
+
+    def inspect(self, *args, **kwargs):
+        """
+        Return image or container info. Equivalent of docker inspect.
+        :return: dict
+        """
+        _, _ = args, kwargs
+
+        if not args or len(args) == 0:
+            yield 'Container or image ID is required.'
+
+        cs = self.containers(all=True)
+        cids = set([])
+        cnames = set([])
+        if cs and len(cs) > 0 and isinstance(cs[0], dict):
+            cids = set([c['Id'] for c in cs])
+            cnames = set([name for c in cs for name in c['Names']])
+
+        for id in args:
+            if id in cids or id in cnames:
+                info = self.instance.inspect_container(id)
+            else:
+                info = self.instance.inspect_image(id)
+            yield json.dumps(info, indent=1)
 
     def containers(self, *args, **kwargs):
         """
@@ -229,8 +254,6 @@ class DockerClient(object):
         if 'all_stopped' in kwargs:
             del kwargs['all_stopped']
 
-        self.is_stream = True
-
         def stream():
             for container in containers:
                 try:
@@ -272,8 +295,6 @@ class DockerClient(object):
 
         if 'all_dangling' in kwargs:
             del kwargs['all_dangling']
-
-        self.is_stream = True
 
         def stream():
             for image in images:
@@ -358,7 +379,6 @@ class DockerClient(object):
             self.is_refresh_running = True
             return [result]
         elif attached:
-            self.is_stream = True
             self.is_refresh_running = True
             return attached
         else:
@@ -374,7 +394,6 @@ class DockerClient(object):
         :param kwargs:
         :return: Iterable output
         """
-        self.is_stream = True
         result = self.instance.attach(**kwargs)
         return result
 
@@ -384,7 +403,6 @@ class DockerClient(object):
         :param kwargs:
         :return: Iterable output
         """
-        self.is_stream = True
         return self.instance.logs(**kwargs)
 
     def images(self, **kwargs):
@@ -457,7 +475,6 @@ class DockerClient(object):
         container = args[0]
         kwargs['stream'] = True
         result = self.instance.pull(container, **kwargs)
-        self.is_stream = True
         self.is_refresh_images = True
 
         def format_line(line):

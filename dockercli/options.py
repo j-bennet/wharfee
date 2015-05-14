@@ -9,6 +9,8 @@ COMMAND_NAMES = [
     'ps',
     'pull',
     'images',
+    'info',
+    'inspect',
     'run',
     'rm',
     'rmi',
@@ -16,10 +18,30 @@ COMMAND_NAMES = [
     'start',
     'stop',
     'top',
-    'info'
 ]
 
 COMMAND_OPTIONS = {
+    'info': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+    ],
+    'inspect': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_IMAGE, 'image',
+                      action='store',
+                      dest="image_id",
+                      help='Image to inspect.',
+                      nargs='*'),
+        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
+                      action='store',
+                      help='Container to inspect.',
+                      nargs='*'),
+    ],
     'ps': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--all',
                       action='store_true',

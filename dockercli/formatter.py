@@ -1,6 +1,9 @@
 """
 Helper functions to format output for CLI.
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+
 from tabulate import tabulate
 
 # Python 3 has no 'basestring' or 'long' type we're checking for.

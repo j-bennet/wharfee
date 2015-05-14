@@ -5,6 +5,7 @@ from __future__ import print_function
 import os
 import click
 
+from types import GeneratorType
 from prompt_toolkit import AbortAction
 from prompt_toolkit import CommandLineInterface
 from prompt_toolkit.buffer import Buffer
@@ -23,6 +24,7 @@ from .client import DockerSslException
 from .completer import DockerCompleter
 from .lexer import CommandLexer
 from .formatter import format_data
+
 
 class DocumentStyle(Style):
     """
@@ -192,7 +194,7 @@ class DockerCli(object):
                 document = dcli.read_input()
                 self.handler.handle_input(document.text)
 
-                if self.handler.is_stream:
+                if isinstance(self.handler.output, GeneratorType):
                     for line in self.handler.output:
                         if self.handler.stream_formatter:
                             line = self.handler.stream_formatter(line)
