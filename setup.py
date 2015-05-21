@@ -8,7 +8,7 @@ setup(
     description='Docker-CLI',
     author='Iryna Truong',
     url='http://www.docker-cli.com.',
-    download_url='http://www.docker-cli/latest.',
+    download_url='http://www.docker-cli.com/latest.',
     author_email='i[dot]chernyavska[at]gmail[dot]com.',
     version='0.1',
     install_requires=[
