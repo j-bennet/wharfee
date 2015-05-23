@@ -6,9 +6,9 @@ except ImportError:
 
 setup(
     description='Docker-CLI',
-    author='Iryna Truong',
-    url='http://www.docker-cli.com.',
-    download_url='http://www.docker-cli.com/latest.',
+    author='Iryna Cherniavska',
+    url='http://dockercli.com.',
+    download_url='http://github.com/j-bennet/dockercli.',
     author_email='i[dot]chernyavska[at]gmail[dot]com.',
     version='0.1',
     install_requires=[
