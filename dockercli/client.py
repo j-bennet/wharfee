@@ -27,7 +27,7 @@ class DockerClient(object):
     is named "limit", some parameters are not implemented at all, etc.
     """
 
-    def __init__(self):
+    def __init__(self, timeout=None):
         """
         Initialize the Docker wrapper.
         """
@@ -68,14 +68,19 @@ class DockerClient(object):
                 # http://docker-py.readthedocs.org/en/latest/boot2docker/
                 # See also: https://github.com/docker/docker-py/issues/406
                 kwargs['tls'].assert_hostname = False
+                kwargs['timeout'] = timeout
                 self.instance = AutoVersionClient(**kwargs)
             except DockerException as x:
                 if 'CERTIFICATE_VERIFY_FAILED' in x.message:
                     raise DockerSslException(x)
-                raise x
+                elif 'ConnectTimeoutError' in x.message:
+                    raise DockerTimeoutException(x)
+                else:
+                    raise x
         else:
             # unix-based
             self.instance = AutoVersionClient(
+                timeout=timeout,
                 base_url='unix://var/run/docker.sock')
 
     def handle_input(self, text):
@@ -535,3 +540,14 @@ Try the following:
 
   brew switch openssl 1.0.1j
 """
+
+
+class DockerTimeoutException(Exception):
+    """
+    Wrapper to handle ConnectTimeoutError.
+    """
+
+    def __init__(self, inner_exception):
+        self.inner_exception = inner_exception
+        self.message = """The Docker daemon, or boot2docker \
+does not seem to be running."""

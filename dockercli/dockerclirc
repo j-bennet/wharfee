@@ -1,0 +1,4 @@
+[main]
+
+# timeout to connect to client, in seconds
+client_timeout = 2

@@ -20,10 +20,13 @@ from pygments.styles.default import DefaultStyle
 
 from .client import DockerClient
 from .client import DockerPermissionException
+from .client import DockerTimeoutException
 from .client import DockerSslException
 from .completer import DockerCompleter
 from .lexer import CommandLexer
 from .formatter import format_data
+from .config import write_default_config
+from .config import read_config
 
 
 class DocumentStyle(Style):
@@ -48,6 +51,7 @@ class DockerCli(object):
     keyword_completer = None
     handler = None
     saved_less_opts = None
+    config = None
 
     def __init__(self):
         """
@@ -55,10 +59,29 @@ class DockerCli(object):
         Should read the config here at some point.
         """
 
-        self.handler = DockerClient()
+        self.config = self.read_configuration()
+        self.handler = DockerClient(
+            self.config.getint('main', 'client_timeout'))
         self.completer = DockerCompleter()
         self.set_completer_options()
         self.saved_less_opts = self.set_less_opts()
+
+    def read_configuration(self):
+        """
+
+        :return:
+        """
+        default_config = os.path.join(self.get_package_path(), 'dockerclirc')
+        write_default_config(default_config, '~/.dockerclirc')
+        return read_config('~/.dockerclirc', default_config)
+
+    def get_package_path(self):
+        """
+        Find out pakage root path.
+        :return: string: path
+        """
+        from dockercli import __file__ as package_root
+        return os.path.dirname(package_root)
 
     def set_less_opts(self):
         """
@@ -229,9 +252,9 @@ class DockerCli(object):
                 # exit out of the CLI
                 break
 
-            #except Exception as ex:
-            #    click.secho(ex.message, fg='red')
-            #    break
+            except Exception as ex:
+                click.secho(ex.message, fg='red')
+                break
 
         self.revert_less_opts()
         print('Goodbye!')
@@ -245,6 +268,8 @@ def cli():
     try:
         dockercli = DockerCli()
         dockercli.run_cli()
+    except DockerTimeoutException as ex:
+        click.secho(ex.message, fg='red')
     except DockerSslException as ex:
         click.secho(ex.message, fg='red')
 
