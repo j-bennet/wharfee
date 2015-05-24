@@ -5,12 +5,12 @@ from .option import CommandOption
 
 COMMAND_NAMES = [
     'help',
-    'version',
-    'ps',
-    'pull',
+    'exec',
     'images',
     'info',
     'inspect',
+    'ps',
+    'pull',
     'run',
     'rm',
     'rmi',
@@ -18,9 +18,20 @@ COMMAND_NAMES = [
     'start',
     'stop',
     'top',
+    'version',
 ]
 
 COMMAND_OPTIONS = {
+    'exec': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
+                      action='store_true',
+                      dest='detach',
+                      help='Detached mode: run command in the background'),
+    ],
     'info': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
                       action='store_true',

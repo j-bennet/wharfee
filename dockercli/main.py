@@ -239,9 +239,9 @@ class DockerCli(object):
                 # exit out of the CLI
                 break
 
-            except Exception as ex:
-                click.secho(ex.message, fg='red')
-                break
+            #except Exception as ex:
+            #    click.secho("{0}".format(ex), fg='red')
+            #    break
 
         self.revert_less_opts()
         print('Goodbye!')

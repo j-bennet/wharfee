@@ -33,6 +33,8 @@ class DockerClient(object):
         """
 
         self.handlers = {
+            'exec': (self.not_implemented, "Run a command in a running" +
+                     " container."),
             'help': (self.help, "Help on available commands."),
             'version': (self.version, "Show the Docker version information."),
             'ps': (self.containers, "List containers."),
