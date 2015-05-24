@@ -16,7 +16,6 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.keys import Keys
 from pygments.style import Style
 from pygments.token import Token
-from pygments.styles.default import DefaultStyle
 
 from .client import DockerClient
 from .client import DockerPermissionException
@@ -27,20 +26,7 @@ from .lexer import CommandLexer
 from .formatter import format_data
 from .config import write_default_config
 from .config import read_config
-
-
-class DocumentStyle(Style):
-    """
-    Encapsulates visual styles for the CLI.
-    TODO: move to a config file.
-    """
-    styles = {
-        Token.Menu.Completions.Completion.Current: 'bg:#00aaaa #000000',
-        Token.Menu.Completions.Completion: 'bg:#008888 #ffffff',
-        Token.Menu.Completions.ProgressButton: 'bg:#003333',
-        Token.Menu.Completions.ProgressBar: 'bg:#00aaaa',
-    }
-    styles.update(DefaultStyle.styles)
+from .style import style_factory
 
 
 class DockerCli(object):
@@ -60,6 +46,7 @@ class DockerCli(object):
         """
 
         self.config = self.read_configuration()
+        self.theme = self.config.get('main', 'theme')
         self.handler = DockerClient(
             self.config.getint('main', 'client_timeout'))
         self.completer = DockerCompleter()
@@ -209,7 +196,7 @@ class DockerCli(object):
             layout=layout,
             buffer=buffer,
             key_bindings_registry=manager.registry,
-            style=DocumentStyle,
+            style=style_factory(self.theme),
             on_exit=AbortAction.RAISE_EXCEPTION)
 
         while True:
