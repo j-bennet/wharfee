@@ -63,6 +63,9 @@ class DockerCompleter(Completer):
         # Unused parameters.
         _ = complete_event
 
+        if DockerCompleter.in_quoted_string(document.text):
+            return []
+
         word_before_cursor = document.get_word_before_cursor(WORD=True)
         first_word = DockerCompleter.first_token(document.text).lower()
         words = DockerCompleter.get_tokens(document.text)
@@ -226,7 +229,8 @@ class DockerCompleter(Completer):
         if text is not None:
             text = text.strip()
             if len(text) > 0:
-                word = shlex.split(text)[0]
+                lexer = shlex.shlex(text)
+                word = lexer.get_token()
                 word = word.strip()
                 return word
         return ''
@@ -245,3 +249,23 @@ class DockerCompleter(Completer):
                 word = word.strip()
                 return word
         return ''
+
+    @staticmethod
+    def in_quoted_string(text):
+        """
+        Find last word in a sentence
+        :param text:
+        :return:
+        """
+        if text is not None:
+            text = text.strip()
+            if len(text) > 0 and ('"' in text or "'" in text):
+                stack = []
+                for char in text:
+                    if char in ['"', "'"]:
+                        if len(stack) > 0 and stack[-1] == char:
+                            stack = stack[:-1]
+                        else:
+                            stack.append(char)
+                return len(stack) > 0
+        return False

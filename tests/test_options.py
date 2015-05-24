@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 from dockercli.options import parse_command_options
+from dockercli.completer import DockerCompleter
 
 
 def test_parse_run():
@@ -44,3 +45,21 @@ def test_parse_run_command_with_dash_arg():
         ['--name', 'boo', 'ubuntu', 'top', '-b'])
     assert pargs == ['ubuntu', 'top', '-b']
     assert popts['name'] == 'boo'
+
+
+def test_parse_quoted_string():
+    """
+    Test parsing of a "complicated" run command.
+    """
+    input = 'run -d ubuntu:14.04 /bin/sh -c "while true; do echo hello world; sleep 1; done"'
+    first = DockerCompleter.first_token(input)
+    assert first == 'run'
+
+
+def test_parse_quoted_string_start():
+    """
+    Test parsing of a "complicated" run command.
+    """
+    input = 'run -d ubuntu:14.04 /bin/sh -c "w'
+    first = DockerCompleter.first_token(input)
+    assert first == 'run'

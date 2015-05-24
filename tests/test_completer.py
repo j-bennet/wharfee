@@ -40,7 +40,7 @@ def test_matching_command_completion(completer, complete_event):
     _test_command_completion(completer, complete_event, 'hel', ['help'])
     _test_command_completion(completer, complete_event, 'help', ['help'])
 
-    _test_command_completion(completer, complete_event, 'i', ['images', 'info'])
+    _test_command_completion(completer, complete_event, 'i', ['images', 'info', 'inspect'])
     _test_command_completion(completer, complete_event, 'im', ['images'])
     _test_command_completion(completer, complete_event, 'ima', ['images'])
     _test_command_completion(completer, complete_event, 'imag', ['images'])
@@ -140,6 +140,16 @@ def test_options_container_running_completion(completer, complete_event):
         [n for n in running_names if n.startswith('e')],
         -1
     )
+
+
+def test_complicated_command_completion(completer, complete_event):
+    input = 'run -d ubuntu:14.04 /bin/sh -c "w'
+
+    _test_command_completion(
+        completer,
+        complete_event,
+        input,
+        [])
 
 
 def test_options_image_completion(completer, complete_event):
