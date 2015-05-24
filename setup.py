@@ -10,7 +10,7 @@ setup(
     url='http://dockercli.com.',
     download_url='http://github.com/j-bennet/dockercli.',
     author_email='i[dot]chernyavska[at]gmail[dot]com.',
-    version='0.1',
+    version='0.2',
     install_requires=[
         'pygments>=2.0.2',
         'prompt-toolkit==0.32',
