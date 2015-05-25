@@ -33,7 +33,7 @@ class DockerClient(object):
         """
 
         self.handlers = {
-            'exec': (self.not_implemented, "Run a command in a running" +
+            'exec': (self.execute, "Run a command in a running" +
                      " container."),
             'help': (self.help, "Help on available commands."),
             'version': (self.version, "Show the Docker version information."),
@@ -348,6 +348,28 @@ class DockerClient(object):
                 }
                 return self.start(**start_args)
         return ['There was a problem running the container.']
+
+    def execute(self, *args, **kwargs):
+        """
+        Execute a command in the container. Equivalent of docker exec.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+        if not args or len(args) < 2:
+            return ['Container ID and command is required.']
+
+        kwargs['container'] = args[0]
+        kwargs['cmd'] = args[1:]
+        is_detach = kwargs.pop('detach')
+        result = self.instance.exec_create(**kwargs)
+
+        if result and 'Id' in result:
+            return self.instance.exec_start(
+                result['Id'],
+                detach=is_detach,
+                stream=True)
+
+        return ['There was a problem executing the command.']
 
     def start(self, **kwargs):
         """

@@ -31,6 +31,13 @@ COMMAND_OPTIONS = {
                       action='store_true',
                       dest='detach',
                       help='Detached mode: run command in the background'),
+        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
+                      action='store',
+                      help='Container to run command in.',
+                      nargs='*'),
+        CommandOption(CommandOption.TYPE_COMMAND, 'command',
+                      action='store',
+                      help='Command to run.'),
     ],
     'info': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
