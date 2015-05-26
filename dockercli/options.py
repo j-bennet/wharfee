@@ -4,8 +4,9 @@ from optparse import OptionParser
 from .option import CommandOption
 
 COMMAND_NAMES = [
-    'help',
+    'build',
     'exec',
+    'help',
     'images',
     'info',
     'inspect',
@@ -22,6 +23,14 @@ COMMAND_NAMES = [
 ]
 
 COMMAND_OPTIONS = {
+    'build': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
+                      action='store_true',
+                      dest='help',
+                      help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_DIRPATH, 'path',
+                      help='Path or URL where the Dockerfile is located.'),
+    ],
     'exec': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
                       action='store_true',

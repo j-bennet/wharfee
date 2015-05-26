@@ -8,6 +8,7 @@ class CommandOption(object):
     """
 
     TYPE_FILEPATH = 1
+    TYPE_DIRPATH = 1
     TYPE_BOOLEAN = 2
     TYPE_NUMERIC = 3
     TYPE_CONTAINER = 4
@@ -28,6 +29,7 @@ class CommandOption(object):
         """
         if option_type not in [
             CommandOption.TYPE_FILEPATH,
+            CommandOption.TYPE_DIRPATH,
             CommandOption.TYPE_BOOLEAN,
             CommandOption.TYPE_NUMERIC,
             CommandOption.TYPE_CONTAINER,
@@ -97,6 +99,20 @@ class CommandOption(object):
         :return: boolean
         """
         return self.option_type == CommandOption.TYPE_IMAGE_TAG
+
+    def is_type_filepath(self):
+        """
+        Should this option suggest filename?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_FILEPATH
+
+    def is_type_dirname(self):
+        """
+        Should this option suggest directory name?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_DIRPATH
 
     @property
     def name(self):

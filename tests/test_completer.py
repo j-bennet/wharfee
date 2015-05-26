@@ -143,6 +143,9 @@ def test_options_container_running_completion(completer, complete_event):
 
 
 def test_complicated_command_completion(completer, complete_event):
+    """
+    Switch off suggestions when we're in the middle of a string.
+    """
     input = 'run -d ubuntu:14.04 /bin/sh -c "w'
 
     _test_command_completion(
@@ -150,6 +153,63 @@ def test_complicated_command_completion(completer, complete_event):
         complete_event,
         input,
         [])
+
+
+def test_build_path_completion_absolute(completer, complete_event):
+    """
+    Suggest build paths from filesystem root.
+    """
+    command = 'build /'
+
+    position = len(command)
+
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position),
+        complete_event))
+
+    expected = ['etc', 'home', 'tmp', 'usr', 'var']
+
+    expected = set(map(lambda t: Completion(t, 0), expected))
+
+    assert expected.issubset(result)
+
+
+def test_build_path_completion_user(completer, complete_event):
+    """
+    Suggest build paths from user home directory.
+    """
+    command = 'build ~'
+
+    position = len(command)
+
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position),
+        complete_event))
+
+    expected = ['~/Documents', '~/Downloads']
+
+    expected = set(map(lambda t: Completion(t, -1), expected))
+
+    assert expected.issubset(result)
+
+
+def test_build_path_completion_user_dir(completer, complete_event):
+    """
+    Suggest build paths from user home directory.
+    """
+    command = 'build ~/s'
+
+    position = len(command)
+
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position),
+        complete_event))
+
+    expected = ['src']
+
+    expected = set(map(lambda t: Completion(t, -1), expected))
+
+    assert expected.issubset(result)
 
 
 def test_options_image_completion(completer, complete_event):

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import os
 import shlex
 
 from prompt_toolkit.completion import Completer, Completion
@@ -125,6 +126,7 @@ class DockerCompleter(Completer):
         add_images = False
         add_running = False
         add_tagged = False
+        add_directory = False
 
         if command in COMMAND_OPTIONS:
             if current_opt and current_opt.is_type_container():
@@ -160,9 +162,11 @@ class DockerCompleter(Completer):
                                 add_running = True
                             elif opt.is_type_tagged():
                                 add_tagged = True
+                            elif opt.is_type_dirname():
+                                add_directory = True
 
-                # Also return images and containers if positional options
-                # require them
+                # Also return completions for positional options
+                # (images, containers, paths)
                 if add_containers:
                     for m in DockerCompleter.find_collection_matches(
                             word, containers):
@@ -179,6 +183,56 @@ class DockerCompleter(Completer):
                     for m in DockerCompleter.find_collection_matches(
                             word, tagged):
                         yield m
+                if add_directory:
+                    for m in DockerCompleter.find_directory_matches(word):
+                        yield m
+
+    @staticmethod
+    def find_directory_matches(word):
+        """
+        Yield matching directory names
+        :param word:
+        :return:
+        """
+        basedir, lastdir, position = '', '', 0
+        if word:
+            basedir, lastdir = os.path.split(word)
+            position = -len(lastdir) if lastdir else 0
+
+        dirs = DockerCompleter.list_dir(word, True)
+        for name in sorted(dirs):
+            if not lastdir or name.startswith(lastdir):
+                yield Completion(name, position)
+            elif lastdir == '~':
+                yield Completion(os.path.join(lastdir, name), position)
+
+    @staticmethod
+    def list_dir(root, dirs_only=False, include_special=False):
+        """
+        List directory.
+        :param root: string: directory to list
+        :param dirs_only: boolean
+        :param include_special: boolean
+        :return: list
+        """
+        root = '.' if not root else root
+        res = []
+
+        if '~' in root:
+            root = os.path.expanduser(root)
+
+        if not os.path.exists(root):
+            root, _ = os.path.split(root)
+
+        if os.path.exists(root):
+            for name in os.listdir(root):
+                path = os.path.join(root, name)
+                if not include_special and name.startswith('.'):
+                    continue
+                if dirs_only and not os.path.isdir(path):
+                    continue
+                res.append(name)
+        return res
 
     @staticmethod
     def find_collection_matches(word, lst):

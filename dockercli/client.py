@@ -33,8 +33,10 @@ class DockerClient(object):
         """
 
         self.handlers = {
-            'exec': (self.execute, "Run a command in a running" +
-                     " container."),
+            'build': (self.not_implemented, ("Build a new image from the source"
+                                             " code")),
+            'exec': (self.execute, ("Run a command in a running"
+                                    " container.")),
             'help': (self.help, "Help on available commands."),
             'version': (self.version, "Show the Docker version information."),
             'ps': (self.containers, "List containers."),
@@ -154,7 +156,7 @@ class DockerClient(object):
         Placeholder for commands to be implemented.
         :return: iterable
         """
-        _, _ = kwargs
+        _, _ = args, kwargs
         return ['Not implemented.']
 
     def version(self, *args, **kwargs):
