@@ -33,8 +33,8 @@ class DockerClient(object):
         """
 
         self.handlers = {
-            'build': (self.not_implemented, ("Build a new image from the source"
-                                             " code")),
+            'build': (self.build, ("Build a new image from the source"
+                                   " code")),
             'exec': (self.execute, ("Run a command in a running"
                                     " container.")),
             'help': (self.help, "Help on available commands."),
@@ -373,6 +373,42 @@ class DockerClient(object):
 
         return ['There was a problem executing the command.']
 
+    def build(self, *args, **kwargs):
+        """
+        Build an image. Equivalent of docker build.
+        :param kwargs:
+        :return: Iterable output.
+        """
+        if not args:
+            return ['Directory path or URL is required.']
+
+        kwargs['path'] = args[0]
+
+        def format_line(line):
+            """
+            Format output of "build".
+            :param line: string
+            :return: string
+            """
+            data = json.loads(line)
+            if 'id' in data and data['id']:
+                if 'progress' in data and data['progress']:
+                    line = "{0} {1}: {2}".format(data['status'],
+                                                 data['id'],
+                                                 data['progress'])
+                else:
+                    line = "{0} {1}".format(data['status'], data['id'])
+            elif 'status' in data:
+                line = "{0}".format(data['status'])
+            elif 'stream' in data:
+                line = "{0}".format(data['stream'])
+            return line
+
+        self.stream_formatter = format_line
+        self.is_refresh_images = True
+
+        return self.instance.build(**kwargs)
+
     def start(self, **kwargs):
         """
         Start a container. Equivalent of docker start.
@@ -517,7 +553,7 @@ class DockerClient(object):
             data = json.loads(line)
             if 'id' in data and data['id']:
                 if 'progress' in data and data['progress']:
-                    line = "{0} {1}: {1}".format(data['status'],
+                    line = "{0} {1}: {2}".format(data['status'],
                                                  data['id'],
                                                  data['progress'])
                 else:

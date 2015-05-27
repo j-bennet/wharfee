@@ -28,6 +28,10 @@ COMMAND_OPTIONS = {
                       action='store_true',
                       dest='help',
                       help='Display help for this command.'),
+        CommandOption(CommandOption.TYPE_IMAGE, '-t', '--tag',
+                      help=('Repository name (and optionally a tag) to be '
+                            'applied to the resulting image in case of '
+                            'success.')),
         CommandOption(CommandOption.TYPE_DIRPATH, 'path',
                       help='Path or URL where the Dockerfile is located.'),
     ],
