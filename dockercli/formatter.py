@@ -4,6 +4,7 @@ Helper functions to format output for CLI.
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import json
 from tabulate import tabulate
 
 # Python 3 has no 'basestring' or 'long' type we're checking for.
@@ -13,6 +14,46 @@ except NameError:
     # Python 3
     basestring = unicode = str
     long = int
+
+
+def format_line_pull(line):
+    """
+    Format output of "pull".
+    :param line: string
+    :return: string
+    """
+    data = json.loads(line)
+    if 'id' in data and data['id']:
+        if 'progress' in data and data['progress']:
+            line = "{0} {1}: {2}".format(data['status'],
+                                         data['id'],
+                                         data['progress'])
+        else:
+            line = "{0} {1}".format(data['status'], data['id'])
+    else:
+        line = "{0}".format(data['status'])
+    return line
+
+
+def format_line_build(line):
+    """
+    Format output of "build".
+    :param line: string
+    :return: string
+    """
+    data = json.loads(line)
+    if 'id' in data and data['id']:
+        if 'progress' in data and data['progress']:
+            line = "{0} {1}: {2}".format(data['status'],
+                                         data['id'],
+                                         data['progress'])
+        else:
+            line = "{0} {1}".format(data['status'], data['id'])
+    elif 'status' in data:
+        line = "{0}".format(data['status'])
+    elif 'stream' in data:
+        line = "{0}".format(data['stream'])
+    return line
 
 
 def format_data(data):
@@ -157,3 +198,8 @@ def truncate_rows(rows, length=30, length_id=10):
         else:
             result.append(row)
     return result
+
+COMMAND_FORMATTERS = {
+    'pull': format_line_pull,
+    'build': format_line_build,
+}

@@ -56,9 +56,9 @@ class DockerClient(object):
             'info': (self.info, "Display system-wide information.")
         }
 
-        self.stream_formatter = None
         self.output = None
         self.after = None
+        self.command = None
 
         self.is_refresh_containers = False
         self.is_refresh_running = False
@@ -103,7 +103,7 @@ class DockerClient(object):
 
         def reset_output():
             """ Set all internals to initial state."""
-            self.stream_formatter = None
+            self.command = None
             self.is_refresh_containers = False
             self.is_refresh_running = False
             self.is_refresh_images = False
@@ -117,6 +117,7 @@ class DockerClient(object):
 
         if cmd and cmd in self.handlers:
             handler = self.handlers[cmd][0]
+            self.command = cmd
 
             if params:
                 try:
@@ -387,27 +388,6 @@ class DockerClient(object):
 
         kwargs['path'] = args[0]
 
-        def format_line(line):
-            """
-            Format output of "build".
-            :param line: string
-            :return: string
-            """
-            data = json.loads(line)
-            if 'id' in data and data['id']:
-                if 'progress' in data and data['progress']:
-                    line = "{0} {1}: {2}".format(data['status'],
-                                                 data['id'],
-                                                 data['progress'])
-                else:
-                    line = "{0} {1}".format(data['status'], data['id'])
-            elif 'status' in data:
-                line = "{0}".format(data['status'])
-            elif 'stream' in data:
-                line = "{0}".format(data['stream'])
-            return line
-
-        self.stream_formatter = format_line
         self.is_refresh_images = True
 
         return self.instance.build(**kwargs)
@@ -554,26 +534,6 @@ class DockerClient(object):
         kwargs['stream'] = True
         result = self.instance.pull(container, **kwargs)
         self.is_refresh_images = True
-
-        def format_line(line):
-            """
-            Format output of "pull".
-            :param line: string
-            :return: string
-            """
-            data = json.loads(line)
-            if 'id' in data and data['id']:
-                if 'progress' in data and data['progress']:
-                    line = "{0} {1}: {2}".format(data['status'],
-                                                 data['id'],
-                                                 data['progress'])
-                else:
-                    line = "{0} {1}".format(data['status'], data['id'])
-            else:
-                line = "{0}".format(data['status'])
-            return line
-
-        self.stream_formatter = format_line
 
         return result
 
