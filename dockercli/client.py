@@ -230,6 +230,8 @@ class DockerClient(object):
                 for i in range(len(csdict)):
                     csdict[i]['Names'] = map(
                         lambda x: x.lstrip('/'), csdict[i]['Names'])
+                    csdict[i]['Created'] = pretty.date(csdict[i]['Created'])
+                    del csdict[i]['Labels']
 
             return csdict
         else:
