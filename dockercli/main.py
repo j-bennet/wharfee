@@ -14,7 +14,6 @@ from prompt_toolkit.contrib.shortcuts import create_eventloop
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.keys import Keys
-from pygments.style import Style
 from pygments.token import Token
 
 from .client import DockerClient
@@ -39,6 +38,8 @@ class DockerCli(object):
     handler = None
     saved_less_opts = None
     config = None
+    config_template = 'dockerclirc'
+    config_name = '~/.dockerclirc'
 
     def __init__(self):
         """
@@ -47,9 +48,9 @@ class DockerCli(object):
         """
 
         self.config = self.read_configuration()
-        self.theme = self.config.get('main', 'theme')
+        self.theme = self.config['main']['theme']
         self.handler = DockerClient(
-            self.config.getint('main', 'client_timeout'))
+            self.config['main'].as_int('client_timeout'))
         self.completer = DockerCompleter()
         self.set_completer_options()
         self.saved_less_opts = self.set_less_opts()
@@ -59,9 +60,10 @@ class DockerCli(object):
 
         :return:
         """
-        default_config = os.path.join(self.get_package_path(), 'dockerclirc')
-        write_default_config(default_config, '~/.dockerclirc')
-        return read_config('~/.dockerclirc', default_config)
+        default_config = os.path.join(
+            self.get_package_path(), self.config_template)
+        write_default_config(default_config, self.config_name)
+        return read_config(self.config_name, default_config)
 
     def get_package_path(self):
         """
