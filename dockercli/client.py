@@ -5,13 +5,14 @@ from __future__ import print_function
 import sys
 import shlex
 import json
+import math
+import pretty
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
 from docker.errors import APIError
 from docker.errors import DockerException
 from requests.exceptions import ConnectionError
-
 from .options import allowed_args
 from .options import parse_command_options
 from .options import format_command_help
@@ -480,6 +481,14 @@ class DockerClient(object):
 
         result = self.instance.images(**kwargs)
         if len(result) > 0:
+            # Drop some keys we're not interested in.
+            for i in range(len(result)):
+                del result[i]['RepoDigests']
+                del result[i]['Labels']
+                del result[i]['Size']
+                result[i]['VirtualSize'] = self.filesize(
+                    result[i]['VirtualSize'])
+                result[i]['Created'] = pretty.date(result[i]['Created'])
             return result
         else:
             return ['There are no images to list.']
@@ -565,6 +574,19 @@ class DockerClient(object):
         self.stream_formatter = format_line
 
         return result
+
+    def filesize(self, size):
+        """
+        Pretty-print file size from bytes.
+        """
+        size_name = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
+        i = int(math.floor(math.log(size, 1024)))
+        p = math.pow(1024, i)
+        s = round(size / p, 3)
+        if s > 0:
+            return '%s %s' % (s, size_name[i])
+        else:
+            return '0B'
 
 
 class DockerPermissionException(Exception):

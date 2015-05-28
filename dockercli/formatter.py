@@ -128,17 +128,18 @@ def flatten_rows(rows):
     return rows
 
 
-def truncate_rows(rows, length=25):
+def truncate_rows(rows, length=30, length_id=10):
     """
     Truncate every string value in a dictionary up to a certain length.
     :param rows: iterable of dictionaries
     :param length: int
+    :param length_id: length for dict keys that end with "Id"
     :return:
     """
 
-    def trimto(str):
+    def trimto(str, l):
         if isinstance(str, basestring):
-            return str[:length+1]
+            return str[:l+1]
         return str
 
     result = []
@@ -146,7 +147,10 @@ def truncate_rows(rows, length=25):
         if isinstance(row, dict):
             updated = {}
             for k, v in row.iteritems():
-                updated[k] = trimto(v)
+                if k.endswith('Id'):
+                    updated[k] = trimto(v, length_id)
+                else:
+                    updated[k] = trimto(v, length)
             result.append(updated)
         elif isinstance(row, basestring):
             result.append(trimto(row))

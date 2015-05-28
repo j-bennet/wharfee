@@ -16,7 +16,8 @@ setup(
         'prompt-toolkit==0.32',
         'docker-py>=1.2.0',
         'tabulate>=0.7.5',
-        'click>=4.0'
+        'click>=4.0',
+        'py-pretty>-0.1'
     ],
     extras_require={
         'testing': ['pytest', 'mock'],
