@@ -7,6 +7,7 @@ import shlex
 import json
 import math
 import pretty
+import re
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
@@ -462,6 +463,7 @@ class DockerClient(object):
         """
 
         result = self.instance.images(**kwargs)
+        RE_DIGITS = re.compile('^[0-9]+$', re.UNICODE)
         if len(result) > 0:
             # Drop some keys we're not interested in.
             for i in range(len(result)):
@@ -470,7 +472,10 @@ class DockerClient(object):
                 del result[i]['Size']
                 result[i]['VirtualSize'] = self.filesize(
                     result[i]['VirtualSize'])
-                result[i]['Created'] = pretty.date(result[i]['Created'])
+                if 'Created' in result[i] \
+                        and result[i]['Created'] \
+                        and RE_DIGITS.search(str(result[i]['Created'])):
+                    result[i]['Created'] = pretty.date(result[i]['Created'])
             return result
         else:
             return ['There are no images to list.']
@@ -542,13 +547,13 @@ class DockerClient(object):
         Pretty-print file size from bytes.
         """
         size_name = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
-        i = int(math.floor(math.log(size, 1024)))
-        p = math.pow(1024, i)
-        s = round(size / p, 3)
-        if s > 0:
-            return '%s %s' % (s, size_name[i])
-        else:
-            return '0B'
+        if int(size) > 0:
+            i = int(math.floor(math.log(size, 1024)))
+            p = math.pow(1024, i)
+            s = round(size / p, 3)
+            if s > 0:
+                return '%s %s' % (s, size_name[i])
+        return '0 B'
 
 
 class DockerPermissionException(Exception):
