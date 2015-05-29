@@ -11,11 +11,14 @@ def read_config(filename, default_filename=None):
     :return: ConfigParser
     """
     filename = expanduser(filename)
-    parser = ConfigObj(filename, interpolation=False)
-
-    # no need for try/except, as parser.read will not fail in case of IOError
     if default_filename:
-        parser.merge(read_config(default_filename))
+        parser = ConfigObj(default_filename, interpolation=False)
+        if exists(filename):
+            parser.merge(read_config(filename))
+    elif exists(filename):
+        parser = ConfigObj(filename, interpolation=False)
+    else:
+        parser = ConfigObj(filename)
 
     return parser
 
