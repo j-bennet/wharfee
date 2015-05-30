@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import json
+import click
 from tabulate import tabulate
 
 # Python 3 has no 'basestring' or 'long' type we're checking for.
@@ -16,52 +17,74 @@ except NameError:
     long = int
 
 
-def format_line_pull(line):
-    """
-    Format output of "pull".
-    :param line: string
-    :return: string
-    """
-    data = json.loads(line)
-    if 'id' in data and data['id']:
-        if 'progress' in data and data['progress']:
-            line = "{0} {1}: {2}".format(data['status'],
-                                         data['id'],
-                                         data['progress'])
-        else:
-            line = "{0} {1}".format(data['status'], data['id'])
-    elif 'status' in data:
-        line = "{0}".format(data['status'])
-    elif 'errorDetail' in data and data['errorDetail']:
-        line = "{0}".format(data['errorDetail'].get('message', 'Unknown error'))
-    elif 'error' in data and data['error']:
-        line = "{0}".format(data['error'])
-    return line
+class SimpleFormatter(object):
+
+    def __init__(self, data):
+        """
+        Initialize the formatter passing in the stream.
+        :param data: generator
+        """
+        self.stream = data
+
+    def output(self):
+        """
+        Process and output line by line.
+        """
+        for line in self.stream:
+            line = line.strip()
+            click.echo(line)
 
 
-def format_line_build(line):
-    """
-    Format output of "build".
-    :param line: string
-    :return: string
-    """
-    data = json.loads(line)
-    if 'id' in data and data['id']:
-        if 'progress' in data and data['progress']:
-            line = "{0} {1}: {2}".format(data['status'],
-                                         data['id'],
-                                         data['progress'])
-        else:
-            line = "{0} {1}".format(data['status'], data['id'])
-    elif 'status' in data:
-        line = "{0}".format(data['status'])
-    elif 'stream' in data:
-        line = "{0}".format(data['stream'])
-    elif 'errorDetail' in data and data['errorDetail']:
-        line = "{0}".format(data['errorDetail'].get('message', 'Unknown error'))
-    elif 'error' in data and data['error']:
-        line = "{0}".format(data['error'])
-    return line
+class StreamFormatter(SimpleFormatter):
+
+    def __init__(self, data):
+        """
+        Initialize the formatter passing in the stream.
+        :param data: generator
+        """
+        SimpleFormatter.__init__(self, data)
+
+    def output(self):
+        """
+        Process and output line by line.
+
+        Lines that contain progress information in them get special handling:
+
+        {
+            "status":"Extracting",
+            "progressDetail":{
+                "current":64618496,
+                "total":65771329
+            },
+            "progress":"[======================\u003e ] 64.62 MB/65.77 MB",
+            "id":"e9e06b06e14c"
+        }
+
+        """
+        for line in self.stream:
+            data = json.loads(line)
+            if 'id' in data and data['id']:
+                if 'progress' in data and data['progress']:
+                    """
+                    Looks like this:
+
+
+                    """
+                    line = "{0} {1}: {2}".format(data['status'],
+                                                 data['id'],
+                                                 data['progress'])
+                else:
+                    line = "{0} {1}".format(data['status'], data['id'])
+            elif 'status' in data:
+                line = "{0}".format(data['status'])
+            elif 'stream' in data:
+                line = "{0}".format(data['stream'])
+            elif 'errorDetail' in data and data['errorDetail']:
+                line = "{0}".format(data['errorDetail'].get(
+                    'message', 'Unknown error'))
+            elif 'error' in data and data['error']:
+                line = "{0}".format(data['error'])
+            click.echo(line)
 
 
 def format_data(data):
@@ -207,7 +230,23 @@ def truncate_rows(rows, length=30, length_id=10):
             result.append(row)
     return result
 
-COMMAND_FORMATTERS = {
-    'pull': format_line_pull,
-    'build': format_line_build,
+
+STREAM_FORMATTERS = {
+    'pull': StreamFormatter,
+    'build': StreamFormatter,
 }
+
+
+def output_stream(command, stream):
+    """
+    Take the iterable and output line by line using click.echo.
+    :param command: string command
+    :param stream: generator
+    """
+
+    if command and command in STREAM_FORMATTERS:
+        formatter = STREAM_FORMATTERS[command](stream)
+    else:
+        formatter = SimpleFormatter(stream)
+
+    formatter.output()

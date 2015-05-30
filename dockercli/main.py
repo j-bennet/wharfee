@@ -23,7 +23,7 @@ from .client import DockerSslException
 from .completer import DockerCompleter
 from .lexer import CommandLexer
 from .formatter import format_data
-from .formatter import COMMAND_FORMATTERS
+from .formatter import output_stream
 from .config import write_default_config
 from .config import read_config
 from .style import style_factory
@@ -206,15 +206,9 @@ class DockerCli(object):
             try:
                 document = dcli.read_input()
                 self.handler.handle_input(document.text)
-                formatter = COMMAND_FORMATTERS.get(self.handler.command, None)
 
                 if isinstance(self.handler.output, GeneratorType):
-                    for line in self.handler.output:
-                        if formatter:
-                            line = formatter(line)
-                        else:
-                            line = line.strip()
-                        click.echo(line)
+                    output_stream(self.handler.command, self.handler.output)
                 else:
                     lines = format_data(self.handler.output)
                     click.echo_via_pager('\n'.join(lines))
