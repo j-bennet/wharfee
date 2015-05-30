@@ -3,24 +3,20 @@ from os.path import expanduser, exists
 
 from configobj import ConfigObj
 
-def read_config(filename, default_filename=None):
+def read_config(usr_config, def_config=None):
     """
     Read config file (if not exists, read default config).
-    :param filename: string: config file name
-    :param default_filename: string: default name
+    :param usr_config: string: config file name
+    :param def_config: string: default name
     :return: ConfigParser
     """
-    filename = expanduser(filename)
-    if default_filename:
-        parser = ConfigObj(default_filename, interpolation=False)
-        if exists(filename):
-            parser.merge(read_config(filename))
-    elif exists(filename):
-        parser = ConfigObj(filename, interpolation=False)
-    else:
-        parser = ConfigObj(filename)
+    cfg = ConfigObj()
 
-    return parser
+    if def_config:
+        cfg.merge(ConfigObj(def_config, interpolation=False))
+
+    cfg.merge(ConfigObj(expanduser(usr_config), interpolation=False))
+    return cfg
 
 
 def write_default_config(source, destination, overwrite=False):
