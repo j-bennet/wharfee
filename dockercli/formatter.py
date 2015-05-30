@@ -65,11 +65,6 @@ class StreamFormatter(SimpleFormatter):
             data = json.loads(line)
             if 'id' in data and data['id']:
                 if 'progress' in data and data['progress']:
-                    """
-                    Looks like this:
-
-
-                    """
                     line = "{0} {1}: {2}".format(data['status'],
                                                  data['id'],
                                                  data['progress'])
