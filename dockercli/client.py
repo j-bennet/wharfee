@@ -388,6 +388,7 @@ class DockerClient(object):
             return ['Directory path or URL is required.']
 
         kwargs['path'] = args[0]
+        kwargs['rm'] = bool(kwargs['rm'])
 
         self.is_refresh_images = True
 

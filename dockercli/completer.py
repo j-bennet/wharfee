@@ -145,6 +145,10 @@ class DockerCompleter(Completer):
                 for m in DockerCompleter.find_collection_matches(
                         word, tagged):
                     yield m
+            elif current_opt and current_opt.is_type_choice():
+                for m in DockerCompleter.find_collection_matches(
+                        word, current_opt.choices):
+                    yield m
             else:
                 for opt in COMMAND_OPTIONS[command]:
                     # Do not offer options that user already set.

@@ -30,8 +30,12 @@ def format_line_pull(line):
                                          data['progress'])
         else:
             line = "{0} {1}".format(data['status'], data['id'])
-    else:
+    elif 'status' in data:
         line = "{0}".format(data['status'])
+    elif 'errorDetail' in data and data['errorDetail']:
+        line = "{0}".format(data['errorDetail'].get('message', 'Unknown error'))
+    elif 'error' in data and data['error']:
+        line = "{0}".format(data['error'])
     return line
 
 
@@ -53,6 +57,10 @@ def format_line_build(line):
         line = "{0}".format(data['status'])
     elif 'stream' in data:
         line = "{0}".format(data['stream'])
+    elif 'errorDetail' in data and data['errorDetail']:
+        line = "{0}".format(data['errorDetail'].get('message', 'Unknown error'))
+    elif 'error' in data and data['error']:
+        line = "{0}".format(data['error'])
     return line
 
 

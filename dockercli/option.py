@@ -17,6 +17,7 @@ class CommandOption(object):
     TYPE_IMAGE_TAG = 7
     TYPE_COMMAND = 8
     TYPE_COMMAND_ARG = 9
+    TYPE_CHOICE = 10
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -37,7 +38,8 @@ class CommandOption(object):
             CommandOption.TYPE_IMAGE,
             CommandOption.TYPE_IMAGE_TAG,
             CommandOption.TYPE_COMMAND,
-            CommandOption.TYPE_COMMAND_ARG
+            CommandOption.TYPE_COMMAND_ARG,
+            CommandOption.TYPE_CHOICE
         ]:
             raise ValueError("Incorrect option_type.", option_type)
 
@@ -66,11 +68,21 @@ class CommandOption(object):
         else:
             self.is_optional = False
 
+        if 'choices' in kwargs:
+            self.choices = kwargs['choices']
+
         self.option_type = option_type
         self.short_name = short_name
         self.long_name = long_name
         self.args = arguments
         self.kwargs = kwargs
+
+    def is_type_choice(self):
+        """
+        If this option is a list of choices.
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_CHOICE
 
     def is_type_container(self):
         """
