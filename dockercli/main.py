@@ -7,10 +7,12 @@ import click
 
 from types import GeneratorType
 from prompt_toolkit import AbortAction
+from prompt_toolkit import Application
 from prompt_toolkit import CommandLineInterface
+from prompt_toolkit.filters import Always, HasFocus, IsDone
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.contrib.shortcuts import create_default_layout
-from prompt_toolkit.contrib.shortcuts import create_eventloop
+from prompt_toolkit.shortcuts import create_default_layout
+from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.keys import Keys
@@ -27,6 +29,7 @@ from .formatter import output_stream
 from .config import write_default_config
 from .config import read_config
 from .style import style_factory
+from .__init__ import __version__
 
 
 class DockerCli(object):
@@ -177,6 +180,8 @@ class DockerCli(object):
         """
         Run the main loop
         """
+        print('Version:', __version__)
+        print('Home: http://dockercli.com')
 
         history = FileHistory(os.path.expanduser('~/.dockercli-history'))
 
@@ -189,22 +194,26 @@ class DockerCli(object):
         buffer = Buffer(
             history=history,
             completer=self.completer,
-        )
+            complete_while_typing=Always())
 
         manager = self.get_key_manager()
-        eventloop = create_eventloop()
 
-        dcli = CommandLineInterface(
-            eventloop,
+        application = Application(
+            style=style_factory(self.theme),
             layout=layout,
             buffer=buffer,
             key_bindings_registry=manager.registry,
-            style=style_factory(self.theme),
             on_exit=AbortAction.RAISE_EXCEPTION)
+
+        eventloop = create_eventloop()
+
+        dcli = CommandLineInterface(
+            application=application,
+            eventloop=eventloop)
 
         while True:
             try:
-                document = dcli.read_input()
+                document = dcli.run()
                 self.handler.handle_input(document.text)
 
                 if isinstance(self.handler.output, GeneratorType):

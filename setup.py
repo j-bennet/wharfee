@@ -1,3 +1,4 @@
+from dockercli.__init__ import __version__
 
 try:
     from setuptools import setup
@@ -10,10 +11,10 @@ setup(
     url='http://dockercli.com.',
     download_url='http://github.com/j-bennet/dockercli.',
     author_email='i[dot]chernyavska[at]gmail[dot]com.',
-    version='0.2',
+    version=__version__,
     install_requires=[
         'pygments>=2.0.2',
-        'prompt-toolkit==0.32',
+        'prompt-toolkit==0.38',
         'docker-py>=1.2.0',
         'tabulate>=0.7.5',
         'click>=4.0',
