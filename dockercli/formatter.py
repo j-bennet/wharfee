@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Helper functions to format output for CLI.
 """
@@ -17,7 +18,7 @@ except NameError:
     long = int
 
 
-class SimpleFormatter(object):
+class StreamFormatter(object):
 
     def __init__(self, data):
         """
@@ -35,14 +36,16 @@ class SimpleFormatter(object):
             click.echo(line)
 
 
-class StreamFormatter(SimpleFormatter):
+class JsonStreamFormatter(StreamFormatter):
+
+    progress = False
 
     def __init__(self, data):
         """
         Initialize the formatter passing in the stream.
         :param data: generator
         """
-        SimpleFormatter.__init__(self, data)
+        StreamFormatter.__init__(self, data)
 
     def output(self):
         """
@@ -63,23 +66,66 @@ class StreamFormatter(SimpleFormatter):
         """
         for line in self.stream:
             data = json.loads(line)
-            if 'id' in data and data['id']:
-                if 'progress' in data and data['progress']:
-                    line = "{0} {1}: {2}".format(data['status'],
-                                                 data['id'],
-                                                 data['progress'])
-                else:
-                    line = "{0} {1}".format(data['status'], data['id'])
-            elif 'status' in data:
-                line = "{0}".format(data['status'])
-            elif 'stream' in data:
-                line = "{0}".format(data['stream'])
-            elif 'errorDetail' in data and data['errorDetail']:
-                line = "{0}".format(data['errorDetail'].get(
-                    'message', 'Unknown error'))
-            elif 'error' in data and data['error']:
-                line = "{0}".format(data['error'])
-            click.echo(line)
+
+            if self.is_progress(data):
+                self.show_progress_line(data)
+            else:
+                self.show_progress_end()
+                self.show_line(data)
+
+    def is_progress(self, data):
+        """
+        If the JSON data contains progress bar information.
+        :param data: json
+        """
+        return 'progress' in data and data['progress']
+
+    def show_line(self, data):
+        """
+        Format and output a JSON line.
+        :param data: json
+        """
+
+        if 'id' in data and data['id']:
+            line = "{0} {1}".format(data['status'], data['id'])
+        elif 'status' in data:
+            line = "{0}".format(data['status'])
+        elif 'stream' in data:
+            line = "{0}".format(data['stream'])
+        elif 'errorDetail' in data and data['errorDetail']:
+            line = "{0}".format(data['errorDetail'].get(
+                'message', 'Unknown error'))
+        elif 'error' in data and data['error']:
+            line = "{0}".format(data['error'])
+        else:
+            line = "{0}".format(data)
+
+        click.echo(line)
+
+    def show_progress_end(self):
+        """
+        If we were just showing progress bar, enter a newline and unset
+        the progress flag.
+        """
+        if self.progress:
+            click.echo()
+        self.progress = False
+
+    def show_progress_line(self, data):
+        """
+        Output a carriage return and new progress.
+        :param data: json
+        """
+        click.echo(b'\x0d', nl=False)
+
+        self.progress = True
+
+        line = "{0} {1}: {2}".format(
+            data['status'],
+            data['id'],
+            data['progress'])
+
+        click.echo(line, nl=False)
 
 
 def format_data(data):
@@ -227,8 +273,8 @@ def truncate_rows(rows, length=30, length_id=10):
 
 
 STREAM_FORMATTERS = {
-    'pull': StreamFormatter,
-    'build': StreamFormatter,
+    'pull': JsonStreamFormatter,
+    'build': JsonStreamFormatter,
 }
 
 
@@ -242,6 +288,6 @@ def output_stream(command, stream):
     if command and command in STREAM_FORMATTERS:
         formatter = STREAM_FORMATTERS[command](stream)
     else:
-        formatter = SimpleFormatter(stream)
+        formatter = StreamFormatter(stream)
 
     formatter.output()

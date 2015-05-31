@@ -1,8 +1,31 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import os
+from time import sleep
 from dockercli.formatter import format_data
 from dockercli.formatter import format_struct
+from dockercli.formatter import JsonStreamFormatter
+
+def test_json_stream_formatting():
+    """
+    Test formatting of pull output
+    """
+    print("\n")
+    fmt = JsonStreamFormatter(pull_stream())
+    fmt.output()
+
+
+def pull_stream():
+    """
+    Read pull output line by line.
+    """
+    p = os.path.dirname(os.path.realpath(__file__))
+    f = os.path.join(p, 'data/pull.output')
+    for line in open(f, 'r'):
+        line = line.strip()
+        sleep(0.1)
+        yield line if line else '{}'
 
 
 def test_help_data_formatting():
