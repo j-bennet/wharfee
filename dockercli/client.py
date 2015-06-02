@@ -47,6 +47,7 @@ class DockerClient(object):
             'images': (self.images, "List images."),
             'inspect': (self.inspect, "Return low-level information on a " +
                         "container or image."),
+            'logs': (self.logs, "Fetch the logs of a container."),
             'run': (self.run, "Run a command in a new container."),
             'rm': (self.rm, "Remove one or more containers."),
             'rmi': (self.rmi, "Remove one or more images."),
@@ -125,7 +126,8 @@ class DockerClient(object):
                     if '-h' in tokens or '--help' in tokens:
                         self.output = [format_command_help(cmd)]
                     else:
-                        parser, popts, pargs = parse_command_options(cmd, params)
+                        parser, popts, pargs = parse_command_options(
+                            cmd, params)
                         if 'help' in popts:
                             del popts['help']
 
@@ -140,7 +142,7 @@ class DockerClient(object):
                     self.output = [ex.message]
             else:
                 self.output = handler()
-        else:
+        elif cmd:
             self.output = self.help()
 
     def help(self, *args, **kwargs):
@@ -438,7 +440,7 @@ class DockerClient(object):
             self.is_refresh_running = True
             return [kwargs['container']]
 
-    def attach(self, **kwargs):
+    def attach(self, *args, **kwargs):
         """
         Attach to container STDOUT and / or STDERR.
         Docker-py does not allow attaching to STDIN.
@@ -447,37 +449,49 @@ class DockerClient(object):
         :param kwargs:
         :return: Iterable output
         """
+        _ = args
+
         result = self.instance.attach(**kwargs)
         return result
 
-    def logs(self, **kwargs):
+    def logs(self, *args, **kwargs):
         """
         Retrieve container logs. Equivalent of docker logs.
         :param kwargs:
         :return: Iterable output
         """
-        return self.instance.logs(**kwargs)
+        if not args:
+            return ['Container ID/name is required.']
 
-    def images(self, **kwargs):
+        kwargs['container'] = args[0]
+
+        result = self.instance.logs(**kwargs)
+        if not kwargs['stream']:
+            result = [result]
+        return result
+
+    def images(self, *args, **kwargs):
         """
         Return the list of images. Equivalent of docker images.
         :return: list of dicts
         """
+        _ = args
 
         result = self.instance.images(**kwargs)
         RE_DIGITS = re.compile('^[0-9]+$', re.UNICODE)
         if len(result) > 0:
-            # Drop some keys we're not interested in.
-            for i in range(len(result)):
-                for unused_key in ['RepoDigests', 'Labels', 'Size']:
-                    if unused_key in result[i]:
-                        del result[i][unused_key]
-                result[i]['VirtualSize'] = self.filesize(
-                    result[i]['VirtualSize'])
-                if 'Created' in result[i] \
-                        and result[i]['Created'] \
-                        and RE_DIGITS.search(str(result[i]['Created'])):
-                    result[i]['Created'] = pretty.date(result[i]['Created'])
+            if isinstance(result[0], dict):
+                # Drop some keys we're not interested in.
+                for i in range(len(result)):
+                    for unused_key in ['RepoDigests', 'Labels', 'Size']:
+                        if unused_key in result[i]:
+                            del result[i][unused_key]
+                    result[i]['VirtualSize'] = self.filesize(
+                        result[i]['VirtualSize'])
+                    if 'Created' in result[i] \
+                            and result[i]['Created'] \
+                            and RE_DIGITS.search(str(result[i]['Created'])):
+                        result[i]['Created'] = pretty.date(result[i]['Created'])
             return result
         else:
             return ['There are no images to list.']

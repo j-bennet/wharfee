@@ -28,6 +28,19 @@ def pull_stream():
         yield line if line else '{}'
 
 
+def test_ps_data_formatting():
+    """
+    Test formatting for list of tuples.
+    """
+    data = [
+        {'Id': u'9e19b1558bbcba9202c1d3c4e26d8fe6e2c6060faad9a7074487e3b210a26a16'},
+        {'Id': 'b798acf4382421d231680d28aa62ae9b486b89711733c6acbb4cc85d8bec4072'},
+    ]
+    formatted = format_data(data)
+    print('\n')
+    print('\n'.join(formatted))
+
+
 def test_help_data_formatting():
     """
     Test formatting for list of tuples.

@@ -218,7 +218,7 @@ class DockerCli(object):
 
                 if isinstance(self.handler.output, GeneratorType):
                     output_stream(self.handler.command, self.handler.output)
-                else:
+                elif self.handler.output is not None:
                     lines = format_data(self.handler.output)
                     click.echo_via_pager('\n'.join(lines))
 

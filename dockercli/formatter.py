@@ -141,10 +141,16 @@ def format_data(data):
             else:
                 return format_struct(data, spaces=2)
         elif isinstance(data[0], dict):
-            data = flatten_rows(data)
-            data = truncate_rows(data)
-            text = tabulate(data, headers='keys')
-            return text.split('\n')
+            if data[0].keys() == ['Id']:
+                # Sometimes our 'quiet' output is a list of dicts but
+                # there's only a single "Id" key in each dict. Let's simplify
+                # those into plain string lists.
+                return [d['Id'] for d in data]
+            else:
+                data = flatten_rows(data)
+                data = truncate_rows(data)
+                text = tabulate(data, headers='keys')
+                return text.split('\n')
         elif isinstance(data[0], basestring):
             if len(data) == 1:
                 return data

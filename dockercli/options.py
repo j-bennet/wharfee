@@ -10,6 +10,7 @@ COMMAND_NAMES = [
     'images',
     'info',
     'inspect',
+    'logs',
     'ps',
     'pull',
     'run',
@@ -45,8 +46,8 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_CHOICE, '--rm',
                       action='store',
                       dest='rm',
-                      help=('Remove intermediate containers after a successful '
-                            'build.'),
+                      help=('Remove intermediate containers after a '
+                            'successful build.'),
                       default='true',
                       choices=['true', 'false']),
         CommandOption(CommandOption.TYPE_BOOLEAN, '--no-cache',
@@ -81,6 +82,15 @@ COMMAND_OPTIONS = {
                       action='store',
                       help='Container to inspect.',
                       nargs='*'),
+    ],
+    'logs': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-f', '--follow',
+                      action='store_true',
+                      dest='stream',
+                      help='Follow log output.'),
+        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
+                      action='store',
+                      help='Container to retrieve the logs from.'),
     ],
     'ps': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--all',
