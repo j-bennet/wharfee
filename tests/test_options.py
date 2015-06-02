@@ -1,8 +1,23 @@
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import pytest
 from dockercli.options import parse_command_options
 from dockercli.completer import DockerCompleter
+
+
+@pytest.mark.parametrize("help_opt_name", [
+    '-h',
+    '--help'
+])
+
+
+def test_parse_images_help(help_opt_name):
+    """
+    Test parsing of a "--help"
+    """
+    parser, popts, pargs = parse_command_options('images', [help_opt_name])
+    assert popts['help'] == True
 
 
 def test_parse_run():

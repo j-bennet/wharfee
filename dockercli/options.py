@@ -22,12 +22,16 @@ COMMAND_NAMES = [
     'version',
 ]
 
+
+OPTION_HELP = CommandOption(
+    CommandOption.TYPE_BOOLEAN, '-h', '--help',
+    action='store_true',
+    dest='help',
+    help='Display help for this command.')
+
+
 COMMAND_OPTIONS = {
     'build': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_IMAGE, '-t', '--tag',
                       dest='tag',
                       help=('Repository name (and optionally a tag) to be '
@@ -53,10 +57,6 @@ COMMAND_OPTIONS = {
                       help='Path or URL where the Dockerfile is located.'),
     ],
     'exec': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
                       action='store_true',
                       dest='detach',
@@ -70,16 +70,8 @@ COMMAND_OPTIONS = {
                       help='Command to run.'),
     ],
     'info': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
     ],
     'inspect': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_IMAGE, 'image',
                       action='store',
                       dest="image_id",
@@ -101,10 +93,6 @@ COMMAND_OPTIONS = {
                       dest='before',
                       help='Show only container created before Id or Name, ' +
                            'include non-running ones.'),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-l', '--latest',
                       action='store_true',
                       dest='latest',
@@ -134,10 +122,6 @@ COMMAND_OPTIONS = {
                            'include non-running ones.')
     ],
     'pull': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_IMAGE, 'image',
                       action='store',
                       help='Image name to pull.'),
@@ -152,10 +136,6 @@ COMMAND_OPTIONS = {
                       action='store',
                       dest='name',
                       help='Provide name to filter on.'),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-q', '--quiet',
                       action='store_true',
                       dest='quiet',
@@ -167,10 +147,6 @@ COMMAND_OPTIONS = {
                       dest='detach',
                       help='Detached mode: run the container in the ' +
                            'background and print the new container ID'),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_CONTAINER, '--name',
                       action='store',
                       dest='name',
@@ -200,10 +176,6 @@ COMMAND_OPTIONS = {
                       help='Attach container\'s STDOUT and STDERR and ' +
                            'forward all signals to the process.',
                       no_match=True),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_CONTAINER, 'container',
                       action='store',
                       help='Container ID or name to use.'),
@@ -213,10 +185,6 @@ COMMAND_OPTIONS = {
                       action='store',
                       help='Container ID or name to use.',
                       nargs='+'),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_BOOLEAN, '--all-stopped',
                       action='store_true',
                       dest='all_stopped',
@@ -227,38 +195,22 @@ COMMAND_OPTIONS = {
                       action='store',
                       help='Image name name to remove.',
                       nargs='+'),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_BOOLEAN, '--all-dangling',
                       action='store_true',
                       dest='all_dangling',
                       help='Shortcut to remove all dangling images.'),
     ],
     'search': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_IMAGE, 'term',
                       action='store',
                       help='A term to search for.'),
     ],
     'stop': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
                       action='store',
                       help='Container ID or name to use.'),
     ],
     'top': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-h', '--help',
-                      action='store_true',
-                      dest='help',
-                      help='Display help for this command.'),
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
                       action='store',
                       help='Container ID or name to use.'),
@@ -274,6 +226,8 @@ def find_option(command, name):
     :return: CommandOption
     """
     if command in COMMAND_OPTIONS:
+        if name == 'help':
+            return OPTION_HELP
         for opt in COMMAND_OPTIONS[command]:
             if opt.name == name:
                 return opt
@@ -304,6 +258,7 @@ def all_options(command):
     """
     result = set([])
     if command in COMMAND_OPTIONS:
+        result.add(OPTION_HELP)
         for opt in COMMAND_OPTIONS[command]:
             if opt.matches:
                 result.add(opt.dest)
@@ -319,6 +274,7 @@ def parse_command_options(cmd, params):
     """
     parser = OptParser(prog=cmd, add_help_option=False)
     parser.disable_interspersed_args()
+    parser.add_option(*OPTION_HELP.args, **OPTION_HELP.kwargs)
     for opt in COMMAND_OPTIONS[cmd]:
         if opt.name.startswith('-'):
             parser.add_option(*opt.args, **opt.kwargs)
@@ -335,7 +291,7 @@ def format_command_help(cmd):
     """
     usage = [cmd, '[options]']
 
-    for opt in COMMAND_OPTIONS[cmd]:
+    for opt in [OPTION_HELP] + COMMAND_OPTIONS[cmd]:
         if not opt.name.startswith('-'):
             optname = "[{0}]".format(opt.name) if opt.is_optional else opt.name
             usage.append(optname)
@@ -344,7 +300,7 @@ def format_command_help(cmd):
 
     parser = OptParser(prog=cmd, add_help_option=False, usage=usage)
 
-    for opt in COMMAND_OPTIONS[cmd]:
+    for opt in [OPTION_HELP] + COMMAND_OPTIONS[cmd]:
         if opt.name.startswith('-'):
             parser.add_option(*opt.args, **opt.kwargs)
 

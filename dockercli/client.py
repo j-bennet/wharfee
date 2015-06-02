@@ -233,7 +233,8 @@ class DockerClient(object):
                     csdict[i]['Names'] = map(
                         lambda x: x.lstrip('/'), csdict[i]['Names'])
                     csdict[i]['Created'] = pretty.date(csdict[i]['Created'])
-                    del csdict[i]['Labels']
+                    if 'Labels' in csdict[i]:
+                        del csdict[i]['Labels']
 
             return csdict
         else:
@@ -468,9 +469,9 @@ class DockerClient(object):
         if len(result) > 0:
             # Drop some keys we're not interested in.
             for i in range(len(result)):
-                del result[i]['RepoDigests']
-                del result[i]['Labels']
-                del result[i]['Size']
+                for unused_key in ['RepoDigests', 'Labels', 'Size']:
+                    if unused_key in result[i]:
+                        del result[i][unused_key]
                 result[i]['VirtualSize'] = self.filesize(
                     result[i]['VirtualSize'])
                 if 'Created' in result[i] \
