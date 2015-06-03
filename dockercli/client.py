@@ -169,7 +169,7 @@ class DockerClient(object):
         Return the version. Equivalent of docker version.
         :return: list of tuples
         """
-        _, _ = kwargs
+        _, _ = args, kwargs
 
         try:
             verdict = self.instance.version()
@@ -397,14 +397,20 @@ class DockerClient(object):
 
         return self.instance.build(**kwargs)
 
-    def start(self, **kwargs):
+    def start(self, *args, **kwargs):
         """
         Start a container. Equivalent of docker start.
         :param kwargs:
         :return: Container ID or iterable output.
         """
 
-        if kwargs['remove']:
+        if args:
+            kwargs['container'] = args[0]
+
+        if not kwargs['container']:
+            return ['Container name is required.']
+
+        if 'remove' in kwargs and kwargs['remove']:
             def on_after():
                 container = kwargs['container']
                 try:
@@ -421,7 +427,7 @@ class DockerClient(object):
 
         attached = None
 
-        if kwargs['attach']:
+        if 'attach' in kwargs and kwargs['attach']:
             attached = self.attach(
                 container=kwargs['container'],
                 stream=True,
@@ -527,6 +533,8 @@ class DockerClient(object):
         :param kwargs:
         :return: Container ID or iterable output.
         """
+        if not args:
+            return ['Container name is required.']
 
         container = args[0]
         self.instance.stop(container, **kwargs)
@@ -535,10 +543,12 @@ class DockerClient(object):
 
     def top(self, *args, **kwargs):
         """
-        Remove a container. Equivalent of docker rm.
+        Show top processes in a container. Equivalent of docker rm.
         :param kwargs:
         :return: Container ID or iterable output.
         """
+        if not args:
+            return ['Container name is required.']
 
         container = args[0]
         result = self.instance.top(container, **kwargs)
@@ -551,9 +561,12 @@ class DockerClient(object):
         :return: Container ID or iterable output.
         """
 
-        container = args[0]
+        if not args:
+            return ['Image name is required.']
+
+        image = args[0]
         kwargs['stream'] = True
-        result = self.instance.pull(container, **kwargs)
+        result = self.instance.pull(image, **kwargs)
         self.is_refresh_images = True
 
         return result
