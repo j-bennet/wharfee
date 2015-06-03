@@ -14,6 +14,7 @@ COMMAND_NAMES = [
     'logs',
     'ps',
     'pull',
+    'pause',
     'run',
     'rm',
     'rmi',
@@ -21,6 +22,7 @@ COMMAND_NAMES = [
     'start',
     'stop',
     'top',
+    'unpause',
     'version',
 ]
 
@@ -93,6 +95,11 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_CONTAINER, 'container',
                       action='store',
                       help='Container to retrieve the logs from.'),
+    ],
+    'pause': [
+        CommandOption(CommandOption.TYPE_CONTAINER_RUN, None, 'container',
+                      action='store',
+                      help='Container ID or name to use.'),
     ],
     'ps': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--all',
@@ -224,6 +231,11 @@ COMMAND_OPTIONS = {
     ],
     'top': [
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
+                      action='store',
+                      help='Container ID or name to use.'),
+    ],
+    'unpause': [
+        CommandOption(CommandOption.TYPE_CONTAINER_RUN, None, 'container',
                       action='store',
                       help='Container ID or name to use.'),
     ]

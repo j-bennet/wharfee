@@ -46,6 +46,7 @@ class DockerClient(object):
                                     " container.")),
             'help': (self.help, "Help on available commands."),
             'version': (self.version, "Show the Docker version information."),
+            'pause': (self.pause, "Pause all processes within a container."),
             'ps': (self.containers, "List containers."),
             'pull': (self.pull, "Pull an image or a repository from the " +
                      "registry."),
@@ -60,7 +61,9 @@ class DockerClient(object):
             'start': (self.start, "Restart a stopped container."),
             'stop': (self.stop, "Stop a running container."),
             'top': (self.top, "Display the running processes of a container."),
-            'info': (self.info, "Display system-wide information.")
+            'info': (self.info, "Display system-wide information."),
+            'unpause': (self.unpause, ("Unpause all processes within a "
+                                       "container.")),
         }
 
         self.output = None
@@ -246,6 +249,21 @@ class DockerClient(object):
             return csdict
         else:
             return ['There are no containers to list.']
+
+    def pause(self, *args, **kwargs):
+        """
+        Pause all processes in a container. Equivalent of docker pause.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+        if not args:
+            return ['Container name is required.']
+
+        kwargs['container'] = args[0]
+
+        self.instance.pause(**kwargs)
+
+        return [kwargs['container']]
 
     def rm(self, *args, **kwargs):
         """
@@ -575,6 +593,21 @@ class DockerClient(object):
         self.is_refresh_images = True
 
         return result
+
+    def unpause(self, *args, **kwargs):
+        """
+        Unpause all processes in a container. Equivalent of docker unpause.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+        if not args:
+            return ['Container name is required.']
+
+        kwargs['container'] = args[0]
+
+        self.instance.unpause(**kwargs)
+
+        return [kwargs['container']]
 
     def filesize(self, size):
         """
