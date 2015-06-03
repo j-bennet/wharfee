@@ -29,14 +29,19 @@ class DockerClient(object):
     is named "limit", some parameters are not implemented at all, etc.
     """
 
-    def __init__(self, timeout=None):
+    def __init__(self, timeout=None, clear_handler=None):
         """
         Initialize the Docker wrapper.
+        :param timeout: int
+        :param clear_handler: callable
         """
+
+        assert callable(clear_handler)
 
         self.handlers = {
             'build': (self.build, ("Build a new image from the source"
                                    " code")),
+            'clear': (clear_handler, "Clear the window."),
             'exec': (self.execute, ("Run a command in a running"
                                     " container.")),
             'help': (self.help, "Help on available commands."),
@@ -139,7 +144,7 @@ class DockerClient(object):
 
                 except Exception as ex:
                     reset_output()
-                    self.output = [ex.message]
+                    self.output = [ex.__repr__()]
             else:
                 self.output = handler()
         elif cmd:

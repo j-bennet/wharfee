@@ -9,7 +9,7 @@ from types import GeneratorType
 from prompt_toolkit import AbortAction
 from prompt_toolkit import Application
 from prompt_toolkit import CommandLineInterface
-from prompt_toolkit.filters import Always, HasFocus, IsDone
+from prompt_toolkit.filters import Always
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.shortcuts import create_default_layout
 from prompt_toolkit.shortcuts import create_eventloop
@@ -37,6 +37,7 @@ class DockerCli(object):
     The CLI implementation.
     """
 
+    dcli = None
     keyword_completer = None
     handler = None
     saved_less_opts = None
@@ -53,7 +54,8 @@ class DockerCli(object):
         self.config = self.read_configuration()
         self.theme = self.config['main']['theme']
         self.handler = DockerClient(
-            self.config['main'].as_int('client_timeout'))
+            self.config['main'].as_int('client_timeout'),
+            self.clear)
         self.completer = DockerCompleter()
         self.set_completer_options()
         self.saved_less_opts = self.set_less_opts()
@@ -138,6 +140,13 @@ class DockerCli(object):
 
         return manager
 
+    def clear(self):
+        """
+        Clear the screen.
+        """
+        if self.dcli:
+            self.dcli.output.erase_screen()
+
     def set_completer_options(self, cons=True, runs=True, imgs=True):
         """
         Set image and container names in Completer.
@@ -207,13 +216,13 @@ class DockerCli(object):
 
         eventloop = create_eventloop()
 
-        dcli = CommandLineInterface(
+        self.dcli = CommandLineInterface(
             application=application,
             eventloop=eventloop)
 
         while True:
             try:
-                document = dcli.run()
+                document = self.dcli.run()
                 self.handler.handle_input(document.text)
 
                 if isinstance(self.handler.output, GeneratorType):

@@ -5,6 +5,7 @@ from .option import CommandOption
 
 COMMAND_NAMES = [
     'build',
+    'clear',
     'exec',
     'help',
     'images',
@@ -57,6 +58,7 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_DIRPATH, 'path',
                       help='Path or URL where the Dockerfile is located.'),
     ],
+    'clear': [],
     'exec': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
                       action='store_true',
@@ -252,7 +254,7 @@ def allowed_args(cmd, **kwargs):
     :return: dict
     """
     matches = {}
-    available = all_options(cmd)
+    available = all_supported(cmd)
     if available:
         for k in kwargs:
             if k in available:
@@ -261,6 +263,17 @@ def allowed_args(cmd, **kwargs):
 
 
 def all_options(command):
+    """
+    Helper method to find all command options.
+    :param command: string
+    :return: set of CommandOption
+    """
+    if command in COMMAND_OPTIONS:
+        return [OPTION_HELP] + COMMAND_OPTIONS[command]
+    return [OPTION_HELP]
+
+
+def all_supported(command):
     """
     Helper method to find all command options that docker-py supports.
     :param command: string
@@ -284,8 +297,7 @@ def parse_command_options(cmd, params):
     """
     parser = OptParser(prog=cmd, add_help_option=False)
     parser.disable_interspersed_args()
-    parser.add_option(*OPTION_HELP.args, **OPTION_HELP.kwargs)
-    for opt in COMMAND_OPTIONS[cmd]:
+    for opt in all_options(cmd):
         if opt.name.startswith('-'):
             parser.add_option(*opt.args, **opt.kwargs)
     popts, pargs = parser.parse_args(params)
@@ -300,8 +312,9 @@ def format_command_help(cmd):
     :return: string
     """
     usage = [cmd, '[options]']
+    alls = all_options(cmd)
 
-    for opt in [OPTION_HELP] + COMMAND_OPTIONS[cmd]:
+    for opt in alls:
         if not opt.name.startswith('-'):
             optname = "[{0}]".format(opt.name) if opt.is_optional else opt.name
             usage.append(optname)
@@ -310,7 +323,7 @@ def format_command_help(cmd):
 
     parser = OptParser(prog=cmd, add_help_option=False, usage=usage)
 
-    for opt in [OPTION_HELP] + COMMAND_OPTIONS[cmd]:
+    for opt in alls:
         if opt.name.startswith('-'):
             parser.add_option(*opt.args, **opt.kwargs)
 

@@ -6,6 +6,7 @@ import shlex
 from prompt_toolkit.completion import Completer, Completion
 from .options import COMMAND_OPTIONS
 from .options import COMMAND_NAMES
+from .options import all_options
 from .options import find_option
 
 
@@ -150,7 +151,7 @@ class DockerCompleter(Completer):
                         word, current_opt.choices):
                     yield m
             else:
-                for opt in COMMAND_OPTIONS[command]:
+                for opt in all_options(command):
                     # Do not offer options that user already set.
                     if opt.name not in params:
                         if opt.name.startswith('-'):
