@@ -48,6 +48,9 @@ class DockerClient(object):
             'version': (self.version, "Show the Docker version information."),
             'pause': (self.pause, "Pause all processes within a container."),
             'ps': (self.containers, "List containers."),
+            'port': (self.port, ("List port mappings for the container, or "
+                                 "lookup the public-facing port that is "
+                                 "NAT-ed to the private_port.")),
             'pull': (self.pull, "Pull an image or a repository from the " +
                      "registry."),
             'images': (self.images, "List images."),
@@ -264,6 +267,23 @@ class DockerClient(object):
         self.instance.pause(**kwargs)
 
         return [kwargs['container']]
+
+    def port(self, *args, **kwargs):
+        """
+        List port mappings for the container. Equivalent of docker port.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+        if not args:
+            return ['Container name is required.']
+
+        port_args = [args[0], None]
+        port_args[1] = args[1] if len(args) > 1 else None
+
+        result = self.instance.port(*port_args)
+        if result:
+            return result
+        return ['There are no port mappings for {0}.'.format(args[0])]
 
     def rm(self, *args, **kwargs):
         """

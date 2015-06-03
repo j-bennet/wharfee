@@ -15,6 +15,7 @@ COMMAND_NAMES = [
     'ps',
     'pull',
     'pause',
+    'port',
     'run',
     'rm',
     'rmi',
@@ -98,6 +99,11 @@ COMMAND_OPTIONS = {
     ],
     'pause': [
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, None, 'container',
+                      action='store',
+                      help='Container ID or name to use.'),
+    ],
+    'port': [
+        CommandOption(CommandOption.TYPE_CONTAINER, None, 'container',
                       action='store',
                       help='Container ID or name to use.'),
     ],
