@@ -9,7 +9,10 @@ from types import GeneratorType
 from prompt_toolkit import AbortAction
 from prompt_toolkit import Application
 from prompt_toolkit import CommandLineInterface
-from prompt_toolkit.filters import Always
+from prompt_toolkit.enums import DEFAULT_BUFFER
+from prompt_toolkit.filters import Always, HasFocus, IsDone
+from prompt_toolkit.layout.processors import \
+    HighlightMatchingBracketProcessor, ConditionalProcessor
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.shortcuts import create_default_layout
 from prompt_toolkit.shortcuts import create_eventloop
@@ -198,7 +201,14 @@ class DockerCli(object):
             message='dockercli> ',
             reserve_space_for_menu=True,
             lexer=CommandLexer,
-            get_bottom_toolbar_tokens=self.get_toolbar_items)
+            get_bottom_toolbar_tokens=self.get_toolbar_items,
+            extra_input_processors=[
+                ConditionalProcessor(
+                    processor=HighlightMatchingBracketProcessor(
+                        chars='[](){}'),
+                    filter=HasFocus(DEFAULT_BUFFER) & ~IsDone())
+            ]
+        )
 
         buffer = Buffer(
             history=history,
