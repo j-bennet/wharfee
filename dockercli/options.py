@@ -20,6 +20,7 @@ COMMAND_NAMES = [
     'rm',
     'rmi',
     'search',
+    'shell',
     'start',
     'stop',
     'top',
@@ -193,6 +194,11 @@ COMMAND_OPTIONS = {
                       help='Remove the container when it exits. ' +
                       'Can\'t be used with --detach',
                       no_match=True),
+    ],
+    'shell': [
+        CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
+                      action='store',
+                      help='Container ID or name to use.'),
     ],
     'start': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--attach',
