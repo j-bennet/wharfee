@@ -16,10 +16,7 @@ from prompt_toolkit.layout.processors import \
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.shortcuts import create_default_layout
 from prompt_toolkit.shortcuts import create_eventloop
-from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.keys import Keys
-from pygments.token import Token
 
 from .client import DockerClient
 from .client import DockerPermissionException
@@ -32,6 +29,8 @@ from .formatter import output_stream
 from .config import write_default_config
 from .config import read_config
 from .style import style_factory
+from .keys import get_key_manager
+from .toolbar import get_toolbar_items
 from .__init__ import __version__
 
 
@@ -107,42 +106,6 @@ class DockerCli(object):
         """
         os.environ['LESS'] = self.saved_less_opts
 
-    def get_toolbar_items(self, cli):
-        """
-        Return bottom menu items
-        :param cli:
-        :return: list of Token.Toolbar
-        """
-        return [
-            (Token.Toolbar.Status, ' [F2] Help '),
-            (Token.Toolbar.Status, ' [F10] Exit ')
-        ]
-
-    def get_key_manager(self):
-        """
-        Create and initialize keybinding manager
-        :return: KeyBindingManager
-        """
-        manager = KeyBindingManager()
-
-        @manager.registry.add_binding(Keys.F2)
-        def _(event):
-            """
-            When F2 has been pressed, fill in the "help" command.
-            """
-            event.cli.current_buffer.insert_text("help")
-
-        @manager.registry.add_binding(Keys.F10)
-        def _(event):
-            """
-            When F10 has been pressed, quit.
-            """
-            # Unused parameters for linter.
-            _ = event
-            raise EOFError
-
-        return manager
-
     def clear(self):
         """
         Clear the screen.
@@ -210,7 +173,7 @@ class DockerCli(object):
             message='dockercli> ',
             reserve_space_for_menu=True,
             lexer=CommandLexer,
-            get_bottom_toolbar_tokens=self.get_toolbar_items,
+            get_bottom_toolbar_tokens=get_toolbar_items,
             extra_input_processors=[
                 ConditionalProcessor(
                     processor=HighlightMatchingBracketProcessor(
@@ -224,7 +187,7 @@ class DockerCli(object):
             completer=self.completer,
             complete_while_typing=Always())
 
-        manager = self.get_key_manager()
+        manager = get_key_manager()
 
         application = Application(
             style=style_factory(self.theme),
