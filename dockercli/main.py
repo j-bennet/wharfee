@@ -188,6 +188,15 @@ class DockerCli(object):
                 self.completer.set_images(images)
                 self.completer.set_tagged(tagged)
 
+    def refresh_completions(self):
+        """
+        After processing the command, refresh the lists of
+        containers and images as needed
+        """
+        self.set_completer_options(self.handler.is_refresh_containers,
+                                   self.handler.is_refresh_running,
+                                   self.handler.is_refresh_images)
+
     def run_cli(self):
         """
         Run the main loop
@@ -238,18 +247,16 @@ class DockerCli(object):
                 if isinstance(self.handler.output, GeneratorType):
                     output_stream(self.handler.command, self.handler.output)
                 elif self.handler.output is not None:
-                    lines = format_data(self.handler.output)
+                    lines = format_data(
+                        self.handler.command,
+                        self.handler.output)
                     click.echo_via_pager('\n'.join(lines))
 
                 if self.handler.after:
                     for line in self.handler.after():
                         click.echo(line)
 
-                # After processing the command, refresh the lists of
-                # containers and images as needed
-                self.set_completer_options(self.handler.is_refresh_containers,
-                                           self.handler.is_refresh_running,
-                                           self.handler.is_refresh_images)
+                self.refresh_completions()
 
             except KeyboardInterrupt:
                 # user pressed Ctrl + C
@@ -257,6 +264,8 @@ class DockerCli(object):
                     click.echo('')
                     for line in self.handler.after():
                         click.echo(line)
+
+                self.refresh_completions()
 
             except DockerPermissionException as ex:
                 click.secho(ex.message, fg='red')

@@ -464,6 +464,9 @@ class DockerClient(object):
                 except APIError as ex:
                     yield "{0:.25}: {1}.".format(container, ex.explanation)
 
+                self.is_refresh_containers = True
+                self.is_refresh_running = True
+
             self.after = on_after
 
         startargs = allowed_args('start', **kwargs)
@@ -479,14 +482,12 @@ class DockerClient(object):
                 logs=False)
 
         result = self.instance.start(**startargs)
+        self.is_refresh_running = True
         if result:
-            self.is_refresh_running = True
             return [result]
         elif attached:
-            self.is_refresh_running = True
             return attached
         else:
-            self.is_refresh_running = True
             return [kwargs['container']]
 
     def attach(self, *args, **kwargs):

@@ -128,11 +128,16 @@ class JsonStreamFormatter(StreamFormatter):
         click.echo(line, nl=False)
 
 
-def format_data(data):
+def format_data(command, data):
     """
     Uses tabulate to format the iterable.
     :return: string (multiline)
     """
+    if command and command in DATA_FORMATTERS:
+        f = DATA_FORMATTERS[command]
+        assert callable(f)
+        return f(data)
+
     if isinstance(data, list) and len(data) > 0:
         if isinstance(data[0], tuple):
             if is_plain_lists(data):
@@ -277,6 +282,27 @@ def truncate_rows(rows, length=30, length_id=10):
             result.append(row)
     return result
 
+
+def format_top(data):
+    """
+    Format "top" output
+    :param data: dict
+    :return: list
+    """
+    result = []
+    if data:
+        if 'Titles' in data:
+            result.append(data['Titles'])
+        if 'Processes' in data:
+            for process in data['Processes']:
+                result.append(process)
+    result = tabulate(result, headers='firstrow').split('\n')
+    return result
+
+
+DATA_FORMATTERS = {
+    'top': format_top
+}
 
 STREAM_FORMATTERS = {
     'pull': JsonStreamFormatter,

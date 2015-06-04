@@ -2,11 +2,30 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import os
+import pytest
 from time import sleep
 from dockercli.formatter import format_data
 from dockercli.formatter import format_struct
+from dockercli.formatter import format_top
 from dockercli.formatter import JsonStreamFormatter
 
+
+def test_top_formatting():
+    """
+    Test formatting of top output.
+    """
+    data = {
+        u'Processes': [
+            [u'root', u'27390', u'2347', u'0', u'Jun02', u'?', u'00:00:21', u'/bin/sh -c while true; do echo Hello boo; sleep 1; done'],
+            [u'root', u'32694', u'27390', u'0', u'21:52', u'?', u'00:00:00', u'sleep 1']],
+        u'Titles': [u'UID', u'PID', u'PPID', u'C', u'STIME', u'TTY', u'TIME', u'CMD']
+    }
+    formatted = format_top(data)
+    print('\n')
+    print('\n'.join(formatted))
+
+
+@pytest.mark.skipif(True, reason='Long running.')
 def test_json_stream_formatting():
     """
     Test formatting of pull output
@@ -36,9 +55,12 @@ def test_ps_data_formatting():
         {'Id': u'9e19b1558bbcba9202c1d3c4e26d8fe6e2c6060faad9a7074487e3b210a26a16'},
         {'Id': 'b798acf4382421d231680d28aa62ae9b486b89711733c6acbb4cc85d8bec4072'},
     ]
-    formatted = format_data(data)
+    formatted = format_data('ps', data)
     print('\n')
     print('\n'.join(formatted))
+
+
+
 
 
 def test_help_data_formatting():
@@ -54,7 +76,7 @@ def test_help_data_formatting():
         ('stop', "Equivalent of 'docker stop'."),
         ('info', "Equivalent of 'docker info'.")
     ]
-    formatted = format_data(data)
+    formatted = format_data('help', data)
     print('\n')
     print('\n'.join(formatted))
 
@@ -67,7 +89,7 @@ def test_rmi_data_formatting():
         "busybox:ubuntu-14.04",
         "busybox:buildroot-2014.02",
     ]
-    formatted = format_data(data)
+    formatted = format_data('rmi', data)
     print('\n')
     print('\n'.join(formatted))
 
