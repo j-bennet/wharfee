@@ -156,31 +156,28 @@ class DockerClient(object):
         elif cmd:
             self.output = self.help()
 
-    def help(self, *args, **kwargs):
+    def help(self, *_):
         """
         Collect and return help docstrings for all commands.
         :return: list of tuples
         """
-        _, _ = args, kwargs
 
         help_rows = [(key, self.handlers[key][1])
                      for key in COMMAND_NAMES]
         return help_rows
 
-    def not_implemented(self, *args, **kwargs):
+    def not_implemented(self, *_):
         """
         Placeholder for commands to be implemented.
         :return: iterable
         """
-        _, _ = args, kwargs
         return ['Not implemented.']
 
-    def version(self, *args, **kwargs):
+    def version(self, *_):
         """
         Return the version. Equivalent of docker version.
         :return: list of tuples
         """
-        _, _ = args, kwargs
 
         try:
             verdict = self.instance.version()
@@ -189,23 +186,21 @@ class DockerClient(object):
         except ConnectionError as ex:
             raise DockerPermissionException(ex)
 
-    def info(self, *args, **kwargs):
+    def info(self, *_):
         """
         Return the system info. Equivalent of docker info.
         :return: list of tuples
         """
-        _, _ = args, kwargs
 
         rdict = self.instance.info()
         result = [(k, rdict[k]) for k in sorted(rdict.keys())]
         return result
 
-    def inspect(self, *args, **kwargs):
+    def inspect(self, *args, **_):
         """
         Return image or container info. Equivalent of docker inspect.
         :return: dict
         """
-        _, _ = args, kwargs
 
         if not args or len(args) == 0:
             yield 'Container or image ID is required.'
@@ -224,13 +219,11 @@ class DockerClient(object):
                 info = self.instance.inspect_image(id)
             yield json.dumps(info, indent=1)
 
-    def containers(self, *args, **kwargs):
+    def containers(self, *_, **kwargs):
         """
         Return the list of containers. Equivalent of docker ps.
         :return: list of dicts
         """
-
-        _ = args
 
         # Truncate by default.
         if 'trunc' in kwargs and kwargs['trunc'] is None:
@@ -490,7 +483,7 @@ class DockerClient(object):
         else:
             return [kwargs['container']]
 
-    def attach(self, *args, **kwargs):
+    def attach(self, *_, **kwargs):
         """
         Attach to container STDOUT and / or STDERR.
         Docker-py does not allow attaching to STDIN.
@@ -499,8 +492,6 @@ class DockerClient(object):
         :param kwargs:
         :return: Iterable output
         """
-        _ = args
-
         result = self.instance.attach(**kwargs)
         return result
 
@@ -520,13 +511,11 @@ class DockerClient(object):
             result = [result]
         return result
 
-    def images(self, *args, **kwargs):
+    def images(self, *_, **kwargs):
         """
         Return the list of images. Equivalent of docker images.
         :return: list of dicts
         """
-        _ = args
-
         result = self.instance.images(**kwargs)
         RE_DIGITS = re.compile('^[0-9]+$', re.UNICODE)
         if len(result) > 0:
@@ -546,14 +535,12 @@ class DockerClient(object):
         else:
             return ['There are no images to list.']
 
-    def search(self, *args, **kwargs):
+    def search(self, *args, **_):
         """
         Return the list of images matching specified term.
         Equivalent of docker search.
         :return: list of dicts
         """
-
-        _ = kwargs
 
         if not args or len(args) < 1:
             return "Search term is required."
