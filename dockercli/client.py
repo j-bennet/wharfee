@@ -8,7 +8,7 @@ import json
 import math
 import pretty
 import re
-import dockerpty
+import pexpect
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
@@ -442,26 +442,27 @@ class DockerClient(object):
 
         return self.instance.build(**kwargs)
 
-    def shell(self, *args, **kwargs):
+    def shell(self, *args, **_):
         """
-        Get the shell into a running container. Practically a shortcut for
+        Get the shell into a running container. A shortcut for
         docker exec -it /usr/bin/env bash.
         :param kwargs:
         :return: None
         """
-        #if not args:
-        #    return ['Container name or ID is required.']
+        if not args:
+            return ['Container name or ID is required.']
 
-        #container = args[0]
+        container = args[0]
 
-        container = self.instance.create_container(
-            image='busybox:latest',
-            stdin_open=True,
-            tty=True,
-            command='/bin/sh',
-        )
+        shellcmd = 'bash'
+        if len(args) > 1:
+            shellcmd = ' '.join(args[1:])
 
-        dockerpty.start(self.instance, container)
+        self.after = lambda: ['\rShell to {0} is closed.'.format(container)]
+
+        command = 'docker exec -it {0} {1}'.format(container, shellcmd)
+        process = pexpect.spawnu(command)
+        process.interact()
 
     def start(self, *args, **kwargs):
         """

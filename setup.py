@@ -20,7 +20,7 @@ setup(
         'click>=4.0',
         'py-pretty>-0.1',
         'configobj >= 5.0.6',
-        'dockerpty>=0.3.3'
+        'pexpect>=3.3'
     ],
     extras_require={
         'testing': ['pytest', 'mock'],

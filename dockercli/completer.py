@@ -128,6 +128,7 @@ class DockerCompleter(Completer):
         add_running = False
         add_tagged = False
         add_directory = False
+        add_choices = []
 
         if command in COMMAND_OPTIONS:
             if current_opt and current_opt.is_type_container():
@@ -169,6 +170,8 @@ class DockerCompleter(Completer):
                                 add_tagged = True
                             elif opt.is_type_dirname():
                                 add_directory = True
+                            elif opt.is_type_choice():
+                                add_choices.extend(opt.choices)
 
                 # Also return completions for positional options
                 # (images, containers, paths)
@@ -190,6 +193,10 @@ class DockerCompleter(Completer):
                         yield m
                 if add_directory:
                     for m in DockerCompleter.find_directory_matches(word):
+                        yield m
+                if add_choices:
+                    for m in DockerCompleter.find_collection_matches(
+                            word, add_choices):
                         yield m
 
     @staticmethod
