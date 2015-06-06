@@ -22,7 +22,11 @@ setup(
         'configobj >= 5.0.6'
     ],
     extras_require={
-        'testing': ['pytest', 'mock'],
+        'testing': [
+            'pytest>=2.7.0',
+            'mock>=1.0.1',
+            'tox>=1.9.2'
+        ],
     },
     entry_points={
         'console_scripts': 'dockercli = dockercli.main:cli'
