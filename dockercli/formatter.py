@@ -26,14 +26,18 @@ class StreamFormatter(object):
         :param data: generator
         """
         self.stream = data
+        self.counter = 0
 
     def output(self):
         """
         Process and output line by line.
+        :return: int
         """
         for line in self.stream:
+            self.counter += 1
             line = line.strip()
             click.echo(line)
+        return self.counter
 
 
 class JsonStreamFormatter(StreamFormatter):
@@ -50,6 +54,7 @@ class JsonStreamFormatter(StreamFormatter):
     def output(self):
         """
         Process and output line by line.
+        :return: int
 
         Lines that contain progress information in them get special handling:
 
@@ -65,6 +70,7 @@ class JsonStreamFormatter(StreamFormatter):
 
         """
         for line in self.stream:
+            self.counter += 1
             data = json.loads(line)
 
             if self.is_progress(data):
@@ -72,6 +78,7 @@ class JsonStreamFormatter(StreamFormatter):
             else:
                 self.show_progress_end()
                 self.show_line(data)
+        return self.counter
 
     def is_progress(self, data):
         """
@@ -310,11 +317,13 @@ STREAM_FORMATTERS = {
 }
 
 
-def output_stream(command, stream):
+def output_stream(command, stream, logs):
     """
     Take the iterable and output line by line using click.echo.
     :param command: string command
     :param stream: generator
+    :param logs: callable
+    :return: None
     """
 
     if command and command in STREAM_FORMATTERS:
@@ -322,4 +331,13 @@ def output_stream(command, stream):
     else:
         formatter = StreamFormatter(stream)
 
-    formatter.output()
+    stream_count = formatter.output()
+
+    if stream_count == 0 and logs and callable(logs):
+        # Something nasty has happened and we got an empty
+        # output stream. But we have logs. Let's show those.
+        lines = logs()
+        if lines:
+            lines = lines.split('\n')
+            for line in lines:
+                click.echo(line)
