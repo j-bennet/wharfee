@@ -14,6 +14,7 @@ from docker.utils import kwargs_from_env
 from docker.errors import APIError
 from docker.errors import DockerException
 from requests.exceptions import ConnectionError
+from requests.packages.urllib3 import disable_warnings
 from .options import allowed_args
 from .options import parse_command_options
 from .options import format_command_help
@@ -78,6 +79,8 @@ class DockerClient(object):
         self.is_refresh_running = False
         self.is_refresh_images = False
 
+        disable_warnings()
+
         if sys.platform.startswith('darwin') \
                 or sys.platform.startswith('win32'):
             try:
@@ -89,6 +92,7 @@ class DockerClient(object):
                 kwargs['tls'].assert_hostname = False
                 kwargs['timeout'] = timeout
                 self.instance = AutoVersionClient(**kwargs)
+
             except DockerException as x:
                 if 'CERTIFICATE_VERIFY_FAILED' in x.message:
                     raise DockerSslException(x)
