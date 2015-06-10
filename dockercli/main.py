@@ -208,7 +208,10 @@ class DockerCli(object):
                 self.handler.handle_input(document.text)
 
                 if isinstance(self.handler.output, GeneratorType):
-                    output_stream(self.handler.command, self.handler.output)
+                    output_stream(self.handler.command,
+                                  self.handler.output,
+                                  self.handler.logs)
+
                 elif self.handler.output is not None:
                     lines = format_data(
                         self.handler.command,
