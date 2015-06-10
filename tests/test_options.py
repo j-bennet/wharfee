@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import pytest
+import shlex
+from optparse import OptionError
 from dockercli.options import parse_command_options
 from dockercli.completer import DockerCompleter
 
@@ -78,3 +80,40 @@ def test_parse_quoted_string_start():
     input = 'run -d ubuntu:14.04 /bin/sh -c "w'
     first = DockerCompleter.first_token(input)
     assert first == 'run'
+
+def test_parse_multiple_args():
+    """
+    Parsing multiple -e options to "run".
+    :return:
+    """
+    expected_opts = {
+        'tty': None,
+        'help': None,
+        'remove': None,
+        'environment': [u'FOO=1', u'BOO=2'],
+        'detach': None,
+        'name': u'boo'
+    }
+
+    expected_args = ['ubuntu']
+
+    parser, popts, pargs = parse_command_options(
+        'run',
+        ['--name', 'boo', '-e', 'FOO=1', '-e', 'BOO=2', 'ubuntu'])
+
+    assert pargs == expected_args
+    assert popts == expected_opts
+
+def test_parse_multiple_args_without_equal():
+    """
+    Parsing multiple -e options to "run".
+    :return:
+    """
+    text = 'run --name boo -e FOO 1 -e BOO 2 ubuntu'
+    tokens = shlex.split(text) if text else ['']
+    cmd = tokens[0]
+    params = tokens[1:]
+
+    with pytest.raises(OptionError) as ex:
+        parse_command_options(cmd, params)
+        assert 'KEY=VALUE' in ex.message

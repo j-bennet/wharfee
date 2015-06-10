@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from optparse import OptionParser
+from optparse import OptionParser, OptionError
 from .option import CommandOption
 
 COMMAND_NAMES = [
@@ -170,8 +170,13 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
                       action='store_true',
                       dest='detach',
-                      help='Detached mode: run the container in the ' +
-                           'background and print the new container ID'),
+                      help=('Detached mode: run the container in the '
+                            'background and print the new container ID')),
+        CommandOption(CommandOption.TYPE_KEYVALUE, '-e', '--env',
+                      action='append',
+                      dest='environment',
+                      help='Set environment variables.',
+                      nargs='*'),
         CommandOption(CommandOption.TYPE_CONTAINER, '--name',
                       action='store',
                       dest='name',
@@ -190,8 +195,8 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_BOOLEAN, '--rm',
                       action='store_true',
                       dest='remove',
-                      help='Remove the container when it exits. ' +
-                      'Can\'t be used with --detach',
+                      help=('Remove the container when it exits. '
+                            'Can\'t be used with --detach'),
                       no_match=True),
     ],
     'start': [
@@ -319,6 +324,7 @@ def parse_command_options(cmd, params):
         if opt.name.startswith('-'):
             parser.add_option(*opt.args, **opt.kwargs)
     popts, pargs = parser.parse_args(params)
+    parser.assert_option_format()
     popts = vars(popts)
     return parser, popts, pargs
 
@@ -349,6 +355,22 @@ def format_command_help(cmd):
 
 
 class OptParser(OptionParser):
+
+    # TODO: Bad bad bad. There should be a better way to do this.
+    def assert_option_format(self):
+        """
+        I don't want environment vars to be provided as
+        "-e KEY VALUE", I want "-e KEY=VALUE" instead.
+        Would argparse help here?
+        """
+        dict_values = vars(self.values)
+        if 'environment' in dict_values and dict_values['environment']:
+            for envar in dict_values['environment']:
+                if '=' not in envar:
+                    raise OptionError(
+                        'Usage: -e KEY1=VALUE1 -e KEY2=VALUE2...',
+                        '-e')
+
     """
     Wrapper around OptionParser.
     Overrides error method to throw an exception.

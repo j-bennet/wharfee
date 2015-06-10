@@ -31,6 +31,7 @@ from .config import read_config
 from .style import style_factory
 from .keys import get_key_manager
 from .toolbar import get_toolbar_items
+from .options import OptionError
 from .__init__ import __version__
 
 
@@ -135,10 +136,19 @@ class DockerCli(object):
                 self.completer.set_running(running)
 
         if imgs:
-            def parse_image_name(tag):
+            def format_tagged(tagname, img_id):
+                if tagname == '<none>:<none>':
+                    return img_id[:11]
+                return tagname
+
+            def parse_image_name(tag, img_id):
                 if ':' in tag:
-                    return tag.split(':', 2)[0]
-                return tag
+                    result = tag.split(':', 2)[0]
+                else:
+                    result = tag
+                if result == '<none>':
+                    result = img_id[:11]
+                return result
 
             ims = self.handler.images()
             if ims and len(ims) > 0 and isinstance(ims[0], dict):
@@ -146,8 +156,8 @@ class DockerCli(object):
                 tagged = set([])
                 for im in ims:
                     for name in im['RepoTags']:
-                        images.add(parse_image_name(name))
-                        tagged.add(name)
+                        images.add(parse_image_name(name, im['Id']))
+                        tagged.add(format_tagged(name, im['Id']))
                 self.completer.set_images(images)
                 self.completer.set_tagged(tagged)
 
@@ -223,6 +233,9 @@ class DockerCli(object):
                         click.echo(line)
 
                 self.refresh_completions()
+
+            except OptionError as ex:
+                click.secho(ex.msg, fg='red')
 
             except KeyboardInterrupt:
                 # user pressed Ctrl + C

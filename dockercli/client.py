@@ -19,6 +19,7 @@ from .options import allowed_args
 from .options import parse_command_options
 from .options import format_command_help
 from .options import COMMAND_NAMES
+from .options import OptionError
 
 
 class DockerClient(object):
@@ -153,6 +154,10 @@ class DockerClient(object):
                 except APIError as ex:
                     reset_output()
                     self.output = [ex.explanation]
+
+                except OptionError as ex:
+                    reset_output()
+                    raise ex
 
                 except Exception as ex:
                     reset_output()

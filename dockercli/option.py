@@ -18,6 +18,7 @@ class CommandOption(object):
     TYPE_COMMAND = 8
     TYPE_COMMAND_ARG = 9
     TYPE_CHOICE = 10
+    TYPE_KEYVALUE = 11
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -39,7 +40,8 @@ class CommandOption(object):
             CommandOption.TYPE_IMAGE_TAG,
             CommandOption.TYPE_COMMAND,
             CommandOption.TYPE_COMMAND_ARG,
-            CommandOption.TYPE_CHOICE
+            CommandOption.TYPE_CHOICE,
+            CommandOption.TYPE_KEYVALUE
         ]:
             raise ValueError("Incorrect option_type.", option_type)
 
@@ -65,8 +67,17 @@ class CommandOption(object):
 
         if 'nargs' in kwargs:
             self.is_optional = (kwargs['nargs'] in ['?', '*'])
+            self.is_multiple = (kwargs['nargs'] in ['+', '*'])
+
+            # TODO: Optparse wants a number here... back to argparse?
+            if kwargs['nargs'] in ['?', '*', '+']:
+                if kwargs['nargs'] in ['*', '+']:
+                    kwargs['action'] = 'append'
+                del kwargs['nargs']
+
         else:
             self.is_optional = False
+            self.is_multiple = False
 
         if 'choices' in kwargs:
             self.choices = kwargs['choices']

@@ -152,8 +152,11 @@ class DockerCompleter(Completer):
                     yield m
             else:
                 for opt in all_options(command):
+
                     # Do not offer options that user already set.
-                    if opt.name not in params:
+                    # Unless user may want to set them multiple times.
+                    # Example: -e VAR1=value1 -e VAR2=value2.
+                    if opt.name not in params or opt.is_multiple:
                         if opt.name.startswith('-'):
                             if opt.name.startswith(word) or not word:
                                 yield Completion(opt.name, -len(word))
