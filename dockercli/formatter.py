@@ -207,7 +207,7 @@ def format_struct(data, spaces=1, indent=0, lines=None):
                 lines = format_struct(row[i], spaces, indent + 1, lines)
             elif isinstance(row[i], list):
                 if is_plain_list(row[i]):
-                    item = ', '.join(map(lambda x: '{0}'.format(x), row[i]))
+                    item = flatten_list(row[i])
                     line, lines = add_item_to_line(item, line, i == (l - 1), lines)
                 else:
                     lines.append(line)
@@ -242,6 +242,42 @@ def is_plain_list(lst):
             return False
     return True
 
+def flatten_list(data):
+    """
+    Format and return a comma-separated string of list items.
+    :param data:
+    :return:
+    """
+    return ', '.join(["{0}".format(x) for x in data])
+
+def flatten_dict(data):
+    """
+    Format and return a comma-separated string of dict items.
+    :param data:
+    :return:
+    """
+    return ', '.join(["{0}: {1}".format(x, y) for x, y in data.iteritems()])
+
+def format_ports(ports):
+    """
+    Ports get special treatment.
+
+    They are a list that looks like this:
+       [{u'Type': u'tcp', u'PrivatePort': 3306}]
+
+    We return this:
+       "3306/tcp"
+
+    :param ports: list of dicts
+    :return: string
+    """
+    def format_port(port):
+        return '{0}/{1}'.format(
+            port.get('PrivatePort', '0000'),
+            port.get('Type', 'type'))
+
+    return ', '.join(format_port(x) for x in ports)
+
 def flatten_rows(rows):
     """
     Transform all list or dict values in a dict into comma-separated strings.
@@ -251,11 +287,12 @@ def flatten_rows(rows):
 
     for row in rows:
         for k in row.iterkeys():
-            if isinstance(row[k], list):
-                row[k] = ', '.join(row[k])
+            if k in ROW_FORMATTERS:
+                row[k] = ROW_FORMATTERS[k](row[k])
+            elif isinstance(row[k], list):
+                row[k] = flatten_list(row[k])
             elif isinstance(row[k], dict):
-                row[k] = ', '.join(["{0}: {1}".format(x, y)
-                                    for x, y in row[k].iteritems()])
+                row[k] = flatten_dict(row[k])
     return rows
 
 
@@ -309,6 +346,10 @@ def format_top(data):
 
 DATA_FORMATTERS = {
     'top': format_top
+}
+
+ROW_FORMATTERS = {
+    'Ports': format_ports
 }
 
 STREAM_FORMATTERS = {
