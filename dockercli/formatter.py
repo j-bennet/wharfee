@@ -268,10 +268,29 @@ def format_ports(ports):
     We return this:
        "3306/tcp"
 
+    Or instead of this:
+       [{
+       u'IP': u'0.0.0.0',
+       u'Type': u'tcp',
+       u'PublicPort': 3000,
+       u'PrivatePort': 3306}]
+
+    We return:
+        "0.0.0.0:3000->3306/tcp"
+
     :param ports: list of dicts
     :return: string
     """
     def format_port(port):
+        """
+        Format port dictionary and return string.
+        """
+        if 'PublicPort' in port:
+            return '{0}:{1}->{2}/{3}'.format(
+                port.get('IP', '0.0.0.0'),
+                port.get('PublicPort', '0000'),
+                port.get('PrivatePort', '0000'),
+                port.get('Type', 'type'))
         return '{0}/{1}'.format(
             port.get('PrivatePort', '0000'),
             port.get('Type', 'type'))
