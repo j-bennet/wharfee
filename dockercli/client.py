@@ -8,6 +8,7 @@ import json
 import math
 import pretty
 import re
+import pexpect
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
@@ -47,7 +48,6 @@ class DockerClient(object):
             'exec': (self.execute, ("Run a command in a running"
                                     " container.")),
             'help': (self.help, "Help on available commands."),
-            'version': (self.version, "Show the Docker version information."),
             'pause': (self.pause, "Pause all processes within a container."),
             'ps': (self.containers, "List containers."),
             'port': (self.port, ("List port mappings for the container, or "
@@ -56,6 +56,7 @@ class DockerClient(object):
             'pull': (self.pull, "Pull an image or a repository from the " +
                      "registry."),
             'images': (self.images, "List images."),
+            'info': (self.info, "Display system-wide information."),
             'inspect': (self.inspect, "Return low-level information on a " +
                         "container or image."),
             'logs': (self.logs, "Fetch the logs of a container."),
@@ -63,12 +64,13 @@ class DockerClient(object):
             'rm': (self.rm, "Remove one or more containers."),
             'rmi': (self.rmi, "Remove one or more images."),
             'search': (self.search, "Search the Docker Hub for images."),
+            'shell': (self.shell, "Get shell into a running container."),
             'start': (self.start, "Restart a stopped container."),
             'stop': (self.stop, "Stop a running container."),
             'top': (self.top, "Display the running processes of a container."),
-            'info': (self.info, "Display system-wide information."),
             'unpause': (self.unpause, ("Unpause all processes within a "
                                        "container.")),
+            'version': (self.version, "Show the Docker version information."),
         }
 
         self.output = None
@@ -443,6 +445,28 @@ class DockerClient(object):
         self.is_refresh_images = True
 
         return self.instance.build(**kwargs)
+
+    def shell(self, *args, **_):
+        """
+        Get the shell into a running container. A shortcut for
+        docker exec -it /usr/bin/env bash.
+        :param kwargs:
+        :return: None
+        """
+        if not args:
+            return ['Container name or ID is required.']
+
+        container = args[0]
+
+        shellcmd = 'bash'
+        if len(args) > 1:
+            shellcmd = ' '.join(args[1:])
+
+        self.after = lambda: ['\rShell to {0} is closed.'.format(container)]
+
+        command = 'docker exec -it {0} {1}'.format(container, shellcmd)
+        process = pexpect.spawnu(command)
+        process.interact()
 
     def start(self, *args, **kwargs):
         """

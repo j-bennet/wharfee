@@ -19,7 +19,8 @@ setup(
         'tabulate>=0.7.5',
         'click>=4.0',
         'py-pretty>-0.1',
-        'configobj >= 5.0.6'
+        'configobj >= 5.0.6',
+        'pexpect>=3.3'
     ],
     extras_require={
         'testing': [
