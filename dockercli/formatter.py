@@ -305,7 +305,7 @@ def flatten_rows(rows):
     """
 
     for row in rows:
-        for k in row.iterkeys():
+        for k in row.keys():
             if k in ROW_FORMATTERS:
                 row[k] = ROW_FORMATTERS[k](row[k])
             elif isinstance(row[k], list):
@@ -333,7 +333,7 @@ def truncate_rows(rows, length=30, length_id=10):
     for row in rows:
         if isinstance(row, dict):
             updated = {}
-            for k, v in row.iteritems():
+            for k, v in row.items():
                 if k.endswith('Id'):
                     updated[k] = trimto(v, length_id)
                 else:

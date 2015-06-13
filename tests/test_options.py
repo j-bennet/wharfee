@@ -102,7 +102,9 @@ def test_parse_multiple_args():
         ['--name', 'boo', '-e', 'FOO=1', '-e', 'BOO=2', 'ubuntu'])
 
     assert pargs == expected_args
-    assert popts == expected_opts
+    for expected_key in expected_opts:
+        assert expected_key in popts
+        assert popts[expected_key] == expected_opts[expected_key]
 
 def test_parse_multiple_args_without_equal():
     """

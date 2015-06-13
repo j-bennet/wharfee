@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import pytest
 from prompt_toolkit.completion import Completion
 from prompt_toolkit.document import Document
-from dockercli.options import COMMAND_OPTIONS
+from dockercli.options import all_options
 from dockercli.options import COMMAND_NAMES
 
 
@@ -18,6 +18,8 @@ def complete_event():
     from mock import Mock
     return Mock()
 
+containers = ['newton', 'tesla', 'einstein', 'edison']
+runnings = ['einstein', 'edison']
 
 def test_empty_string_completion(completer, complete_event):
     """
@@ -29,130 +31,6 @@ def test_empty_string_completion(completer, complete_event):
         Document(text=text, cursor_position=position),
         complete_event))
     assert result == set(map(Completion, COMMAND_NAMES))
-
-
-def test_matching_command_completion(completer, complete_event):
-    """
-    Beginning of the command should suggest the command.
-    """
-    _test_command_completion(completer, complete_event, 'h', ['help'])
-    _test_command_completion(completer, complete_event, 'he', ['help'])
-    _test_command_completion(completer, complete_event, 'hel', ['help'])
-    _test_command_completion(completer, complete_event, 'help', ['help'])
-
-    _test_command_completion(completer, complete_event, 'i', ['images', 'info', 'inspect'])
-    _test_command_completion(completer, complete_event, 'im', ['images'])
-    _test_command_completion(completer, complete_event, 'ima', ['images'])
-    _test_command_completion(completer, complete_event, 'imag', ['images'])
-
-
-def test_options_completion(completer, complete_event):
-    """
-    After command name, suggest command options.
-    """
-
-    ps_opts = _get_command_option_names('ps')
-
-    _test_options_completion(
-        completer, complete_event, 'ps ', ps_opts, 0)
-
-    _test_options_completion(
-        completer, complete_event, 'ps --', [n for n in ps_opts if n.startswith('--')], -2)
-
-    _test_options_completion(
-        completer, complete_event, 'ps --h', ['--help'], -3)
-
-
-def test_options_completion_exclusion(completer, complete_event):
-    """
-    After command name, do not suggest options that are already set.
-    """
-
-    ps_opts = _get_command_option_names('ps')
-
-    _test_options_completion(
-        completer,
-        complete_event,
-        'ps --all ',
-        [n for n in ps_opts if n != '--all'],
-        0)
-
-    _test_options_completion(
-        completer,
-        complete_event,
-        'ps --all --quiet ',
-        [n for n in ps_opts if n not in ['--all', '--quiet']],
-        0)
-
-
-def test_options_container_completion(completer, complete_event):
-    """
-    Suggest container names in relevant options (ps --before)
-    """
-    container_names = ['newton', 'tesla', 'einstein', 'edison']
-
-    completer.set_containers(container_names)
-
-    _test_options_completion(
-        completer,
-        complete_event,
-        'ps --before ',
-        container_names,
-        0
-    )
-    _test_options_completion(
-        completer,
-        complete_event,
-        'ps --before e',
-        filter(lambda x: x.startswith('e'), container_names),
-        -1
-    )
-    _test_options_completion(
-        completer,
-        complete_event,
-        'ps --before ei',
-        filter(lambda x: x.startswith('ei'), container_names),
-        -2
-    )
-
-
-def test_options_container_running_completion(completer, complete_event):
-    """
-    Suggest running container names (top [container])
-    """
-    container_names = ['newton', 'tesla', 'einstein', 'edison']
-    running_names = ['einstein', 'edison']
-
-    completer.set_containers(container_names)
-    completer.set_running(running_names)
-
-    _test_options_completion(
-        completer,
-        complete_event,
-        'top ',
-        running_names + ['--help'],
-        0
-    )
-    _test_options_completion(
-        completer,
-        complete_event,
-        'top e',
-        [n for n in running_names if n.startswith('e')],
-        -1
-    )
-
-
-def test_complicated_command_completion(completer, complete_event):
-    """
-    Switch off suggestions when we're in the middle of a string.
-    """
-    input = 'run -d ubuntu:14.04 /bin/sh -c "w'
-
-    _test_command_completion(
-        completer,
-        complete_event,
-        input,
-        [])
 
 
 def test_build_path_completion_absolute(completer, complete_event):
@@ -212,59 +90,129 @@ def test_build_path_completion_user_dir(completer, complete_event):
     assert expected.issubset(result)
 
 
-def test_options_image_completion(completer, complete_event):
-    """
-    Suggest image names in relevant options (images --filter)
-    """
-    image_names = ['ubuntu', 'hello-world', 'postgres', 'nginx']
-
-    completer.set_images(image_names)
-
-    _test_options_completion(
-        completer,
-        complete_event,
-        'images --filter ',
-        image_names,
-        0
-    )
-
-
 def _get_command_option_names(command):
     """
     Helper method to get all option names for command.
     :param command: string
     :return: list
     """
-    return [opt.name for opt in COMMAND_OPTIONS[command]]
+    return [opt.name for opt in all_options(command)]
 
 
-def _test_command_completion(completer, complete_event, command, expected):
+@pytest.mark.parametrize("command, expected", [
+    ("h", ['help']),
+    ("he", ['help']),
+    ("hel", ['help']),
+    ("help", ['help']),
+    ('run -d ubuntu:14.04 /bin/sh -c "w', [])  # not complete in quoted string
+])
+def test_command_completion(command, expected):
     """
-    Helper method to test command suggestions.
+    Test command suggestions.
     :param command: string: text that user started typing
     :param expected: list: expected completions
     """
+    c = completer()
+    e = complete_event()
+
     position = len(command)
-    result = set(completer.get_completions(
+    result = set(c.get_completions(
         Document(text=command, cursor_position=position),
-        complete_event))
+        e))
 
     expected = set(map(lambda t: Completion(t, -len(command)), expected))
 
     assert result == expected
 
+pso = _get_command_option_names('ps')
 
-def _test_options_completion(completer, complete_event, command, expected, expected_pos):
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ("ps ", pso, 0),
+    ("ps --", filter(lambda x: x.startswith('--'), pso), -2),
+    ("ps --h", filter(lambda x: x.startswith('--h'), pso), -3),
+    ("ps --all ", filter(lambda x: x not in ['--all'], pso), 0),
+    ("ps --all --quiet ", filter(lambda x: x not in ['--all', '--quiet'], pso), 0),
+])
+def test_options_completion(command, expected, expected_pos):
     """
-    Helper method to test command options suggestions.
+    Test command options suggestions.
     :param command: string: text that user started typing
     :param expected: list: expected completions
     """
+    c = completer()
+    e = complete_event()
+
+    position = len(command)
+
+    result = set(c.get_completions(
+        Document(text=command, cursor_position=position), e))
+
+    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+
+    assert result == expected
+
+
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ("ps --before ", containers, 0),
+    ("ps --before e", filter(lambda x: x.startswith('e'), containers), -1),
+    ("ps --before ei", filter(lambda x: x.startswith('ei'), containers), -2),
+])
+def test_options_container_completion(command, expected, expected_pos):
+    """
+    Suggest container names in relevant options (ps --before)
+    """
+    c = completer()
+    e = complete_event()
+
+    c.set_containers(containers)
+
+    position = len(command)
+
+    result = set(c.get_completions(
+        Document(text=command, cursor_position=position), e))
+
+    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+
+    assert result == expected
+
+
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ("top ", runnings + ['--help'], 0),
+    ("top e", filter(lambda x: x.startswith('e'), runnings), -1),
+])
+def test_options_container_running_completion(command, expected, expected_pos):
+    """
+    Suggest running container names (top [container])
+    """
+    c = completer()
+    e = complete_event()
+
+    c.set_containers(containers)
+    c.set_running(runnings)
+
+    position = len(command)
+
+    result = set(c.get_completions(
+        Document(text=command, cursor_position=position), e))
+
+    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+
+    assert result == expected
+
+
+def test_options_image_completion(completer, complete_event):
+    """
+    Suggest image names in relevant options (images --filter)
+    """
+    command = 'images --filter '
+    expected = ['ubuntu', 'hello-world', 'postgres', 'nginx']
+    expected_pos = 0
+
+    completer.set_images(expected)
     position = len(command)
 
     result = set(completer.get_completions(
-        Document(text=command, cursor_position=position),
-        complete_event))
+        Document(text=command, cursor_position=position), complete_event))
 
     expected = set(map(lambda t: Completion(t, expected_pos), expected))
 
