@@ -34,5 +34,16 @@ setup(
     },
     packages=['dockercli'],
     scripts=[],
-    name='dockercli'
+    name='dockercli',
+    classifiers=[
+        'Intended Audience :: Developers',
+        'Operating System :: Unix',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Topic :: Software Development',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
 )
