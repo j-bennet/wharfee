@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import os
 import shlex
 
+from itertools import chain
 from prompt_toolkit.completion import Completer, Completion
 from .options import COMMAND_OPTIONS
 from .options import COMMAND_NAMES
@@ -123,35 +124,26 @@ class DockerCompleter(Completer):
         params = set(params) if params else set([])
         current_opt = find_option(command, prev) if prev else None
 
-        add_containers = False
-        add_images = False
-        add_running = False
-        add_tagged = False
         add_directory = False
-        add_choices = []
 
         if command in COMMAND_OPTIONS:
-            if current_opt and current_opt.is_type_container():
+            if current_opt:
+                opt_suggestions = []
+                if current_opt.is_type_container():
+                    opt_suggestions = containers
+                elif current_opt.is_type_running():
+                    opt_suggestions = running
+                elif current_opt.is_type_image():
+                    opt_suggestions = images
+                elif current_opt.is_type_tagged():
+                    opt_suggestions = tagged
+                elif current_opt.is_type_choice():
+                    opt_suggestions = current_opt.choices
                 for m in DockerCompleter.find_collection_matches(
-                        word, containers):
-                    yield m
-            elif current_opt and current_opt.is_type_running():
-                for m in DockerCompleter.find_collection_matches(
-                        word, running):
-                    yield m
-            elif current_opt and current_opt.is_type_image():
-                for m in DockerCompleter.find_collection_matches(
-                        word, images):
-                    yield m
-            elif current_opt and current_opt.is_type_tagged():
-                for m in DockerCompleter.find_collection_matches(
-                        word, tagged):
-                    yield m
-            elif current_opt and current_opt.is_type_choice():
-                for m in DockerCompleter.find_collection_matches(
-                        word, current_opt.choices):
+                        word, opt_suggestions):
                     yield m
             else:
+                positionals = []
                 for opt in all_options(command):
 
                     # Do not offer options that user already set.
@@ -164,42 +156,26 @@ class DockerCompleter(Completer):
                         else:
                             # positional option
                             if opt.is_type_container():
-                                add_containers = True
+                                positionals = chain(positionals, containers)
                             elif opt.is_type_image():
-                                add_images = True
+                                positionals = chain(positionals, images)
                             elif opt.is_type_running():
-                                add_running = True
+                                positionals = chain(positionals, running)
                             elif opt.is_type_tagged():
-                                add_tagged = True
+                                positionals = chain(positionals, tagged)
+                            elif opt.is_type_choice():
+                                positionals = chain(positionals, opt.choices)
                             elif opt.is_type_dirname():
                                 add_directory = True
-                            elif opt.is_type_choice():
-                                add_choices.extend(opt.choices)
 
-                # Also return completions for positional options
-                # (images, containers, paths)
-                if add_containers:
-                    for m in DockerCompleter.find_collection_matches(
-                            word, containers):
-                        yield m
-                if add_running:
-                    for m in DockerCompleter.find_collection_matches(
-                            word, running):
-                        yield m
-                if add_images:
-                    for m in DockerCompleter.find_collection_matches(
-                            word, images):
-                        yield m
-                if add_tagged:
-                    for m in DockerCompleter.find_collection_matches(
-                            word, tagged):
-                        yield m
+                # Also return completions for positional options (images,
+                # containers, etc.)
+                for m in DockerCompleter.find_collection_matches(
+                        word, positionals):
+                    yield m
+                # Special handling for path completion
                 if add_directory:
                     for m in DockerCompleter.find_directory_matches(word):
-                        yield m
-                if add_choices:
-                    for m in DockerCompleter.find_collection_matches(
-                            word, add_choices):
                         yield m
 
     @staticmethod
@@ -207,7 +183,7 @@ class DockerCompleter(Completer):
         """
         Yield matching directory names
         :param word:
-        :return:
+        :return: iterable
         """
         basedir, lastdir, position = '', '', 0
         if word:
