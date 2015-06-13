@@ -127,8 +127,8 @@ class DockerCompleter(Completer):
         add_directory = False
 
         if command in COMMAND_OPTIONS:
+            opt_suggestions = []
             if current_opt:
-                opt_suggestions = []
                 if current_opt.is_type_container():
                     opt_suggestions = containers
                 elif current_opt.is_type_running():
@@ -139,10 +139,14 @@ class DockerCompleter(Completer):
                     opt_suggestions = tagged
                 elif current_opt.is_type_choice():
                     opt_suggestions = current_opt.choices
+                elif current_opt.is_type_dirname():
+                    add_directory = True
+
                 for m in DockerCompleter.find_collection_matches(
                         word, opt_suggestions):
                     yield m
-            else:
+
+            if not opt_suggestions:
                 positionals = []
                 for opt in all_options(command):
 
@@ -173,10 +177,11 @@ class DockerCompleter(Completer):
                 for m in DockerCompleter.find_collection_matches(
                         word, positionals):
                     yield m
-                # Special handling for path completion
-                if add_directory:
-                    for m in DockerCompleter.find_directory_matches(word):
-                        yield m
+
+        # Special handling for path completion
+        if add_directory:
+            for m in DockerCompleter.find_directory_matches(word):
+                yield m
 
     @staticmethod
     def find_directory_matches(word):
