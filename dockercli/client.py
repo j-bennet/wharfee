@@ -400,11 +400,11 @@ class DockerClient(object):
             if "Id" in result and result['Id']:
                 self.is_refresh_containers = True
                 is_attach = 'detach' not in kwargs or not kwargs['detach']
-                start_args = {
+                start_args = allowed_args('start', **kwargs)
+                start_args.update({
                     'container': result['Id'],
-                    'attach': is_attach,
-                    'remove': kwargs['remove']
-                }
+                    'attach': is_attach
+                })
                 return self.start(**start_args)
         return ['There was a problem running the container.']
 

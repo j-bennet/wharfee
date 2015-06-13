@@ -52,11 +52,11 @@ class CommandOption(object):
         else:
             arguments = [short_name]
 
-        if 'no_match' in kwargs and kwargs['no_match']:
-            self.matches = False
-            del kwargs['no_match']
+        if 'api_match' in kwargs and kwargs['api_match'] is not None:
+            self.api_match = kwargs['api_match']
+            del kwargs['api_match']
         else:
-            self.matches = True
+            self.api_match = True
 
         if 'dest' in kwargs:
             self.dest = kwargs['dest']

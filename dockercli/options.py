@@ -182,6 +182,12 @@ COMMAND_OPTIONS = {
                       action='store',
                       dest='name',
                       help='Assign a name to the container.'),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-P', '--publish-all',
+                      action='store_true',
+                      dest='publish_all_ports',
+                      help=('Publish all exposed ports to the host '
+                            'interfaces.'),
+                      api_match=False),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-t', '--tty',
                       action='store_true',
                       dest='tty',
@@ -198,7 +204,7 @@ COMMAND_OPTIONS = {
                       dest='remove',
                       help=('Remove the container when it exits. '
                             'Can\'t be used with --detach'),
-                      no_match=True),
+                      api_match=False),
     ],
     'shell': [
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
@@ -227,7 +233,7 @@ COMMAND_OPTIONS = {
                       dest='attach',
                       help='Attach container\'s STDOUT and STDERR and ' +
                            'forward all signals to the process.',
-                      no_match=True),
+                      api_match=False),
         CommandOption(CommandOption.TYPE_CONTAINER, 'container',
                       action='store',
                       help='Container ID or name to use.'),
@@ -275,6 +281,17 @@ COMMAND_OPTIONS = {
 }
 
 
+HIDDEN_OPTIONS = {
+    'start': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-P', '--publish-all',
+                      action='store_true',
+                      dest='publish_all_ports',
+                      help=('Publish all exposed ports to the host '
+                            'interfaces.')),
+    ]
+}
+
+
 def find_option(command, name):
     """
     Helper method to find command option by its name.
@@ -307,15 +324,19 @@ def allowed_args(cmd, **kwargs):
     return matches
 
 
-def all_options(command):
+def all_options(command, include_hidden=False):
     """
     Helper method to find all command options.
     :param command: string
+    :param include_hidden: boolean
     :return: set of CommandOption
     """
+    result = [OPTION_HELP]
     if command in COMMAND_OPTIONS:
-        return [OPTION_HELP] + COMMAND_OPTIONS[command]
-    return [OPTION_HELP]
+        result.extend(COMMAND_OPTIONS[command])
+    if include_hidden and command in HIDDEN_OPTIONS:
+        result.extend(HIDDEN_OPTIONS[command])
+    return result
 
 
 def all_supported(command):
@@ -324,12 +345,14 @@ def all_supported(command):
     :param command: string
     :return: set of CommandOption
     """
-    result = set([])
+    result = set([OPTION_HELP])
+
     if command in COMMAND_OPTIONS:
-        result.add(OPTION_HELP)
-        for opt in COMMAND_OPTIONS[command]:
-            if opt.matches:
-                result.add(opt.dest)
+        result.update([x.dest for x in COMMAND_OPTIONS[command] if x.api_match])
+
+    if command in HIDDEN_OPTIONS:
+        result.update([x.dest for x in HIDDEN_OPTIONS[command]])
+
     return result
 
 
@@ -342,7 +365,7 @@ def parse_command_options(cmd, params):
     """
     parser = OptParser(prog=cmd, add_help_option=False)
     parser.disable_interspersed_args()
-    for opt in all_options(cmd):
+    for opt in all_options(cmd, include_hidden=True):
         if opt.name.startswith('-'):
             parser.add_option(*opt.args, **opt.kwargs)
     popts, pargs = parser.parse_args(params)
