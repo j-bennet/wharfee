@@ -189,6 +189,15 @@ COMMAND_OPTIONS = {
                       help=('Publish all exposed ports to the host '
                             'interfaces.'),
                       api_match=False),
+        CommandOption(CommandOption.TYPE_PORT_BINDING, '-p', '--publish',
+                      action='append',
+                      dest='port_bindings',
+                      help=('Publish a container\'s port to the host. '
+                            'Format: ip:hostPort:containerPort or '
+                            'ip::containerPort or hostPort:containerPort or '
+                            'containerPort'),
+                      nargs='*',
+                      api_match=False),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-t', '--tty',
                       action='store_true',
                       dest='tty',
@@ -289,7 +298,24 @@ HIDDEN_OPTIONS = {
                       dest='publish_all_ports',
                       help=('Publish all exposed ports to the host '
                             'interfaces.')),
-    ]
+        CommandOption(CommandOption.TYPE_PORT_BINDING, '-p', '--publish',
+                      action='append',
+                      dest='port_bindings',
+                      help=('Publish a container\'s port to the host. '
+                            'Format: ip:hostPort:containerPort or '
+                            'ip::containerPort or hostPort:containerPort or '
+                            'containerPort'),
+                      nargs='*'),
+    ],
+    'run': [
+        CommandOption(CommandOption.TYPE_NUMERIC, 'ports', None,
+                      action='append',
+                      dest='ports',
+                      nargs='*'),
+        CommandOption(CommandOption.TYPE_OBJECT, 'host_config', None,
+                      action='store',
+                      dest='host_config'),
+    ],
 }
 
 

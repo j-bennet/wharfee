@@ -12,7 +12,7 @@ import re
 import pexpect
 
 from docker import AutoVersionClient
-from docker.utils import kwargs_from_env
+from docker.utils import kwargs_from_env, create_host_config
 from docker.errors import APIError
 from docker.errors import DockerException
 from requests.exceptions import ConnectionError
@@ -226,11 +226,11 @@ class DockerClient(object):
             cids = set([c['Id'] for c in cs])
             cnames = set([name for c in cs for name in c['Names']])
 
-        for id in args:
-            if id in cids or id in cnames:
-                info = self.instance.inspect_container(id)
+        for cid in args:
+            if cid in cids or cid in cnames:
+                info = self.instance.inspect_container(cid)
             else:
-                info = self.instance.inspect_image(id)
+                info = self.instance.inspect_image(cid)
             yield json.dumps(info, indent=1)
 
     def containers(self, *_, **kwargs):
@@ -275,7 +275,7 @@ class DockerClient(object):
 
         return [kwargs['container']]
 
-    def port(self, *args, **kwargs):
+    def port(self, *args, **_):
         """
         List port mappings for the container. Equivalent of docker port.
         :param kwargs:
@@ -391,6 +391,18 @@ class DockerClient(object):
 
         kwargs['image'] = args[0]
         kwargs['command'] = args[1:] if len(args) > 1 else []
+
+        if 'port_bindings' in kwargs and kwargs['port_bindings']:
+            port_bindings = kwargs['port_bindings'] = self.parse_port_bindings(
+                kwargs['port_bindings']
+            )
+
+            # Have to provide list of ports to open in create_container.
+            kwargs['ports'] = port_bindings.keys()
+
+            # Have to provide host config with port mappings.
+            kwargs['host_config'] = create_host_config(
+                port_bindings=port_bindings)
 
         runargs = allowed_args('run', **kwargs)
         result = self.instance.create_container(**runargs)
@@ -558,7 +570,7 @@ class DockerClient(object):
         :return: list of dicts
         """
         result = self.instance.images(**kwargs)
-        RE_DIGITS = re.compile('^[0-9]+$', re.UNICODE)
+        re_digits = re.compile('^[0-9]+$', re.UNICODE)
         if len(result) > 0:
             if isinstance(result[0], dict):
                 # Drop some keys we're not interested in.
@@ -570,7 +582,7 @@ class DockerClient(object):
                         result[i]['VirtualSize'])
                     if 'Created' in result[i] \
                             and result[i]['Created'] \
-                            and RE_DIGITS.search(str(result[i]['Created'])):
+                            and re_digits.search(str(result[i]['Created'])):
                         result[i]['Created'] = pretty.date(result[i]['Created'])
             return result
         else:
@@ -657,6 +669,45 @@ class DockerClient(object):
         self.instance.unpause(**kwargs)
 
         return [kwargs['container']]
+
+    def parse_port_bindings(self, bindings):
+        """
+        Parse array of string port bindings into a dict.
+
+        port_bindings={
+            1111: 4567,
+            2222: None
+        }
+
+        or
+        port_bindings={
+            1111: ('127.0.0.1', 4567)
+        }
+
+        :param bindings: array of string
+        :return: dict
+        """
+
+        def parse_port_mapping(s):
+            """
+            Parse single port mapping.
+            """
+            if ':' in s:
+                parts = s.split(':')
+                if len(parts) > 2:
+                    ip, hp, cp = parts[0], parts[1], parts[2]
+                    return cp, (ip, None if hp == '' else hp)
+                else:
+                    hp, cp = parts[0], parts[1]
+                    return cp, None if hp == '' else hp
+            else:
+                return s, None
+        result = {}
+        if bindings:
+            for binding in bindings:
+                container_port, mapping = parse_port_mapping(binding)
+                result[container_port] = mapping
+        return result
 
     def filesize(self, size):
         """
