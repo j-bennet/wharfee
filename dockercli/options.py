@@ -328,6 +328,22 @@ HIDDEN_OPTIONS = {
 }
 
 
+def all_option_names():
+    """
+    Helper method to go through all commands and return all option names,
+    long or short.
+    :return: iterable
+    """
+    opts = {OPTION_HELP.short_name, OPTION_HELP.long_name}
+    for command in COMMAND_OPTIONS:
+        for opt in COMMAND_OPTIONS[command]:
+            if opt.short_name and opt.short_name.startswith('-'):
+                opts.add(opt.short_name)
+            if opt.long_name and opt.long_name.startswith('--'):
+                opts.add(opt.long_name)
+    return sorted(list(opts))
+
+
 def find_option(command, name):
     """
     Helper method to find command option by its name.
@@ -381,7 +397,7 @@ def all_supported(command):
     :param command: string
     :return: set of CommandOption
     """
-    result = set([OPTION_HELP])
+    result = {OPTION_HELP}
 
     if command in COMMAND_OPTIONS:
         result.update([x.dest for x in COMMAND_OPTIONS[command] if x.api_match])

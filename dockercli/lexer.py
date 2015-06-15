@@ -2,7 +2,7 @@ from pygments.lexer import RegexLexer
 from pygments.lexer import words
 from pygments.token import *
 
-from .options import COMMAND_NAMES
+from .options import COMMAND_NAMES, all_option_names
 
 
 class CommandLexer(RegexLexer):
@@ -14,7 +14,8 @@ class CommandLexer(RegexLexer):
         'root': [
             (words(tuple(COMMAND_NAMES), prefix=r'^', suffix=r'\b'),
              Operator.Word),
-            (r'--[a-z\-]+\b', Keyword),
+            (words(tuple(all_option_names()), prefix=r'', suffix=r'\b'),
+             Keyword),
             (r'.*\n', Text),
         ]
     }
