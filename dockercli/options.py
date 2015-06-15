@@ -183,6 +183,14 @@ COMMAND_OPTIONS = {
                       action='store',
                       dest='name',
                       help='Assign a name to the container.'),
+        CommandOption(CommandOption.TYPE_CONTAINER, '--link',
+                      action='append',
+                      dest='links',
+                      help=('Add link to another container in the form of '
+                            '<name|id>:alias. To add multiple links: --link '
+                            'name1:alias1 --link name2:alias2...'),
+                      nargs='*',
+                      api_match=False),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-P', '--publish-all',
                       action='store_true',
                       dest='publish_all_ports',
@@ -195,7 +203,8 @@ COMMAND_OPTIONS = {
                       help=('Publish a container\'s port to the host. '
                             'Format: ip:hostPort:containerPort or '
                             'ip::containerPort or hostPort:containerPort or '
-                            'containerPort'),
+                            'containerPort. To add multiple ports: --publish '
+                            '1111:2222 --publish 3333:4444...'),
                       nargs='*',
                       api_match=False),
         CommandOption(CommandOption.TYPE_BOOLEAN, '-t', '--tty',

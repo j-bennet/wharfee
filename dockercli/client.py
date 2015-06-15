@@ -392,17 +392,8 @@ class DockerClient(object):
         kwargs['image'] = args[0]
         kwargs['command'] = args[1:] if len(args) > 1 else []
 
-        if 'port_bindings' in kwargs and kwargs['port_bindings']:
-            port_bindings = kwargs['port_bindings'] = self.parse_port_bindings(
-                kwargs['port_bindings']
-            )
-
-            # Have to provide list of ports to open in create_container.
-            kwargs['ports'] = port_bindings.keys()
-
-            # Have to provide host config with port mappings.
-            kwargs['host_config'] = create_host_config(
-                port_bindings=port_bindings)
+        self._add_port_bindings(kwargs)
+        self._add_link_bindings(kwargs)
 
         runargs = allowed_args('run', **kwargs)
         result = self.instance.create_container(**runargs)
@@ -420,6 +411,48 @@ class DockerClient(object):
                 })
                 return self.start(**start_args)
         return ['There was a problem running the container.']
+
+    def _add_link_bindings(self, arg_dict):
+        """
+        Update kwargs if user wants to link containers.
+        :param arg_dict:
+        """
+        if 'links' in arg_dict and arg_dict['links']:
+            links = {}
+            for link in arg_dict['links']:
+                link_name, link_alias = link.split(':', 2)
+                links[link_name] = link_alias
+            link_conf = create_host_config(links=links)
+            self._update_host_config(arg_dict, link_conf)
+
+    def _add_port_bindings(self, arg_dict):
+        """
+        Update kwargs if user wants to bind some ports.
+        :param kwargs:
+        """
+        if 'port_bindings' in arg_dict and arg_dict['port_bindings']:
+            port_bindings = self.parse_port_bindings(
+                arg_dict['port_bindings']
+            )
+
+            # Have to provide list of ports to open in create_container.
+            arg_dict['ports'] = port_bindings.keys()
+
+            # Have to provide host config with port mappings.
+            port_conf = create_host_config(port_bindings=port_bindings)
+
+            self._update_host_config(arg_dict, port_conf)
+
+    def _update_host_config(self, arg_dict, config_to_merge):
+        """
+        Update config dictionary in kwargs with another dictionary.
+        :param arg_dict: dict
+        :param config_to_merge: dict with new values
+        """
+        if 'host_config' in arg_dict and arg_dict['host_config']:
+            arg_dict['host_config'].update(config_to_merge)
+        else:
+            arg_dict['host_config'] = config_to_merge
 
     def execute(self, *args, **kwargs):
         """
