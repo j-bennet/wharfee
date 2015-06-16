@@ -1,7 +1,6 @@
 # -*- coding: utf-8
 from __future__ import unicode_literals
 
-import os
 import shlex
 
 from itertools import chain
@@ -10,6 +9,7 @@ from .options import COMMAND_OPTIONS
 from .options import COMMAND_NAMES
 from .options import all_options
 from .options import find_option
+from .helpers import list_dir, parse_path, complete_path
 
 
 class DockerCompleter(Completer):
@@ -61,7 +61,6 @@ class DockerCompleter(Completer):
         Get completions for the current scope.
         :param document:
         :param complete_event:
-        :param smart_completion:
         """
 
         # Unused parameters.
@@ -126,6 +125,7 @@ class DockerCompleter(Completer):
         current_opt = find_option(command, prev) if prev else None
 
         add_directory = False
+        add_filepath = False
 
         if command in COMMAND_OPTIONS:
             opt_suggestions = []
@@ -142,6 +142,8 @@ class DockerCompleter(Completer):
                     opt_suggestions = current_opt.choices
                 elif current_opt.is_type_dirname():
                     add_directory = True
+                elif current_opt.is_type_filepath():
+                    add_filepath = True
 
                 for m in DockerCompleter.find_collection_matches(
                         word, opt_suggestions):
@@ -172,6 +174,8 @@ class DockerCompleter(Completer):
                                 positionals = chain(positionals, opt.choices)
                             elif opt.is_type_dirname():
                                 add_directory = True
+                            elif opt.is_type_filepath():
+                                add_filepath = True
 
                 # Also return completions for positional options (images,
                 # containers, etc.)
@@ -183,6 +187,9 @@ class DockerCompleter(Completer):
         if add_directory:
             for m in DockerCompleter.find_directory_matches(word):
                 yield m
+        # if add_filepath:
+        #     for m in DockerCompleter.find_filepath_matches(word):
+        #         yield m
 
     @staticmethod
     def find_directory_matches(word):
@@ -191,45 +198,12 @@ class DockerCompleter(Completer):
         :param word:
         :return: iterable
         """
-        basedir, lastdir, position = '', '', 0
-        if word:
-            basedir, lastdir = os.path.split(word)
-            position = -len(lastdir) if lastdir else 0
-
-        dirs = DockerCompleter.list_dir(word, True)
+        base_dir, last_dir, position = parse_path(word)
+        dirs = list_dir(word, True)
         for name in sorted(dirs):
-            if not lastdir or name.startswith(lastdir):
-                yield Completion(name, position)
-            elif lastdir == '~':
-                yield Completion(os.path.join(lastdir, name), position)
-
-    @staticmethod
-    def list_dir(root, dirs_only=False, include_special=False):
-        """
-        List directory.
-        :param root: string: directory to list
-        :param dirs_only: boolean
-        :param include_special: boolean
-        :return: list
-        """
-        root = '.' if not root else root
-        res = []
-
-        if '~' in root:
-            root = os.path.expanduser(root)
-
-        if not os.path.exists(root):
-            root, _ = os.path.split(root)
-
-        if os.path.exists(root):
-            for name in os.listdir(root):
-                path = os.path.join(root, name)
-                if not include_special and name.startswith('.'):
-                    continue
-                if dirs_only and not os.path.isdir(path):
-                    continue
-                res.append(name)
-        return res
+            suggestion = complete_path(name, last_dir)
+            if suggestion:
+                yield Completion(suggestion, position)
 
     @staticmethod
     def find_collection_matches(word, lst):

@@ -224,6 +224,14 @@ COMMAND_OPTIONS = {
                       help=('Remove the container when it exits. '
                             'Can\'t be used with --detach'),
                       api_match=False),
+        CommandOption(CommandOption.TYPE_FILEPATH, '-v', '--volume',
+                      action='append',
+                      dest='volumes',
+                      help=('Bind mount a volume (e.g., from the host: -v '
+                            '/host-path:/container-path, from Docker: '
+                            '-v /container-path).'),
+                      nargs='*',
+                      api_match=False),
         CommandOption(CommandOption.TYPE_CONTAINER, '--volumes-from',
                       action='append',
                       dest='volumes_from',

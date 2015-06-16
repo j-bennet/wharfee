@@ -412,6 +412,17 @@ class DockerClient(object):
                 return self.start(**start_args)
         return ['There was a problem running the container.']
 
+    def _add_volumes(self, params):
+        """
+        Update kwargs if volumes are present.
+        :param params: dict
+        """
+        if 'volumes' in params and params['volumes']:
+            # TODO: implement
+            # conf = create_host_config(binds={})
+            # self._update_host_config(params, conf)
+            pass
+
     def _add_volumes_from(self, params):
         """
         Update kwargs if volumes-from are present.
