@@ -20,7 +20,7 @@ from .options import parse_command_options
 from .options import format_command_help
 from .options import COMMAND_NAMES
 from .options import OptionError
-from .helpers import filesize, parse_port_bindings
+from .helpers import filesize, parse_port_bindings, parse_volume_bindings
 
 
 class DockerClient(object):
@@ -394,6 +394,7 @@ class DockerClient(object):
         self._add_port_bindings(kwargs)
         self._add_link_bindings(kwargs)
         self._add_volumes_from(kwargs)
+        self._add_volumes(kwargs)
 
         runargs = allowed_args('run', **kwargs)
         result = self.instance.create_container(**runargs)
@@ -418,10 +419,10 @@ class DockerClient(object):
         :param params: dict
         """
         if 'volumes' in params and params['volumes']:
-            # TODO: implement
-            # conf = create_host_config(binds={})
-            # self._update_host_config(params, conf)
-            pass
+            binds = parse_volume_bindings(params['volumes'])
+            params['volumes'] = [x['bind'] for x in binds.values()]
+            conf = create_host_config(binds=binds)
+            self._update_host_config(params, conf)
 
     def _add_volumes_from(self, params):
         """

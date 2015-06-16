@@ -187,19 +187,33 @@ class DockerCompleter(Completer):
         if add_directory:
             for m in DockerCompleter.find_directory_matches(word):
                 yield m
-        # if add_filepath:
-        #     for m in DockerCompleter.find_filepath_matches(word):
-        #         yield m
+        if add_filepath:
+            for m in DockerCompleter.find_filepath_matches(word):
+                yield m
+
+    @staticmethod
+    def find_filepath_matches(word):
+        """
+        Yield matching directory or file names.
+        :param word:
+        :return: iterable
+        """
+        base_path, last_path, position = parse_path(word)
+        paths = list_dir(word, dirs_only=False)
+        for name in sorted(paths):
+            suggestion = complete_path(name, last_path)
+            if suggestion:
+                yield Completion(suggestion, position)
 
     @staticmethod
     def find_directory_matches(word):
         """
-        Yield matching directory names
+        Yield matching directory names.
         :param word:
         :return: iterable
         """
         base_dir, last_dir, position = parse_path(word)
-        dirs = list_dir(word, True)
+        dirs = list_dir(word, dirs_only=True)
         for name in sorted(dirs):
             suggestion = complete_path(name, last_dir)
             if suggestion:

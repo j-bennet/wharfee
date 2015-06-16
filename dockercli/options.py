@@ -230,8 +230,7 @@ COMMAND_OPTIONS = {
                       help=('Bind mount a volume (e.g., from the host: -v '
                             '/host-path:/container-path, from Docker: '
                             '-v /container-path).'),
-                      nargs='*',
-                      api_match=False),
+                      nargs='*'),
         CommandOption(CommandOption.TYPE_CONTAINER, '--volumes-from',
                       action='append',
                       dest='volumes_from',

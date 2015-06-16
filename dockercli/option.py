@@ -8,7 +8,7 @@ class CommandOption(object):
     useful to do autocompletion in context of this option.
     """
 
-    TYPE_FILEPATH = 1
+    TYPE_FILEPATH = 0
     TYPE_DIRPATH = 1
     TYPE_BOOLEAN = 2
     TYPE_NUMERIC = 3

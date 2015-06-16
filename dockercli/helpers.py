@@ -3,20 +3,52 @@ import os
 import math
 
 
+def parse_volume_bindings(volumes):
+    """
+    Parse volumes into a dict.
+    :param volumes: list of strings
+    :return: dict
+    """
+
+    def parse_volume(v):
+        if ':' in v:
+            parts = v.split(':')
+            if len(parts) > 2:
+                hp, cp, ro = parts[0], parts[1], parts[2]
+                return hp, cp, ro == 'ro'
+            else:
+                hp, cp = parts[0], parts[1]
+                return hp, cp, False
+        else:
+            return None, v, False
+
+    result = {}
+    if volumes:
+        for vol in volumes:
+            host_path, container_path, read_only = parse_volume(vol)
+            if host_path:
+                result[host_path] = {
+                    'bind': container_path,
+                    'ro': read_only
+                }
+    return result
+
+
 def parse_port_bindings(bindings):
     """
-    Parse array of string port bindings into a dict.
-
-    port_bindings={
-        1111: 4567,
-        2222: None
-    }
-
-    or
-    port_bindings={
-        1111: ('127.0.0.1', 4567)
-    }
-
+    Parse array of string port bindings into a dict. For example:
+        ['4567:1111', '2222']
+    becomes
+        port_bindings={
+            1111: 4567,
+            2222: None
+        }
+    and
+        ['127.0.0.1:4567:1111']
+    becomes
+        port_bindings={
+            1111: ('127.0.0.1', 4567)
+        }
     :param bindings: array of string
     :return: dict
     """
@@ -35,6 +67,7 @@ def parse_port_bindings(bindings):
                 return cp, None if hp == '' else hp
         else:
             return s, None
+
     result = {}
     if bindings:
         for binding in bindings:

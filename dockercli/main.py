@@ -254,6 +254,7 @@ class DockerCli(object):
                 # exit out of the CLI
                 break
 
+            # TODO: uncomment for release
             #except Exception as ex:
             #    click.secho("{0}".format(ex), fg='red')
             #    break
