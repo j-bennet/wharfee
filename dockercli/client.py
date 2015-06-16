@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import sys
 import shlex
-import math
 import pretty
 import re
 import pexpect
@@ -21,6 +20,7 @@ from .options import parse_command_options
 from .options import format_command_help
 from .options import COMMAND_NAMES
 from .options import OptionError
+from .helpers import filesize, parse_port_bindings
 
 
 class DockerClient(object):
@@ -453,9 +453,7 @@ class DockerClient(object):
         :param params: dict
         """
         if 'port_bindings' in params and params['port_bindings']:
-            port_bindings = self.parse_port_bindings(
-                params['port_bindings']
-            )
+            port_bindings = parse_port_bindings(params['port_bindings'])
 
             # Have to provide list of ports to open in create_container.
             params['ports'] = port_bindings.keys()
@@ -633,12 +631,13 @@ class DockerClient(object):
                     for unused_key in ['RepoDigests', 'Labels', 'Size']:
                         if unused_key in result[i]:
                             del result[i][unused_key]
-                    result[i]['VirtualSize'] = self.filesize(
+                    result[i]['VirtualSize'] = filesize(
                         result[i]['VirtualSize'])
                     if 'Created' in result[i] \
                             and result[i]['Created'] \
                             and re_digits.search(str(result[i]['Created'])):
-                        result[i]['Created'] = pretty.date(result[i]['Created'])
+                        result[i]['Created'] = pretty.date(
+                            result[i]['Created'])
             return result
         else:
             return ['There are no images to list.']
@@ -724,58 +723,6 @@ class DockerClient(object):
         self.instance.unpause(**kwargs)
 
         return [kwargs['container']]
-
-    def parse_port_bindings(self, bindings):
-        """
-        Parse array of string port bindings into a dict.
-
-        port_bindings={
-            1111: 4567,
-            2222: None
-        }
-
-        or
-        port_bindings={
-            1111: ('127.0.0.1', 4567)
-        }
-
-        :param bindings: array of string
-        :return: dict
-        """
-
-        def parse_port_mapping(s):
-            """
-            Parse single port mapping.
-            """
-            if ':' in s:
-                parts = s.split(':')
-                if len(parts) > 2:
-                    ip, hp, cp = parts[0], parts[1], parts[2]
-                    return cp, (ip, None if hp == '' else hp)
-                else:
-                    hp, cp = parts[0], parts[1]
-                    return cp, None if hp == '' else hp
-            else:
-                return s, None
-        result = {}
-        if bindings:
-            for binding in bindings:
-                container_port, mapping = parse_port_mapping(binding)
-                result[container_port] = mapping
-        return result
-
-    def filesize(self, size):
-        """
-        Pretty-print file size from bytes.
-        """
-        size_name = ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
-        if int(size) > 0:
-            i = int(math.floor(math.log(size, 1024)))
-            p = math.pow(1024, i)
-            s = round(size / p, 3)
-            if s > 0:
-                return '%s %s' % (s, size_name[i])
-        return '0 B'
 
 
 class DockerPermissionException(Exception):
