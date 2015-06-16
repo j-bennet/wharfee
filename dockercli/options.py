@@ -224,6 +224,15 @@ COMMAND_OPTIONS = {
                       help=('Remove the container when it exits. '
                             'Can\'t be used with --detach'),
                       api_match=False),
+        CommandOption(CommandOption.TYPE_CONTAINER, '--volumes-from',
+                      action='append',
+                      dest='volumes_from',
+                      help=('Mount volumes from the specified containers. Can '
+                            'be specified multiple times. Alternatively, can '
+                            'accept a comma-separated string of container '
+                            'names.'),
+                      nargs='*',
+                      api_match=False),
     ],
     'shell': [
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',

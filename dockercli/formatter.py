@@ -40,6 +40,21 @@ class StreamFormatter(object):
         return self.counter
 
 
+class JsonStreamDumper(StreamFormatter):
+
+    def output(self):
+        """
+        Process and output object by object.
+        :return: int
+        """
+        for obj in self.stream:
+            self.counter += 1
+            text = json.dumps(obj, indent=4)
+            for line in text.split('\n'):
+                click.echo(line)
+        return self.counter
+
+
 class JsonStreamFormatter(StreamFormatter):
 
     progress = False
@@ -151,7 +166,7 @@ def format_data(command, data):
                 text = tabulate(data)
                 return text.split('\n')
             else:
-                return format_struct(data, spaces=2)
+                return format_struct(data)
         elif isinstance(data[0], dict):
             if data[0].keys() == ['Id']:
                 # Sometimes our 'quiet' output is a list of dicts but
@@ -175,7 +190,7 @@ def format_data(command, data):
     return data
 
 
-def format_struct(data, spaces=1, indent=0, lines=None):
+def format_struct(data, spaces=4, indent=0, lines=None):
 
     if lines is None:
         lines = []
@@ -183,7 +198,7 @@ def format_struct(data, spaces=1, indent=0, lines=None):
     if isinstance(data, dict):
         data = [(k, data[k]) for k in sorted(data.keys())]
 
-    def add_item_to_line(current_item, current_line, is_last_item, current_list):
+    def item_to_line(current_item, current_line, is_last_item, current_list):
         """ Helper to add item to end of line """
         if len(current_line) == 0:
             current_indent = ' ' * (indent * spaces)
@@ -208,12 +223,12 @@ def format_struct(data, spaces=1, indent=0, lines=None):
             elif isinstance(row[i], list):
                 if is_plain_list(row[i]):
                     item = flatten_list(row[i])
-                    line, lines = add_item_to_line(item, line, i == (l - 1), lines)
+                    line, lines = item_to_line(item, line, i == (l - 1), lines)
                 else:
                     lines.append(line)
                     lines = format_struct(row[i], spaces, indent + 1, lines)
             else:
-                line, lines = add_item_to_line(row[i], line, i == (l - 1), lines)
+                line, lines = item_to_line(row[i], line, i == (l - 1), lines)
 
     return lines
 
@@ -374,6 +389,7 @@ ROW_FORMATTERS = {
 STREAM_FORMATTERS = {
     'pull': JsonStreamFormatter,
     'build': JsonStreamFormatter,
+    'inspect': JsonStreamDumper,
 }
 
 
@@ -385,7 +401,6 @@ def output_stream(command, stream, logs):
     :param logs: callable
     :return: None
     """
-
     if command and command in STREAM_FORMATTERS:
         formatter = STREAM_FORMATTERS[command](stream)
     else:

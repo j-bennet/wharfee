@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import sys
 import shlex
-import json
 import math
 import pretty
 import re
@@ -231,7 +230,7 @@ class DockerClient(object):
                 info = self.instance.inspect_container(cid)
             else:
                 info = self.instance.inspect_image(cid)
-            yield json.dumps(info, indent=1)
+            yield info
 
     def containers(self, *_, **kwargs):
         """
@@ -394,6 +393,7 @@ class DockerClient(object):
 
         self._add_port_bindings(kwargs)
         self._add_link_bindings(kwargs)
+        self._add_volumes_from(kwargs)
 
         runargs = allowed_args('run', **kwargs)
         result = self.instance.create_container(**runargs)
@@ -412,47 +412,58 @@ class DockerClient(object):
                 return self.start(**start_args)
         return ['There was a problem running the container.']
 
-    def _add_link_bindings(self, arg_dict):
+    def _add_volumes_from(self, params):
+        """
+        Update kwargs if volumes-from are present.
+        :param params: dict
+        """
+        if 'volumes_from' in params and params['volumes_from']:
+            cs = ','.join(params['volumes_from'])
+            cs = [x.strip() for x in cs.split(',') if x]
+            conf = create_host_config(volumes_from=cs)
+            self._update_host_config(params, conf)
+
+    def _add_link_bindings(self, params):
         """
         Update kwargs if user wants to link containers.
-        :param arg_dict:
+        :param params: dict
         """
-        if 'links' in arg_dict and arg_dict['links']:
+        if 'links' in params and params['links']:
             links = {}
-            for link in arg_dict['links']:
+            for link in params['links']:
                 link_name, link_alias = link.split(':', 2)
                 links[link_name] = link_alias
             link_conf = create_host_config(links=links)
-            self._update_host_config(arg_dict, link_conf)
+            self._update_host_config(params, link_conf)
 
-    def _add_port_bindings(self, arg_dict):
+    def _add_port_bindings(self, params):
         """
         Update kwargs if user wants to bind some ports.
-        :param kwargs:
+        :param params: dict
         """
-        if 'port_bindings' in arg_dict and arg_dict['port_bindings']:
+        if 'port_bindings' in params and params['port_bindings']:
             port_bindings = self.parse_port_bindings(
-                arg_dict['port_bindings']
+                params['port_bindings']
             )
 
             # Have to provide list of ports to open in create_container.
-            arg_dict['ports'] = port_bindings.keys()
+            params['ports'] = port_bindings.keys()
 
             # Have to provide host config with port mappings.
             port_conf = create_host_config(port_bindings=port_bindings)
 
-            self._update_host_config(arg_dict, port_conf)
+            self._update_host_config(params, port_conf)
 
-    def _update_host_config(self, arg_dict, config_to_merge):
+    def _update_host_config(self, params, config_to_merge):
         """
         Update config dictionary in kwargs with another dictionary.
-        :param arg_dict: dict
+        :param params: dict
         :param config_to_merge: dict with new values
         """
-        if 'host_config' in arg_dict and arg_dict['host_config']:
-            arg_dict['host_config'].update(config_to_merge)
+        if 'host_config' in params and params['host_config']:
+            params['host_config'].update(config_to_merge)
         else:
-            arg_dict['host_config'] = config_to_merge
+            params['host_config'] = config_to_merge
 
     def execute(self, *args, **kwargs):
         """
