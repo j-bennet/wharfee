@@ -33,6 +33,6 @@ Ah, if only everything in life was so easy.
 * To format the output: [tabulate](https://pypi.python.org/pypi/tabulate).
 * To print out the output: [Click](http://click.pocoo.org/3/).
 
-## Is it perfect?
+## Can I contribute?
 
-Not... yet. But I believe it can be.
+Yes! Pull request or [issues](https://github.com/j-bennet/dockercli/issues) are welcome.
