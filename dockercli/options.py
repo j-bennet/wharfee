@@ -371,7 +371,7 @@ def find_option(command, name):
         if name == 'help':
             return OPTION_HELP
         for opt in COMMAND_OPTIONS[command]:
-            if opt.name == name:
+            if name in [opt.short_name, opt.long_name]:
                 return opt
     return None
 
