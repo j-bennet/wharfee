@@ -21,6 +21,9 @@ def style_factory(name):
             Token.Menu.Completions.Completion: 'bg:#008888 #ffffff',
             Token.Menu.Completions.ProgressButton: 'bg:#003333',
             Token.Menu.Completions.ProgressBar: 'bg:#00aaaa',
+            Token.Toolbar: 'bg:#222222 #aaaaaa',
+            Token.Toolbar.Off: 'bg:#222222 #888888',
+            Token.Toolbar.On: 'bg:#222222 #ffffff',
         })
 
     return CliStyle

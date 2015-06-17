@@ -7,3 +7,7 @@ client_timeout = 2
 # native, perldoc, borland, tango, emacs, friendly, monokai, paraiso-dark,
 # colorful, murphy, bw, pastie, paraiso-light, trac, default, fruity
 theme = default
+
+# Whether to suggest long option names. Default is 'True'. If 'False',
+# short option names are suggested.
+suggest_long_option_names = True

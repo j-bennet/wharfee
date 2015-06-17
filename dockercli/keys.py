@@ -6,11 +6,15 @@ from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.keys import Keys
 
 
-def get_key_manager():
+def get_key_manager(set_long_options, get_long_options):
     """
     Create and initialize keybinding manager
     :return: KeyBindingManager
     """
+
+    assert callable(set_long_options)
+    assert callable(get_long_options)
+
     manager = KeyBindingManager()
 
     @manager.registry.add_binding(Keys.F2)
@@ -19,6 +23,13 @@ def get_key_manager():
         When F2 has been pressed, fill in the "help" command.
         """
         event.cli.current_buffer.insert_text("help")
+
+    @manager.registry.add_binding(Keys.F3)
+    def _(_):
+        """
+        Enable/Disable long option name suggestion.
+        """
+        set_long_options(not get_long_options())
 
     @manager.registry.add_binding(Keys.F10)
     def _(event):

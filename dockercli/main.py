@@ -31,7 +31,7 @@ from .config import write_default_config
 from .config import read_config
 from .style import style_factory
 from .keys import get_key_manager
-from .toolbar import get_toolbar_items
+from .toolbar import create_toolbar_handler
 from .options import OptionError
 from .__init__ import __version__
 
@@ -60,7 +60,9 @@ class DockerCli(object):
         self.handler = DockerClient(
             self.config['main'].as_int('client_timeout'),
             self.clear)
-        self.completer = DockerCompleter()
+
+        long_options = self.config['main'].as_bool('suggest_long_option_names')
+        self.completer = DockerCompleter(long_option_names=long_options)
         self.set_completer_options()
         self.saved_less_opts = self.set_less_opts()
 
@@ -179,12 +181,14 @@ class DockerCli(object):
         print('Home: http://dockercli.com')
 
         history = FileHistory(os.path.expanduser('~/.dockercli-history'))
+        toolbar_handler = create_toolbar_handler(
+            self.completer.get_long_options)
 
         layout = create_default_layout(
             message='dockercli> ',
             reserve_space_for_menu=True,
             lexer=CommandLexer,
-            get_bottom_toolbar_tokens=get_toolbar_items,
+            get_bottom_toolbar_tokens=toolbar_handler,
             extra_input_processors=[
                 ConditionalProcessor(
                     processor=HighlightMatchingBracketProcessor(
@@ -198,7 +202,9 @@ class DockerCli(object):
             completer=self.completer,
             complete_while_typing=Always())
 
-        manager = get_key_manager()
+        manager = get_key_manager(
+            self.completer.set_long_options,
+            self.completer.get_long_options)
 
         application = Application(
             style=style_factory(self.theme),

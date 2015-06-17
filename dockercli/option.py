@@ -52,10 +52,13 @@ class CommandOption(object):
 
         if long_name and short_name:
             arguments = [short_name, long_name]
+            self.display = '{0}/{1}'.format(short_name, long_name)
         elif long_name:
             arguments = [long_name]
+            self.display = long_name
         else:
             arguments = [short_name]
+            self.display = short_name
 
         if 'api_match' in kwargs and kwargs['api_match'] is not None:
             self.api_match = kwargs['api_match']
@@ -141,6 +144,28 @@ class CommandOption(object):
         :return: boolean
         """
         return self.option_type == CommandOption.TYPE_DIRPATH
+
+    def get_name(self, is_long):
+        """
+        Return short name if we have one, and is requested. Otherwise default
+        to long name.
+        :param is_long: boolean
+        :return: string
+        """
+        if self.short_name and not is_long:
+            return self.short_name
+        return self.long_name
+
+    def is_match(self, word):
+        """
+        Can this option be suggested having this word being tyoed?
+        :param word:
+        :return:
+        """
+        if word:
+            return (self.long_name and self.long_name.startswith(word)) or \
+                   (self.short_name and self.short_name.startswith(word))
+        return True
 
     @property
     def name(self):

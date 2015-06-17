@@ -17,7 +17,8 @@ class DockerCompleter(Completer):
     Completer for Docker commands and parameters.
     """
 
-    def __init__(self, containers=None, running=None, images=None, tagged=None):
+    def __init__(self, containers=None, running=None, images=None, tagged=None,
+                 long_option_names=True):
         """
         Initialize the completer
         :return:
@@ -27,6 +28,7 @@ class DockerCompleter(Completer):
         self.running = set(running) if running else set()
         self.images = set(images) if images else set()
         self.tagged = set(tagged) if tagged else set()
+        self.long_option_mode = long_option_names
 
     def set_containers(self, containers):
         """
@@ -55,6 +57,19 @@ class DockerCompleter(Completer):
         :param images: list
         """
         self.tagged = set(images) if images else set()
+
+    def set_long_options(self, is_long):
+        """
+        Setter for long option names.
+        :param is_long: boolean
+        """
+        self.long_option_mode = is_long
+
+    def get_long_options(self):
+        """
+        Getter for long option names.
+        """
+        return self.long_option_mode
 
     def get_completions(self, document, complete_event):
         """
@@ -96,7 +111,8 @@ class DockerCompleter(Completer):
                 self.containers,
                 self.running,
                 self.images,
-                self.tagged)
+                self.tagged,
+                self.long_option_mode)
         else:
             completions = DockerCompleter.find_matches(
                 word_before_cursor,
@@ -107,7 +123,7 @@ class DockerCompleter(Completer):
     @staticmethod
     def find_command_matches(command, word='', prev='', params=None,
                              containers=None, running=None, images=None,
-                             tagged=None):
+                             tagged=None, long_options=True):
         """
         Find all matches in context of the given command.
         :param command: string: command keyword (such as "ps", "images")
@@ -156,10 +172,16 @@ class DockerCompleter(Completer):
                     # Do not offer options that user already set.
                     # Unless user may want to set them multiple times.
                     # Example: -e VAR1=value1 -e VAR2=value2.
-                    if opt.name not in params or opt.is_multiple:
+                    opt_unused = opt.long_name not in params and \
+                                 opt.short_name not in params
+
+                    if opt_unused or opt.is_multiple:
                         if opt.name.startswith('-'):
-                            if opt.name.startswith(word) or not word:
-                                yield Completion(opt.name, -len(word))
+                            if opt.is_match(word):
+                                yield Completion(
+                                    opt.get_name(long_options),
+                                    -len(word),
+                                    opt.display)
                         else:
                             # positional option
                             if opt.is_type_container():
