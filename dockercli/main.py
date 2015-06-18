@@ -27,8 +27,7 @@ from .completer import DockerCompleter
 from .lexer import CommandLexer
 from .formatter import format_data
 from .formatter import output_stream
-from .config import write_default_config
-from .config import read_config
+from .config import write_default_config, read_config, write_config
 from .style import style_factory
 from .keys import get_key_manager
 from .toolbar import create_toolbar_handler
@@ -110,6 +109,12 @@ class DockerCli(object):
         """
         os.environ['LESS'] = self.saved_less_opts
 
+    def write_config_file(self):
+        """
+        Write config file on exit.
+        """
+        write_config(self.config, self.config_name)
+
     def clear(self):
         """
         Clear the screen.
@@ -164,6 +169,21 @@ class DockerCli(object):
                 self.completer.set_images(images)
                 self.completer.set_tagged(tagged)
 
+    def set_long_options(self, is_long):
+        """
+        Setter for long option names.
+        :param is_long: boolean
+        """
+        self.config['main']['suggest_long_option_names'] = is_long
+        self.completer.set_long_options(is_long)
+
+    def get_long_options(self):
+        """
+        Getter for long option names.
+        :return: boolean
+        """
+        return self.config['main'].as_bool('suggest_long_option_names')
+
     def refresh_completions(self):
         """
         After processing the command, refresh the lists of
@@ -181,8 +201,7 @@ class DockerCli(object):
         print('Home: http://dockercli.com')
 
         history = FileHistory(os.path.expanduser('~/.dockercli-history'))
-        toolbar_handler = create_toolbar_handler(
-            self.completer.get_long_options)
+        toolbar_handler = create_toolbar_handler(self.get_long_options)
 
         layout = create_default_layout(
             message='dockercli> ',
@@ -202,9 +221,7 @@ class DockerCli(object):
             completer=self.completer,
             complete_while_typing=Always())
 
-        manager = get_key_manager(
-            self.completer.set_long_options,
-            self.completer.get_long_options)
+        manager = get_key_manager(self.set_long_options, self.get_long_options)
 
         application = Application(
             style=style_factory(self.theme),
@@ -266,6 +283,7 @@ class DockerCli(object):
             #    break
 
         self.revert_less_opts()
+        self.write_config_file()
         print('Goodbye!')
 
 

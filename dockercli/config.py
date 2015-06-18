@@ -31,3 +31,13 @@ def write_default_config(source, destination, overwrite=False):
         return
 
     shutil.copyfile(source, destination)
+
+
+def write_config(cfg, cfg_path):
+    """
+    Write current user's config.
+    :param cfg: ConfigObj
+    :param cfg_path: string: path to write
+    """
+    cfg.filename = expanduser(cfg_path)
+    cfg.write()
