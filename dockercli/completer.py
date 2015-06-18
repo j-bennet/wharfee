@@ -167,21 +167,25 @@ class DockerCompleter(Completer):
 
             if not opt_suggestions:
                 positionals = []
-                for opt in all_options(command):
+                possible_options = all_options(command)
+                for opt in possible_options:
 
                     # Do not offer options that user already set.
                     # Unless user may want to set them multiple times.
                     # Example: -e VAR1=value1 -e VAR2=value2.
                     opt_unused = opt.long_name not in params and \
                                  opt.short_name not in params
+                    opt_current = word in opt.names
 
-                    if opt_unused or opt.is_multiple:
+                    if opt_unused or opt_current or opt.is_multiple:
                         if opt.name.startswith('-'):
                             if opt.is_match(word):
-                                yield Completion(
-                                    opt.get_name(long_options),
-                                    -len(word),
-                                    opt.display)
+                                suggestion = opt.get_name(long_options)
+                                if suggestion:
+                                    yield Completion(
+                                        suggestion,
+                                        -len(word),
+                                        opt.display)
                         else:
                             # positional option
                             if opt.is_type_container():

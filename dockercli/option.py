@@ -152,13 +152,13 @@ class CommandOption(object):
         :param is_long: boolean
         :return: string
         """
-        if self.short_name and not is_long:
-            return self.short_name
-        return self.long_name
+        if is_long:
+            return self.long_name if self.long_name else self.short_name
+        return self.short_name if self.short_name else self.long_name
 
     def is_match(self, word):
         """
-        Can this option be suggested having this word being tyoed?
+        Can this option be suggested having this word being typed?
         :param word:
         :return:
         """
@@ -174,3 +174,24 @@ class CommandOption(object):
         :return: string
         """
         return self.long_name if self.long_name else self.short_name
+
+    @property
+    def names(self):
+        """
+        Getter for all possible names.
+        :return: list
+        """
+        if self.short_name and self.long_name:
+            return [self.short_name, self.long_name]
+        elif self.long_name:
+            return [self.long_name]
+        else:
+            return [self.short_name]
+
+    def __repr__(self):
+        """
+        Return the printable representation.
+        """
+        return 'CommandOption({0}, {1}'.format(
+            self.short_name,
+            self.long_name)

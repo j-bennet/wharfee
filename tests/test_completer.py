@@ -90,15 +90,6 @@ def test_build_path_completion_user_dir(completer, complete_event):
     assert expected.issubset(result)
 
 
-def _get_command_option_names(command):
-    """
-    Helper method to get all option names for command.
-    :param command: string
-    :return: list
-    """
-    return [opt.name for opt in all_options(command)]
-
-
 @pytest.mark.parametrize("command, expected", [
     ("h", ['help']),
     ("he", ['help']),
@@ -124,16 +115,18 @@ def test_command_completion(command, expected):
 
     assert result == expected
 
-pso = _get_command_option_names('ps')
+pso = filter(lambda x: x.name.startswith('-'), all_options('ps'))
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("ps ", pso, 0),
-    ("ps --", filter(lambda x: x.startswith('--'), pso), -2),
-    ("ps --h", filter(lambda x: x.startswith('--h'), pso), -3),
-    ("ps --all ", filter(lambda x: x not in ['--all'], pso), 0),
-    ("ps --all --quiet ", filter(lambda x: x not in ['--all', '--quiet'], pso), 0),
+    ("ps --", filter(lambda x: x.long_name and x.long_name.startswith('--'), pso), -2),
+    ("ps --h", filter(lambda x: x.long_name and x.long_name.startswith('--h'), pso), -3),
+    ("ps --all ", filter(lambda x: x.long_name not in ['--all'], pso), 0),
+    ("ps --all --quiet ",
+     filter(lambda x: x.long_name not in ['--all', '--quiet'], pso),
+     0),
 ])
-def test_options_completion(command, expected, expected_pos):
+def test_options_completion_long(command, expected, expected_pos):
     """
     Test command options suggestions.
     :param command: string: text that user started typing
@@ -147,7 +140,34 @@ def test_options_completion(command, expected, expected_pos):
     result = set(c.get_completions(
         Document(text=command, cursor_position=position), e))
 
-    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+    expected = set(map(lambda t: Completion(
+        t.get_name(is_long=True), expected_pos, t.display), expected))
+
+    assert result == expected
+
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ("ps ", pso, 0),
+    ("ps -", filter(lambda x: x.name.startswith('-'), pso), -1),
+    ("ps -h", filter(lambda x: x.short_name and x.short_name.startswith('-h'), pso), -2),
+])
+def test_options_completion_short(command, expected, expected_pos):
+    """
+    Test command options suggestions.
+    :param command: string: text that user started typing
+    :param expected: list: expected completions
+    """
+    c = completer()
+    e = complete_event()
+    c.set_long_options(False)
+
+    position = len(command)
+
+    result = set(c.get_completions(
+        Document(text=command, cursor_position=position), e))
+
+    expected = set(map(lambda t: Completion(
+        t.get_name(
+            is_long=c.get_long_options()), expected_pos, t.display), expected))
 
     assert result == expected
 
@@ -175,10 +195,9 @@ def test_options_container_completion(command, expected, expected_pos):
 
     assert result == expected
 
-
 @pytest.mark.parametrize("command, expected, expected_pos", [
-    ("top ", runnings + ['--help'], 0),
-    ("top e", filter(lambda x: x.startswith('e'), runnings), -1),
+    ("top ", list(map(lambda x: (x, x), runnings)) + [('--help', '-h/--help')], 0),
+    ("top e", map(lambda x: (x, x), filter(lambda x: x.startswith('e'), runnings)), -1),
 ])
 def test_options_container_running_completion(command, expected, expected_pos):
     """
@@ -195,9 +214,14 @@ def test_options_container_running_completion(command, expected, expected_pos):
     result = set(c.get_completions(
         Document(text=command, cursor_position=position), e))
 
-    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+    expected_completions = set()
+    for text, display in expected:
+        if display:
+            expected_completions.add(Completion(text, expected_pos, display))
+        else:
+            expected_completions.add(Completion(text, expected_pos))
 
-    assert result == expected
+    assert result == expected_completions
 
 
 def test_options_image_completion(completer, complete_event):

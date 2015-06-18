@@ -130,7 +130,7 @@ COMMAND_OPTIONS = {
                       dest='limit',
                       help='Show n last created containers, include ' +
                            'non-running ones.'),
-        CommandOption(CommandOption.TYPE_NUMERIC, '--no-trunc', None,
+        CommandOption(CommandOption.TYPE_BOOLEAN, None, '--no-trunc',
                       action='store_false',
                       dest='trunc',
                       help='Don\'t truncate output.'),
@@ -367,6 +367,7 @@ def find_option(command, name):
     :param name: string
     :return: CommandOption
     """
+    # TODO: use all_options
     if command in COMMAND_OPTIONS:
         if name == 'help':
             return OPTION_HELP
