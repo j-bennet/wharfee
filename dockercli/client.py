@@ -249,8 +249,8 @@ class DockerClient(object):
                 # Container names start with /.
                 # Let's strip this for readability.
                 for i in range(len(csdict)):
-                    csdict[i]['Names'] = map(
-                        lambda x: x.lstrip('/'), csdict[i]['Names'])
+                    csdict[i]['Names'] = list(map(
+                        lambda x: x.lstrip('/'), csdict[i]['Names']))
                     csdict[i]['Created'] = pretty.date(csdict[i]['Created'])
                     if 'Labels' in csdict[i]:
                         del csdict[i]['Labels']
