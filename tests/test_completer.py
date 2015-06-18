@@ -115,16 +115,14 @@ def test_command_completion(command, expected):
 
     assert result == expected
 
-pso = filter(lambda x: x.name.startswith('-'), all_options('ps'))
+pso = list(filter(lambda x: x.name.startswith('-'), all_options('ps')))
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("ps ", pso, 0),
-    ("ps --", filter(lambda x: x.long_name and x.long_name.startswith('--'), pso), -2),
-    ("ps --h", filter(lambda x: x.long_name and x.long_name.startswith('--h'), pso), -3),
-    ("ps --all ", filter(lambda x: x.long_name not in ['--all'], pso), 0),
-    ("ps --all --quiet ",
-     filter(lambda x: x.long_name not in ['--all', '--quiet'], pso),
-     0),
+    ("ps --", list(filter(lambda x: x.long_name and x.long_name.startswith('--'), pso)), -2),
+    ("ps --h", list(filter(lambda x: x.long_name and x.long_name.startswith('--h'), pso)), -3),
+    ("ps --all ", list(filter(lambda x: x.long_name not in ['--all'], pso)), 0),
+    ("ps --all --quiet ", list(filter(lambda x: x.long_name not in ['--all', '--quiet'], pso)), 0),
 ])
 def test_options_completion_long(command, expected, expected_pos):
     """
