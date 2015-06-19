@@ -1,0 +1,24 @@
+-------  ----------------------------------------------------------------------------------------------------------
+build    Build a new image from the source code
+clear    Clear the window.
+exec     Run a command in a running container.
+help     Help on available commands.
+images   List images.
+info     Display system-wide information.
+inspect  Return low-level information on a container or image.
+logs     Fetch the logs of a container.
+ps       List containers.
+pull     Pull an image or a repository from the registry.
+pause    Pause all processes within a container.
+port     List port mappings for the container, or lookup the public-facing port that is NAT-ed to the private_port.
+run      Run a command in a new container.
+rm       Remove one or more containers.
+rmi      Remove one or more images.
+search   Search the Docker Hub for images.
+shell    Get shell into a running container.
+start    Restart a stopped container.
+stop     Stop a running container.
+top      Display the running processes of a container.
+unpause  Unpause all processes within a container.
+version  Show the Docker version information.
+-------  ----------------------------------------------------------------------------------------------------------
