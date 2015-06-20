@@ -27,7 +27,7 @@ from .completer import DockerCompleter
 from .lexer import CommandLexer
 from .formatter import format_data
 from .formatter import output_stream
-from .config import write_default_config, read_config, write_config
+from .config import write_default_config, read_config
 from .style import style_factory
 from .keys import get_key_manager
 from .toolbar import create_toolbar_handler
@@ -113,7 +113,7 @@ class DockerCli(object):
         """
         Write config file on exit.
         """
-        write_config(self.config, self.config_name)
+        self.config.write()
 
     def clear(self):
         """

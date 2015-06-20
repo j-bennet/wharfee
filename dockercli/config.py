@@ -10,12 +10,15 @@ def read_config(usr_config, def_config=None):
     :param def_config: string: default name
     :return: ConfigParser
     """
+    usr_config_file = expanduser(usr_config)
+
     cfg = ConfigObj()
+    cfg.filename = usr_config_file
 
     if def_config:
         cfg.merge(ConfigObj(def_config, interpolation=False))
 
-    cfg.merge(ConfigObj(expanduser(usr_config), interpolation=False))
+    cfg.merge(ConfigObj(usr_config_file, interpolation=False))
     return cfg
 
 
@@ -31,13 +34,3 @@ def write_default_config(source, destination, overwrite=False):
         return
 
     shutil.copyfile(source, destination)
-
-
-def write_config(cfg, cfg_path):
-    """
-    Write current user's config.
-    :param cfg: ConfigObj
-    :param cfg_path: string: path to write
-    """
-    cfg.filename = expanduser(cfg_path)
-    cfg.write()
