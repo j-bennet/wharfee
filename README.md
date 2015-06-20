@@ -36,3 +36,17 @@ Ah, if only everything in life was so easy.
 ## Can I contribute?
 
 Yes! Pull request or [issues](https://github.com/j-bennet/dockercli/issues) are welcome.
+
+## How do you test it?
+
+First, install the requirements for testing:
+
+    $ pip install -r requirements-dev.txt
+
+There are unit tests under *tests*. The command to run them is:
+
+    $ py.test
+
+Additionally, there are integration tests, that can be run with:
+
+    $ behave

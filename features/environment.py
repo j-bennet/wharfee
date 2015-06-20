@@ -41,6 +41,7 @@ def before_all(context):
     os.environ['LINES'] = "50"
     os.environ['COLUMNS'] = "120"
     context.fixture_lines = read_fixture_files()
+    context.exit_sent = False
 
 
 def after_scenario(context, _):
@@ -48,7 +49,7 @@ def after_scenario(context, _):
     Cleans up after each test complete.
     """
 
-    if hasattr(context, 'cli'):
+    if hasattr(context, 'cli') and not context.exit_sent:
         # Send Ctrl + D into cli
         context.cli.sendcontrol('d')
         context.cli.expect(pexpect.EOF)
