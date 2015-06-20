@@ -7,8 +7,8 @@ Feature: run the cli,
       when we run dockercli
       then we see dockercli prompt
 
-#  Scenario: run "help" command
-#     Given we have dockercli installed
-#      when we run dockercli
-#      and we send "help" command
-#      then we see help output
+  Scenario: run "help" command
+     Given we have dockercli installed
+      when we run dockercli
+      and we send "help" command
+      then we see help output
