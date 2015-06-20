@@ -50,3 +50,7 @@ There are unit tests under *tests*. The command to run them is:
 Additionally, there are integration tests, that can be run with:
 
     $ behave
+
+To see stdout/stderr, use the following command:
+
+    $ behave --no-capture
