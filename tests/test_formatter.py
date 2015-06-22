@@ -16,9 +16,12 @@ def test_top_formatting():
     """
     data = {
         u'Processes': [
-            [u'root', u'27390', u'2347', u'0', u'Jun02', u'?', u'00:00:21', u'/bin/sh -c while true; do echo Hello boo; sleep 1; done'],
-            [u'root', u'32694', u'27390', u'0', u'21:52', u'?', u'00:00:00', u'sleep 1']],
-        u'Titles': [u'UID', u'PID', u'PPID', u'C', u'STIME', u'TTY', u'TIME', u'CMD']
+            [u'root', u'27390', u'2347', u'0', u'Jun02', u'?', u'00:00:21',
+             u'/bin/sh -c while true; do echo Hello boo; sleep 1; done'],
+            [u'root', u'32694', u'27390', u'0', u'21:52', u'?', u'00:00:00',
+             u'sleep 1']],
+        u'Titles': [u'UID', u'PID', u'PPID', u'C', u'STIME', u'TTY', u'TIME',
+                    u'CMD']
     }
     formatted = format_top(data)
     print('\n')
@@ -52,15 +55,14 @@ def test_ps_data_formatting():
     Test formatting for list of tuples.
     """
     data = [
-        {'Id': u'9e19b1558bbcba9202c1d3c4e26d8fe6e2c6060faad9a7074487e3b210a26a16'},
-        {'Id': 'b798acf4382421d231680d28aa62ae9b486b89711733c6acbb4cc85d8bec4072'},
+        {'Id': ('9e19b1558bbcba9202c1d3c4e26d8fe6e2c6060faad9a7074487e3b210a2'
+                '6a16')},
+        {'Id': ('b798acf4382421d231680d28aa62ae9b486b89711733c6acbb4cc85d8bec4'
+                '072')},
     ]
     formatted = format_data('ps', data)
     print('\n')
     print('\n'.join(formatted))
-
-
-
 
 
 def test_help_data_formatting():
@@ -80,6 +82,7 @@ def test_help_data_formatting():
     print('\n')
     print('\n'.join(formatted))
 
+
 def test_rmi_data_formatting():
     """
     Test formatting for list of strings.
@@ -92,6 +95,7 @@ def test_rmi_data_formatting():
     formatted = format_data('rmi', data)
     print('\n')
     print('\n'.join(formatted))
+
 
 def test_dict_data_formatting():
     """
@@ -147,7 +151,8 @@ def test_info_data_formatting():
         'NFd': 13,
         'NGoroutines': 19,
         'Name': 'boot2docker',
-        'OperatingSystem': 'Boot2Docker 1.6.0 (TCL 5.4); master : a270c71 - Thu Apr 16 19:50:36 UTC 2015',
+        'OperatingSystem': ('Boot2Docker 1.6.0 (TCL 5.4); master : a270c71 - '
+                            'Thu Apr 16 19:50:36 UTC 2015'),
         'RegistryConfig': {
             'IndexConfigs': {
                 'docker.io': {
@@ -157,7 +162,8 @@ def test_info_data_formatting():
                     'Secure': True
                 }
             },
-        'InsecureRegistryCIDRs': ['127.0.0.0/8']},
+            'InsecureRegistryCIDRs': ['127.0.0.0/8']
+        },
         'SwapLimit': 1,
         'SystemTime': '2015-04-29T04:58:07.548655766Z'
     }

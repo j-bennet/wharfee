@@ -278,7 +278,7 @@ class DockerCli(object):
                 break
 
             # TODO: uncomment for release
-            #except Exception as ex:
+            # except Exception as ex:
             #    click.secho("{0}".format(ex), fg='red')
             #    break
 

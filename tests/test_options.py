@@ -12,21 +12,20 @@ from dockercli.completer import DockerCompleter
     '-h',
     '--help'
 ])
-
-
 def test_parse_images_help(help_opt_name):
     """
     Test parsing of a "--help"
     """
     parser, popts, pargs = parse_command_options('images', [help_opt_name])
-    assert popts['help'] == True
+    assert popts['help'] is True
 
 
 def test_parse_run():
     """
     Test parsing of a simple "run"
     """
-    parser, popts, pargs = parse_command_options('run', ['--name', 'boo', 'ubuntu'])
+    parser, popts, pargs = parse_command_options(
+        'run', ['--name', 'boo', 'ubuntu'])
     assert pargs == ['ubuntu']
     assert popts['name'] == 'boo'
 
@@ -68,7 +67,8 @@ def test_parse_quoted_string():
     """
     Test parsing of a "complicated" run command.
     """
-    input = 'run -d ubuntu:14.04 /bin/sh -c "while true; do echo hello world; sleep 1; done"'
+    input = ('run -d ubuntu:14.04 /bin/sh -c '
+             '"while true; do echo hello world; sleep 1; done"')
     first = DockerCompleter.first_token(input)
     assert first == 'run'
 
@@ -80,6 +80,7 @@ def test_parse_quoted_string_start():
     input = 'run -d ubuntu:14.04 /bin/sh -c "w'
     first = DockerCompleter.first_token(input)
     assert first == 'run'
+
 
 def test_parse_multiple_args():
     """
@@ -105,6 +106,7 @@ def test_parse_multiple_args():
     for expected_key in expected_opts:
         assert expected_key in popts
         assert popts[expected_key] == expected_opts[expected_key]
+
 
 def test_parse_multiple_args_without_equal():
     """

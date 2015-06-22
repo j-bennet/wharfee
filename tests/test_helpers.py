@@ -19,6 +19,7 @@ def test_port_parsing(ports, expected):
 
     assert result == expected
 
+
 @pytest.mark.parametrize("volumes, expected", [
     (['/tmp'], {}),
     (['/var/www:/webapp'], {'/var/www': {'bind': '/webapp', 'ro': False}}),

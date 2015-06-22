@@ -21,6 +21,7 @@ def complete_event():
 containers = ['newton', 'tesla', 'einstein', 'edison']
 runnings = ['einstein', 'edison']
 
+
 def test_empty_string_completion(completer, complete_event):
     """
     In the beginning of the line, all available commands are suggested.
@@ -115,14 +116,20 @@ def test_command_completion(command, expected):
 
     assert result == expected
 
+
 pso = list(filter(lambda x: x.name.startswith('-'), all_options('ps')))
+
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("ps ", pso, 0),
-    ("ps --", list(filter(lambda x: x.long_name and x.long_name.startswith('--'), pso)), -2),
-    ("ps --h", list(filter(lambda x: x.long_name and x.long_name.startswith('--h'), pso)), -3),
-    ("ps --all ", list(filter(lambda x: x.long_name not in ['--all'], pso)), 0),
-    ("ps --all --quiet ", list(filter(lambda x: x.long_name not in ['--all', '--quiet'], pso)), 0),
+    ("ps --", list(filter(
+        lambda x: x.long_name and x.long_name.startswith('--'), pso)), -2),
+    ("ps --h", list(filter(
+        lambda x: x.long_name and x.long_name.startswith('--h'), pso)), -3),
+    ("ps --all ", list(filter(
+        lambda x: x.long_name not in ['--all'], pso)), 0),
+    ("ps --all --quiet ", list(filter(
+        lambda x: x.long_name not in ['--all', '--quiet'], pso)), 0),
 ])
 def test_options_completion_long(command, expected, expected_pos):
     """
@@ -143,10 +150,13 @@ def test_options_completion_long(command, expected, expected_pos):
 
     assert result == expected
 
+
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("ps ", pso, 0),
-    ("ps -", filter(lambda x: x.name.startswith('-'), pso), -1),
-    ("ps -h", filter(lambda x: x.short_name and x.short_name.startswith('-h'), pso), -2),
+    ("ps -", filter(
+        lambda x: x.name.startswith('-'), pso), -1),
+    ("ps -h", filter(
+        lambda x: x.short_name and x.short_name.startswith('-h'), pso), -2),
 ])
 def test_options_completion_short(command, expected, expected_pos):
     """
@@ -193,9 +203,12 @@ def test_options_container_completion(command, expected, expected_pos):
 
     assert result == expected
 
+
 @pytest.mark.parametrize("command, expected, expected_pos", [
-    ("top ", list(map(lambda x: (x, x), runnings)) + [('--help', '-h/--help')], 0),
-    ("top e", map(lambda x: (x, x), filter(lambda x: x.startswith('e'), runnings)), -1),
+    ("top ", list(map(
+        lambda x: (x, x), runnings)) + [('--help', '-h/--help')], 0),
+    ("top e", map(
+        lambda x: (x, x), filter(lambda x: x.startswith('e'), runnings)), -1),
 ])
 def test_options_container_running_completion(command, expected, expected_pos):
     """

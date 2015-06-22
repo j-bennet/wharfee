@@ -417,7 +417,8 @@ def all_supported(command):
     result = {OPTION_HELP}
 
     if command in COMMAND_OPTIONS:
-        result.update([x.dest for x in COMMAND_OPTIONS[command] if x.api_match])
+        result.update(
+            [x.dest for x in COMMAND_OPTIONS[command] if x.api_match])
 
     if command in HIDDEN_OPTIONS:
         result.update([x.dest for x in HIDDEN_OPTIONS[command]])
