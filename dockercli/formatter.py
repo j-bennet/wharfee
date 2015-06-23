@@ -257,6 +257,7 @@ def is_plain_list(lst):
             return False
     return True
 
+
 def flatten_list(data):
     """
     Format and return a comma-separated string of list items.
@@ -265,6 +266,7 @@ def flatten_list(data):
     """
     return ', '.join(["{0}".format(x) for x in data])
 
+
 def flatten_dict(data):
     """
     Format and return a comma-separated string of dict items.
@@ -272,6 +274,7 @@ def flatten_dict(data):
     :return:
     """
     return ', '.join(["{0}: {1}".format(x, y) for x, y in data.iteritems()])
+
 
 def format_ports(ports):
     """
@@ -312,6 +315,7 @@ def format_ports(ports):
 
     return ', '.join(format_port(x) for x in ports)
 
+
 def flatten_rows(rows):
     """
     Transform all list or dict values in a dict into comma-separated strings.
@@ -339,10 +343,15 @@ def truncate_rows(rows, length=30, length_id=10):
     :return:
     """
 
-    def trimto(str, l):
-        if isinstance(str, basestring):
-            return str[:l+1]
-        return str
+    def trimto(s, l):
+        """
+        Trim string to length.
+        :param s: string to trim
+        :param l: length
+        """
+        if isinstance(s, basestring):
+            return s[:l + 1]
+        return s
 
     result = []
     for row in rows:
@@ -355,7 +364,7 @@ def truncate_rows(rows, length=30, length_id=10):
                     updated[k] = trimto(v, length)
             result.append(updated)
         elif isinstance(row, basestring):
-            result.append(trimto(row))
+            result.append(trimto(row, length))
         else:
             result.append(row)
     return result

@@ -71,15 +71,14 @@ class DockerCompleter(Completer):
         """
         return self.long_option_mode
 
-    def get_completions(self, document, complete_event):
+    def get_completions(self, document, _):
         """
         Get completions for the current scope.
         :param document:
-        :param complete_event:
+        :param _: complete_event
         """
 
         # Unused parameters.
-        _ = complete_event
 
         if DockerCompleter.in_quoted_string(document.text):
             return []
@@ -96,7 +95,8 @@ class DockerCompleter(Completer):
             previous_start = document.find_start_of_previous_word(WORD=True)
 
             if previous_start == -len(word_before_cursor):
-                previous_start = document.find_start_of_previous_word(WORD=True, count=2)
+                previous_start = document.find_start_of_previous_word(
+                    WORD=True, count=2)
 
             if previous_start:
                 previous_word = document.text_before_cursor[previous_start:]
@@ -173,8 +173,9 @@ class DockerCompleter(Completer):
                     # Do not offer options that user already set.
                     # Unless user may want to set them multiple times.
                     # Example: -e VAR1=value1 -e VAR2=value2.
-                    opt_unused = opt.long_name not in params and \
-                                 opt.short_name not in params
+                    opt_unused = \
+                        opt.long_name not in params and \
+                        opt.short_name not in params
                     opt_current = word in opt.names
 
                     if opt_unused or opt_current or opt.is_multiple:

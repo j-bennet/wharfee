@@ -37,7 +37,6 @@ def get_key_manager(set_long_options, get_long_options):
         When F10 has been pressed, quit.
         """
         # Unused parameters for linter.
-        _ = event
         raise EOFError
 
     @manager.registry.add_binding(Keys.ControlSpace)

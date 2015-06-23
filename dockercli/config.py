@@ -3,6 +3,7 @@ from os.path import expanduser, exists
 
 from configobj import ConfigObj
 
+
 def read_config(usr_config, def_config=None):
     """
     Read config file (if not exists, read default config).

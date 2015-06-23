@@ -1,6 +1,6 @@
 from pygments.lexer import RegexLexer
 from pygments.lexer import words
-from pygments.token import *
+from pygments.token import Operator, Keyword, Text
 
 from .options import COMMAND_NAMES, all_option_names
 

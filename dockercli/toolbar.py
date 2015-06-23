@@ -4,17 +4,17 @@ from __future__ import print_function
 
 from pygments.token import Token
 
+
 def create_toolbar_handler(is_long_option):
 
     assert callable(is_long_option)
 
-    def get_toolbar_items(cli):
+    def get_toolbar_items(_):
         """
         Return bottom menu items
-        :param cli:
+        :param _: cli instance
         :return: list of Token.Toolbar
         """
-        _ = cli
 
         if is_long_option():
             option_mode_token = Token.Toolbar.On
