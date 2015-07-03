@@ -20,7 +20,8 @@ setup(
         'click>=4.0',
         'py-pretty>-0.1',
         'configobj >= 5.0.6',
-        'pexpect>=3.3'
+        'pexpect>=3.3',
+        'fuzzyfinder>=1.0.0'
     ],
     extras_require={
         'testing': [

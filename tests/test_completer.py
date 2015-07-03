@@ -116,6 +116,32 @@ def test_command_completion(command, expected):
 
     assert result == expected
 
+@pytest.mark.parametrize("command, expected", [
+    ("h", ['help', 'shell', 'search']),
+    ("he", ['help', 'shell']),
+    ("hel", ['help', 'shell']),
+    ("help", ['help']),
+    ('run -d ubuntu:14.04 /bin/sh -c "w', [])  # not complete in quoted string
+])
+def test_command_completion_fuzzy(command, expected):
+    """
+    Test command suggestions.
+    :param command: string: text that user started typing
+    :param expected: list: expected completions
+    """
+    c = completer()
+    e = complete_event()
+    c.set_fuzzy_match(True)
+
+    position = len(command)
+    result = list(c.get_completions(
+        Document(text=command, cursor_position=position),
+        e))
+
+    expected = map(lambda t: Completion(t, -len(command)), expected)
+
+    assert result == expected
+
 
 pso = list(filter(lambda x: x.name.startswith('-'), all_options('ps')))
 
@@ -147,6 +173,40 @@ def test_options_completion_long(command, expected, expected_pos):
 
     expected = set(map(lambda t: Completion(
         t.get_name(is_long=True), expected_pos, t.display), expected))
+
+    assert result == expected
+
+
+def option_map(cmd, is_long):
+    return {
+        x.get_name(is_long): x.display for x in all_options(cmd) if x.name.startswith('-')
+    }
+
+psm = option_map('ps', True)
+
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ("ps ", sorted(psm.keys()), 0),
+    ("ps h", ['--help'], -1),
+    ("ps i", ['--since', '--size', '--quiet'], -1),
+    ("ps ze", ['--size'], -2),
+])
+def test_options_completion_long_fuzzy(command, expected, expected_pos):
+    """
+    Test command options suggestions.
+    :param command: string: text that user started typing
+    :param expected: list: expected completions
+    """
+    c = completer()
+    e = complete_event()
+    c.set_fuzzy_match(True)
+
+    position = len(command)
+
+    result = list(c.get_completions(
+        Document(text=command, cursor_position=position), e))
+
+    expected = list(map(lambda t: Completion(
+        t, expected_pos, psm[t]), expected))
 
     assert result == expected
 

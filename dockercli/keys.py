@@ -6,7 +6,7 @@ from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.keys import Keys
 
 
-def get_key_manager(set_long_options, get_long_options):
+def get_key_manager(set_long_options, get_long_options, set_fuzzy_match, get_fuzzy_match):
     """
     Create and initialize keybinding manager
     :return: KeyBindingManager
@@ -14,6 +14,8 @@ def get_key_manager(set_long_options, get_long_options):
 
     assert callable(set_long_options)
     assert callable(get_long_options)
+    assert callable(set_fuzzy_match)
+    assert callable(get_fuzzy_match)
 
     manager = KeyBindingManager()
 
@@ -30,6 +32,13 @@ def get_key_manager(set_long_options, get_long_options):
         Enable/Disable long option name suggestion.
         """
         set_long_options(not get_long_options())
+
+    @manager.registry.add_binding(Keys.F4)
+    def _(_):
+        """
+        Enable/Disable fuzzy matching.
+        """
+        set_fuzzy_match(not get_fuzzy_match())
 
     @manager.registry.add_binding(Keys.F10)
     def _(event):

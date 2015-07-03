@@ -60,8 +60,9 @@ class DockerCli(object):
             self.config['main'].as_int('client_timeout'),
             self.clear)
 
-        long_options = self.config['main'].as_bool('suggest_long_option_names')
-        self.completer = DockerCompleter(long_option_names=long_options)
+        self.completer = DockerCompleter(
+            long_option_names=self.get_long_options(),
+            fuzzy=self.get_fuzzy_match())
         self.set_completer_options()
         self.saved_less_opts = self.set_less_opts()
 
@@ -169,6 +170,21 @@ class DockerCli(object):
                 self.completer.set_images(images)
                 self.completer.set_tagged(tagged)
 
+    def set_fuzzy_match(self, is_fuzzy):
+        """
+        Setter for fuzzy matching mode
+        :param is_fuzzy: boolean
+        """
+        self.config['main']['fuzzy_match'] = is_fuzzy
+        self.completer.set_fuzzy_match(is_fuzzy)
+
+    def get_fuzzy_match(self):
+        """
+        Getter for fuzzy matching mode
+        :return: boolean
+        """
+        return self.config['main'].as_bool('fuzzy_match')
+
     def set_long_options(self, is_long):
         """
         Setter for long option names.
@@ -201,7 +217,7 @@ class DockerCli(object):
         print('Home: http://dockercli.com')
 
         history = FileHistory(os.path.expanduser('~/.dockercli-history'))
-        toolbar_handler = create_toolbar_handler(self.get_long_options)
+        toolbar_handler = create_toolbar_handler(self.get_long_options, self.get_fuzzy_match)
 
         layout = create_default_layout(
             message='dockercli> ',
@@ -216,17 +232,21 @@ class DockerCli(object):
             ]
         )
 
-        buffer = Buffer(
+        cli_buffer = Buffer(
             history=history,
             completer=self.completer,
             complete_while_typing=Always())
 
-        manager = get_key_manager(self.set_long_options, self.get_long_options)
+        manager = get_key_manager(
+            self.set_long_options,
+            self.get_long_options,
+            self.set_fuzzy_match,
+            self.get_fuzzy_match)
 
         application = Application(
             style=style_factory(self.theme),
             layout=layout,
-            buffer=buffer,
+            buffer=cli_buffer,
             key_bindings_registry=manager.registry,
             on_exit=AbortAction.RAISE_EXCEPTION)
 

@@ -11,3 +11,6 @@ theme = default
 # Whether to suggest long option names. Default is 'True'. If 'False',
 # short option names are suggested.
 suggest_long_option_names = True
+
+# Use fuzzy matching mode (default is to use simple substring match).
+fuzzy_match = False
