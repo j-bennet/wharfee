@@ -18,9 +18,11 @@ def complete_event():
     from mock import Mock
     return Mock()
 
-containers = ['newton', 'tesla', 'einstein', 'edison']
-runnings = ['einstein', 'edison']
+cs1 = ['newton', 'tesla', 'einstein', 'edison']
+rs1 = ['einstein', 'edison']
+im1 = ['ubuntu', 'hello-world', 'postgres', 'nginx']
 
+cs2 = ['desperate_hodgkin', 'desperate_torvalds', 'silly_fermat', 'some-percona']
 
 def test_empty_string_completion(completer, complete_event):
     """
@@ -241,9 +243,9 @@ def test_options_completion_short(command, expected, expected_pos):
 
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
-    ("ps --before ", containers, 0),
-    ("ps --before e", filter(lambda x: x.startswith('e'), containers), -1),
-    ("ps --before ei", filter(lambda x: x.startswith('ei'), containers), -2),
+    ("ps --before ", cs1, 0),
+    ("ps --before e", filter(lambda x: x.startswith('e'), cs1), -1),
+    ("ps --before ei", filter(lambda x: x.startswith('ei'), cs1), -2),
 ])
 def test_options_container_completion(command, expected, expected_pos):
     """
@@ -252,7 +254,7 @@ def test_options_container_completion(command, expected, expected_pos):
     c = completer()
     e = complete_event()
 
-    c.set_containers(containers)
+    c.set_containers(cs1)
 
     position = len(command)
 
@@ -266,9 +268,9 @@ def test_options_container_completion(command, expected, expected_pos):
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("top ", list(map(
-        lambda x: (x, x), runnings)) + [('--help', '-h/--help')], 0),
+        lambda x: (x, x), rs1)) + [('--help', '-h/--help')], 0),
     ("top e", map(
-        lambda x: (x, x), filter(lambda x: x.startswith('e'), runnings)), -1),
+        lambda x: (x, x), filter(lambda x: x.startswith('e'), rs1)), -1),
 ])
 def test_options_container_running_completion(command, expected, expected_pos):
     """
@@ -277,8 +279,8 @@ def test_options_container_running_completion(command, expected, expected_pos):
     c = completer()
     e = complete_event()
 
-    c.set_containers(containers)
-    c.set_running(runnings)
+    c.set_containers(cs1)
+    c.set_running(rs1)
 
     position = len(command)
 
@@ -291,6 +293,36 @@ def test_options_container_running_completion(command, expected, expected_pos):
             expected_completions.add(Completion(text, expected_pos, display))
         else:
             expected_completions.add(Completion(text, expected_pos))
+
+    assert result == expected_completions
+
+
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ("rm ", ['--all-stopped', ('--help', '-h/--help')] + cs2, 0),
+    ("rm spe", ['--all-stopped', 'desperate_hodgkin', 'desperate_torvalds', 'some-percona'], -3),
+])
+def test_options_container_completion_fuzzy(command, expected, expected_pos):
+    """
+    Suggest running container names (top [container])
+    """
+    c = completer()
+    e = complete_event()
+
+    c.set_containers(cs2)
+
+    c.set_fuzzy_match(True)
+
+    position = len(command)
+
+    result = list(c.get_completions(
+        Document(text=command, cursor_position=position), e))
+
+    expected_completions = []
+    for x in expected:
+        if isinstance(x, tuple):
+            expected_completions.append(Completion(x[0], expected_pos, x[1]))
+        else:
+            expected_completions.append(Completion(x, expected_pos))
 
     assert result == expected_completions
 
@@ -310,5 +342,32 @@ def test_options_image_completion(completer, complete_event):
         Document(text=command, cursor_position=position), complete_event))
 
     expected = set(map(lambda t: Completion(t, expected_pos), expected))
+
+    assert result == expected
+
+
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ('images --filter ', ['hello-world', 'nginx', 'postgres', 'ubuntu'], 0),
+    ('images --filter n', ['nginx', 'ubuntu'], -1),
+    ('images --filter g', ['nginx', 'postgres'], -1),
+    ('images --filter u', ['ubuntu'], -1),
+])
+def test_options_image_completion_fuzzy(command, expected, expected_pos):
+    """
+    Suggest image names in relevant options (images --filter)
+    """
+    c = completer()
+    e = complete_event()
+
+    c.set_images(im1)
+
+    c.set_fuzzy_match(True)
+
+    position = len(command)
+
+    result = list(c.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
+
+    expected = list(map(lambda t: Completion(t, expected_pos), expected))
 
     assert result == expected
