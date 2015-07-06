@@ -66,6 +66,12 @@ class CommandOption(object):
         else:
             self.api_match = True
 
+        if 'cli_match' in kwargs and kwargs['cli_match'] is not None:
+            self.cli_match = kwargs['cli_match']
+            del kwargs['cli_match']
+        else:
+            self.cli_match = True
+
         if 'dest' in kwargs:
             self.dest = kwargs['dest']
         elif long_name:

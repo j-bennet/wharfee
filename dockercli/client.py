@@ -317,8 +317,7 @@ class DockerClient(object):
         else:
             containers = args
 
-        if 'all_stopped' in kwargs:
-            del kwargs['all_stopped']
+        kwargs = allowed_args('rm', **kwargs)
 
         def stream():
             for container in containers:
@@ -359,8 +358,7 @@ class DockerClient(object):
         else:
             images = args
 
-        if 'all_dangling' in kwargs:
-            del kwargs['all_dangling']
+        kwargs = allowed_args('rmi', **kwargs)
 
         def stream():
             for image in images:

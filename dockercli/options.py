@@ -1,7 +1,7 @@
 # -*- coding: utf-8
 from __future__ import unicode_literals
 
-from optparse import OptionParser, OptionError
+from optparse import OptionParser, OptionError, OptionGroup
 from .option import CommandOption
 
 COMMAND_NAMES = [
@@ -281,7 +281,9 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_BOOLEAN, '--all-stopped',
                       action='store_true',
                       dest='all_stopped',
-                      help='Shortcut to remove all stopped containers.'),
+                      help='Shortcut to remove all stopped containers.',
+                      api_match=False,
+                      cli_match=False),
     ],
     'rmi': [
         CommandOption(CommandOption.TYPE_IMAGE_TAG, 'image',
@@ -291,7 +293,9 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_BOOLEAN, '--all-dangling',
                       action='store_true',
                       dest='all_dangling',
-                      help='Shortcut to remove all dangling images.'),
+                      help='Shortcut to remove all dangling images.',
+                      api_match=False,
+                      cli_match=False),
     ],
     'search': [
         CommandOption(CommandOption.TYPE_IMAGE, 'term',
@@ -316,6 +320,9 @@ COMMAND_OPTIONS = {
 }
 
 
+# Hidden options are options that docker-py supports, but the standard docker cli doesn't have
+# them. Since we're emulating the standard cli as close as possible, we're not suggesting these
+# to the user.
 HIDDEN_OPTIONS = {
     'start': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-P', '--publish-all',
@@ -454,6 +461,9 @@ def format_command_help(cmd):
     usage = [cmd, '[options]']
     alls = all_options(cmd)
 
+    standards = [_ for _ in alls if _.cli_match]
+    extras = [_ for _ in alls if not _.cli_match]
+
     for opt in alls:
         if not opt.name.startswith('-'):
             optname = "[{0}]".format(opt.name) if opt.is_optional else opt.name
@@ -463,9 +473,15 @@ def format_command_help(cmd):
 
     parser = OptParser(prog=cmd, add_help_option=False, usage=usage)
 
-    for opt in alls:
+    for opt in standards:
         if opt.name.startswith('-'):
             parser.add_option(*opt.args, **opt.kwargs)
+
+    if extras:
+        g = OptionGroup(parser, "Non-standard options")
+        for opt in extras:
+            g.add_option(*opt.args, **opt.kwargs)
+        parser.add_option_group(g)
 
     return parser.format_help()
 

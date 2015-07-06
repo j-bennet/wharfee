@@ -4,7 +4,8 @@ from __future__ import print_function
 import pytest
 import shlex
 from optparse import OptionError
-from dockercli.options import parse_command_options
+from textwrap import dedent
+from dockercli.options import parse_command_options, format_command_help
 from dockercli.completer import DockerCompleter
 
 
@@ -121,3 +122,24 @@ def test_parse_multiple_args_without_equal():
     with pytest.raises(OptionError) as ex:
         parse_command_options(cmd, params)
         assert 'KEY=VALUE' in ex.message
+
+
+def test_help_formatting():
+    """
+    Format and output help for the command.
+    """
+    output = dedent(format_command_help('rmi')).strip()
+
+    expected = dedent("""
+        Usage: rmi [options] image
+
+        Options:
+          -h, --help        Display help for this command.
+
+          Non-standard options:
+            --all-dangling  Shortcut to remove all dangling images.
+    """).strip()
+
+    print(output)
+
+    assert output == expected
