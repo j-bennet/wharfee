@@ -5,7 +5,8 @@ import pytest
 import shlex
 from optparse import OptionError
 from textwrap import dedent
-from dockercli.options import parse_command_options, format_command_help
+from dockercli.options import parse_command_options, format_command_help, \
+    format_command_line
 from dockercli.completer import DockerCompleter
 
 
@@ -143,3 +144,28 @@ def test_help_formatting():
     print(output)
 
     assert output == expected
+
+
+@pytest.mark.parametrize('text, is_long, expected', [
+    ('exec -it boo /usr/bin/bash', False, 'exec -i -t boo /usr/bin/bash'),
+    ('exec -i -t boo /usr/bin/bash', False, 'exec -i -t boo /usr/bin/bash'),
+    ('exec -i -t boo /usr/bin/bash', True, 'exec --interactive --tty boo /usr/bin/bash'),
+    ('exec --interactive --tty boo /usr/bin/bash', False, 'exec -i -t boo /usr/bin/bash'),
+    ('exec -i --tty boo /usr/bin/bash', False, 'exec -i -t boo /usr/bin/bash'),
+])
+def test_external_command_line(text, is_long, expected):
+    """
+    Parse and reconstruct the command line.
+    """
+    cmd, params = text.split(' ', 1)
+    params = shlex.split(params)
+
+    parser, popts, pargs = parse_command_options(cmd, params)
+
+    result = format_command_line(cmd, is_long, pargs, popts)
+
+    result_words = set(result.split(' ')[1:])
+    expected_words = set(expected.split(' '))
+
+    assert result_words == expected_words
+

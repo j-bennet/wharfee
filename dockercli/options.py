@@ -68,7 +68,17 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
                       action='store_true',
                       dest='detach',
-                      help='Detached mode: run command in the background'),
+                      help='Detached mode: run command in the background.'),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-i', '--interactive',
+                      action='store_true',
+                      dest='interactive',
+                      default=False,
+                      help='Keep STDIN open even if not attached.'),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-t', '--tty',
+                      action='store_true',
+                      dest='tty',
+                      default=False,
+                      help='Allocate a pseudo-TTY.'),
         CommandOption(CommandOption.TYPE_CONTAINER, 'container',
                       action='store',
                       help='Container to run command in.',
@@ -450,6 +460,29 @@ def parse_command_options(cmd, params):
     parser.assert_option_format()
     popts = vars(popts)
     return parser, popts, pargs
+
+
+def format_command_line(cmd, is_long, args, kwargs):
+    """
+    Reconstruct the command  line for sending back to official Docker CLI.
+    :param cmd: command
+    :param is_long: bool use long option names
+    :param args: positional parameters
+    :param kwargs: named parameters
+    :return: string
+    """
+    opts = {x.dest: x for x in all_options(cmd)}
+    comps = ['docker', cmd]
+    for opt_dest, opt_value in kwargs.items():
+        if opt_dest in opts and opt_value is not None:
+            opt = opts[opt_dest]
+            if isinstance(opt_value, bool):
+                comps.append(opt.get_name(is_long))
+            else:
+                comps.append('{0}={1}'.format(opt.get_name(is_long), opt_value))
+    comps.extend(args)
+    external_command = ' '.join(comps)
+    return external_command
 
 
 def format_command_help(cmd):

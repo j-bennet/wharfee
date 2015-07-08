@@ -17,7 +17,7 @@ from requests.exceptions import ConnectionError
 from requests.packages.urllib3 import disable_warnings
 from .options import allowed_args
 from .options import parse_command_options
-from .options import format_command_help
+from .options import format_command_help, format_command_line
 from .options import COMMAND_NAMES
 from .options import OptionError
 from .helpers import filesize, parse_port_bindings, parse_volume_bindings
@@ -482,18 +482,38 @@ class DockerClient(object):
         if not args or len(args) < 2:
             return ['Container ID and command is required.']
 
-        kwargs['container'] = args[0]
-        kwargs['cmd'] = args[1:]
-        is_detach = kwargs.pop('detach')
-        result = self.instance.exec_create(**kwargs)
+        is_interactive = kwargs.pop('interactive', None)
+        is_tty = kwargs.pop('tty', None)
 
-        if result and 'Id' in result:
-            return self.instance.exec_start(
-                result['Id'],
-                detach=is_detach,
-                stream=True)
+        def execute_external():
+            """
+            Call the official cli
+            """
+            kwargs['interactive'] = is_interactive
+            kwargs['tty'] = is_tty
+            command = format_command_line('exec', False, args, kwargs)
+            process = pexpect.spawnu(command)
+            process.interact()
 
-        return ['There was a problem executing the command.']
+        if is_interactive or is_tty:
+            # \r is to make sure when there is some error output,
+            # prompt is back to beginning of line
+            self.after = lambda: ['\rInteractive terminal is closed.']
+            execute_external()
+        else:
+            kwargs['container'] = args[0]
+            kwargs['cmd'] = args[1:]
+
+            is_detach = kwargs.pop('detach')
+            result = self.instance.exec_create(**kwargs)
+
+            if result and 'Id' in result:
+                return self.instance.exec_start(
+                    result['Id'],
+                    detach=is_detach,
+                    stream=True)
+
+            return ['There was a problem executing the command.']
 
     def build(self, *args, **kwargs):
         """
