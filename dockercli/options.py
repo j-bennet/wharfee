@@ -476,10 +476,11 @@ def format_command_line(cmd, is_long, args, kwargs):
     for opt_dest, opt_value in kwargs.items():
         if opt_dest in opts and opt_value is not None:
             opt = opts[opt_dest]
-            if isinstance(opt_value, bool):
-                comps.append(opt.get_name(is_long))
-            else:
-                comps.append('{0}={1}'.format(opt.get_name(is_long), opt_value))
+            if opt.cli_match:
+                if isinstance(opt_value, bool):
+                    comps.append(opt.get_name(is_long))
+                else:
+                    comps.append('{0}={1}'.format(opt.get_name(is_long), opt_value))
     comps.extend(args)
     external_command = ' '.join(comps)
     return external_command
