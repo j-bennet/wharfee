@@ -495,10 +495,15 @@ class DockerClient(object):
             process = pexpect.spawnu(command)
             process.interact()
 
-        if is_interactive or is_tty:
+        def on_after():
             # \r is to make sure when there is some error output,
             # prompt is back to beginning of line
-            self.after = lambda: ['\rInteractive terminal is closed.']
+            self.is_refresh_containers = True
+            self.is_refresh_running = True
+            return ['\rInteractive terminal is closed.']
+
+        if is_interactive or is_tty:
+            self.after = on_after
             execute_external()
         else:
             kwargs['container'] = args[0]
