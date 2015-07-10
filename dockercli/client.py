@@ -386,30 +386,32 @@ class DockerClient(object):
         if kwargs['remove'] and kwargs['detach']:
             return ['Use either --rm or --detach.']
 
-        kwargs['image'] = args[0]
-        kwargs['command'] = args[1:] if len(args) > 1 else []
+        called, args, kwargs = self.call_external_cli('run', *args, **kwargs)
+        if not called:
+            kwargs['image'] = args[0]
+            kwargs['command'] = args[1:] if len(args) > 1 else []
 
-        self._add_port_bindings(kwargs)
-        self._add_link_bindings(kwargs)
-        self._add_volumes_from(kwargs)
-        self._add_volumes(kwargs)
+            self._add_port_bindings(kwargs)
+            self._add_link_bindings(kwargs)
+            self._add_volumes_from(kwargs)
+            self._add_volumes(kwargs)
 
-        runargs = allowed_args('run', **kwargs)
-        result = self.instance.create_container(**runargs)
+            runargs = allowed_args('run', **kwargs)
+            result = self.instance.create_container(**runargs)
 
-        if result:
-            if "Warnings" in result and result['Warnings']:
-                return [result['Warnings']]
-            if "Id" in result and result['Id']:
-                self.is_refresh_containers = True
-                is_attach = 'detach' not in kwargs or not kwargs['detach']
-                start_args = allowed_args('start', **kwargs)
-                start_args.update({
-                    'container': result['Id'],
-                    'attach': is_attach
-                })
-                return self.start(**start_args)
-        return ['There was a problem running the container.']
+            if result:
+                if "Warnings" in result and result['Warnings']:
+                    return [result['Warnings']]
+                if "Id" in result and result['Id']:
+                    self.is_refresh_containers = True
+                    is_attach = 'detach' not in kwargs or not kwargs['detach']
+                    start_args = allowed_args('start', **kwargs)
+                    start_args.update({
+                        'container': result['Id'],
+                        'attach': is_attach
+                    })
+                    return self.start(**start_args)
+            return ['There was a problem running the container.']
 
     def _add_volumes(self, params):
         """
