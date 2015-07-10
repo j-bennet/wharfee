@@ -422,7 +422,6 @@ def all_options(command, include_hidden=False):
         result.extend(COMMAND_OPTIONS[command])
     if include_hidden and command in HIDDEN_OPTIONS:
         result.extend(HIDDEN_OPTIONS[command])
-    result = sorted(result, key=lambda x: x.name)
     return result
 
 

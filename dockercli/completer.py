@@ -203,7 +203,7 @@ class DockerCompleter(Completer):
                 possible_options = [x for x in all_options(command) if is_unused(x)
                                     or is_current(x)
                                     or x.is_multiple]
-                named_options = [x for x in possible_options if x.name.startswith('-')]
+                named_options = sorted([x for x in possible_options if x.name.startswith('-')])
                 positional_options = [x for x in possible_options if not x.name.startswith('-')]
 
                 named_option_map = {}
@@ -335,7 +335,7 @@ class DockerCompleter(Completer):
         """
         if text is not None:
             text = text.strip()
-            words = shlex.split(text)
+            words = DockerCompleter.safe_split(text)
             return words
         return []
 
@@ -365,10 +365,21 @@ class DockerCompleter(Completer):
         if text is not None:
             text = text.strip()
             if len(text) > 0:
-                word = shlex.split(text)[-1]
+                word = DockerCompleter.safe_split(text)[-1]
                 word = word.strip()
                 return word
         return ''
+
+    @staticmethod
+    def safe_split(text):
+        """
+        Shlex can't always split. For example, "\" crashes the completer.
+        """
+        try:
+            words = shlex.split(text)
+            return words
+        except:
+            return text
 
     @staticmethod
     def in_quoted_string(text):
