@@ -482,30 +482,8 @@ class DockerClient(object):
         if not args or len(args) < 2:
             return ['Container ID and command is required.']
 
-        is_interactive = kwargs.pop('interactive', None)
-        is_tty = kwargs.pop('tty', None)
-
-        def execute_external():
-            """
-            Call the official cli
-            """
-            kwargs['interactive'] = is_interactive
-            kwargs['tty'] = is_tty
-            command = format_command_line('exec', False, args, kwargs)
-            process = pexpect.spawnu(command)
-            process.interact()
-
-        def on_after():
-            # \r is to make sure when there is some error output,
-            # prompt is back to beginning of line
-            self.is_refresh_containers = True
-            self.is_refresh_running = True
-            return ['\rInteractive terminal is closed.']
-
-        if is_interactive or is_tty:
-            self.after = on_after
-            execute_external()
-        else:
+        called, args, kwargs = self.call_external_cli('exec', *args, **kwargs)
+        if not called:
             kwargs['container'] = args[0]
             kwargs['cmd'] = args[1:]
 
@@ -747,6 +725,43 @@ class DockerClient(object):
         self.instance.unpause(**kwargs)
 
         return [kwargs['container']]
+
+    def call_external_cli(self, cmd, *args, **kwargs):
+        """
+        Call the "officia" CLI if needed.
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        called = False
+
+        is_interactive = kwargs.pop('interactive', None)
+        is_tty = kwargs.pop('tty', None)
+
+        def execute_external():
+            """
+            Call the official cli
+            """
+            kwargs['interactive'] = is_interactive
+            kwargs['tty'] = is_tty
+
+            command = format_command_line(cmd, False, args, kwargs)
+            process = pexpect.spawnu(command)
+            process.interact()
+
+        def on_after():
+            # \r is to make sure when there is some error output,
+            # prompt is back to beginning of line
+            self.is_refresh_containers = True
+            self.is_refresh_running = True
+            return ['\rInteractive terminal is closed.']
+
+        if is_interactive or is_tty:
+            self.after = on_after
+            called = True
+            execute_external()
+
+        return called, args, kwargs
 
 
 class DockerPermissionException(Exception):
