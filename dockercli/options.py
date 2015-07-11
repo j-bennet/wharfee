@@ -287,6 +287,12 @@ COMMAND_OPTIONS = {
                       help='Attach container\'s STDOUT and STDERR and ' +
                            'forward all signals to the process.',
                       api_match=False),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-i', '--interactive',
+                      action='store_true',
+                      dest='interactive',
+                      default=False,
+                      help='Attach container\'s STDIN.',
+                      api_match=False),
         CommandOption(CommandOption.TYPE_CONTAINER, 'container',
                       action='store',
                       help='Container ID or name to use.'),
@@ -478,16 +484,22 @@ def format_command_line(cmd, is_long, args, kwargs):
     :param kwargs: named parameters
     :return: string
     """
-    opts = {x.dest: x for x in all_options(cmd)}
+    opts = {x.dest: x for x in all_options(cmd) if x.name.startswith('-')}
     comps = ['docker', cmd]
+
+    def kv(o, v):
+        return '{0}={1}'.format(o.get_name(is_long), v)
+
     for opt_dest, opt_value in kwargs.items():
         if opt_dest in opts and opt_value is not None:
             opt = opts[opt_dest]
             if opt.cli_match:
                 if isinstance(opt_value, bool):
                     comps.append(opt.get_name(is_long))
+                elif isinstance(opt_value, list):
+                    comps.append(' '.join([kv(opt, val) for val in opt_value]))
                 else:
-                    comps.append('{0}={1}'.format(opt.get_name(is_long), opt_value))
+                    comps.append(kv(opt, opt_value))
     comps.extend(args)
     external_command = ' '.join(comps)
     return external_command

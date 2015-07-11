@@ -551,47 +551,50 @@ class DockerClient(object):
         if not kwargs['container']:
             return ['Container name is required.']
 
-        if 'remove' in kwargs and kwargs['remove']:
-            def on_after():
-                container = kwargs['container']
-                try:
-                    self.instance.stop(container)
-                    self.instance.remove_container(container)
-                    yield "Removed container {0:.25} on exit.".format(
-                        container)
-                except APIError as ex:
-                    yield "{0:.25}: {1}.".format(container, ex.explanation)
+        called, args, kwargs = self.call_external_cli('start', *args, **kwargs)
+        if not called:
 
-                self.is_refresh_containers = True
-                self.is_refresh_running = True
+            if 'remove' in kwargs and kwargs['remove']:
+                def on_after():
+                    container = kwargs['container']
+                    try:
+                        self.instance.stop(container)
+                        self.instance.remove_container(container)
+                        yield "Removed container {0:.25} on exit.".format(
+                            container)
+                    except APIError as ex:
+                        yield "{0:.25}: {1}.".format(container, ex.explanation)
 
-            self.after = on_after
+                    self.is_refresh_containers = True
+                    self.is_refresh_running = True
 
-        startargs = allowed_args('start', **kwargs)
+                self.after = on_after
 
-        attached = None
+            startargs = allowed_args('start', **kwargs)
 
-        if 'attach' in kwargs and kwargs['attach']:
-            attached = self.attach(
-                container=kwargs['container'],
-                stream=True,
-                stdout=True,
-                stderr=False,
-                logs=False)
+            attached = None
 
-        result = self.instance.start(**startargs)
+            if 'attach' in kwargs and kwargs['attach']:
+                attached = self.attach(
+                    container=kwargs['container'],
+                    stream=True,
+                    stdout=True,
+                    stderr=False,
+                    logs=False)
 
-        # Just in case the stream generated no output, let's allow for
-        # retrieving the logs. They will be our last resort output.
-        self.logs = lambda: self.instance.logs(kwargs['container'])
+            result = self.instance.start(**startargs)
 
-        self.is_refresh_running = True
-        if result:
-            return [result]
-        elif attached:
-            return attached
-        else:
-            return [kwargs['container']]
+            # Just in case the stream generated no output, let's allow for
+            # retrieving the logs. They will be our last resort output.
+            self.logs = lambda: self.instance.logs(kwargs['container'])
+
+            self.is_refresh_running = True
+            if result:
+                return [result]
+            elif attached:
+                return attached
+            else:
+                return [kwargs['container']]
 
     def attach(self, *_, **kwargs):
         """

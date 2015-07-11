@@ -90,7 +90,7 @@ def test_parse_multiple_args():
     :return:
     """
     expected_opts = {
-        'tty': None,
+        'tty': False,
         'help': None,
         'remove': None,
         'environment': [u'FOO=1', u'BOO=2'],
@@ -152,6 +152,9 @@ def test_help_formatting():
     ('exec -i -t boo /usr/bin/bash', True, 'exec --interactive --tty boo /usr/bin/bash'),
     ('exec --interactive --tty boo /usr/bin/bash', False, 'exec -i -t boo /usr/bin/bash'),
     ('exec -i --tty boo /usr/bin/bash', False, 'exec -i -t boo /usr/bin/bash'),
+    ('run --name some-percona --env MYSQL_ROOT_PASSWORD=masterkey --publish 9999:3306 --interactive --tty percona',
+     False,
+     'run --name=some-percona -e=MYSQL_ROOT_PASSWORD=masterkey -p=9999:3306 -i -t percona')
 ])
 def test_external_command_line(text, is_long, expected):
     """
