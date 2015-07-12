@@ -20,7 +20,8 @@ from .options import parse_command_options
 from .options import format_command_help, format_command_line
 from .options import COMMAND_NAMES
 from .options import OptionError
-from .helpers import filesize, parse_port_bindings, parse_volume_bindings
+from .helpers import filesize, parse_port_bindings, parse_volume_bindings, \
+    parse_exposed_ports
 
 
 class DockerClient(object):
@@ -392,6 +393,7 @@ class DockerClient(object):
             kwargs['command'] = args[1:] if len(args) > 1 else []
 
             self._add_port_bindings(kwargs)
+            self._add_exposed_ports(kwargs)
             self._add_link_bindings(kwargs)
             self._add_volumes_from(kwargs)
             self._add_volumes(kwargs)
@@ -461,6 +463,22 @@ class DockerClient(object):
 
             # Have to provide host config with port mappings.
             port_conf = create_host_config(port_bindings=port_bindings)
+
+            self._update_host_config(params, port_conf)
+
+    def _add_exposed_ports(self, params):
+        """
+        Update kwargs if user wants to expose some ports.
+        :param params: dict
+        """
+        if 'expose' in params and params['expose']:
+            ports = parse_exposed_ports(params['expose'])
+
+            # Have to provide list of ports to open in create_container.
+            params['ports'] = ports.keys()
+
+            # Have to provide host config with port mappings.
+            port_conf = create_host_config(port_bindings=ports)
 
             self._update_host_config(params, port_conf)
 

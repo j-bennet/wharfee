@@ -21,7 +21,8 @@ class CommandOption(object):
     TYPE_CHOICE = 10
     TYPE_KEYVALUE = 11
     TYPE_PORT_BINDING = 12
-    TYPE_OBJECT = 13
+    TYPE_PORT_RANGE = 13
+    TYPE_OBJECT = 14
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -46,6 +47,7 @@ class CommandOption(object):
             CommandOption.TYPE_CHOICE,
             CommandOption.TYPE_KEYVALUE,
             CommandOption.TYPE_PORT_BINDING,
+            CommandOption.TYPE_PORT_RANGE,
             CommandOption.TYPE_OBJECT
         ]:
             raise ValueError("Incorrect option_type.", option_type)

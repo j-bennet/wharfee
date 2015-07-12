@@ -190,6 +190,13 @@ COMMAND_OPTIONS = {
                       dest='environment',
                       help='Set environment variables.',
                       nargs='*'),
+        CommandOption(CommandOption.TYPE_PORT_RANGE, None, '--expose',
+                      action='append',
+                      dest='expose',
+                      help=('Expose a port or a range of ports (e.g. '
+                            '--expose=3300-3310) from the container without '
+                            'publishing it to your host.'),
+                      nargs='*'),
         CommandOption(CommandOption.TYPE_CONTAINER, '--name',
                       action='store',
                       dest='name',

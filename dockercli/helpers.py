@@ -34,6 +34,27 @@ def parse_volume_bindings(volumes):
     return result
 
 
+def parse_exposed_ports(ps):
+    """
+    Parse array of exposed ports (not public).
+
+    [1000] -> { 1000: None }
+    [1000-1002] -> { 1000: None, 1001: None, 1002: None }
+
+    :return: dict
+    """
+    result = {}
+    for p in ps:
+        if '-' in p:
+            # it is a range from port to port
+            p1, p2 = p.split('-')
+            for x in range(p1, p2 + 1):
+                result[x] = None
+        else:
+            result[p] = None
+    return result
+
+
 def parse_port_bindings(bindings):
     """
     Parse array of string port bindings into a dict. For example:
