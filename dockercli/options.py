@@ -17,6 +17,7 @@ COMMAND_NAMES = [
     'pull',
     'pause',
     'port',
+    'restart',
     'run',
     'rm',
     'rmi',
@@ -303,6 +304,17 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_CONTAINER, 'container',
                       action='store',
                       help='Container ID or name to use.'),
+    ],
+    'restart': [
+        CommandOption(CommandOption.TYPE_NUMERIC, '-t', '--timeout',
+                      dest='timeout',
+                      help=('Number of seconds to try to stop for before '
+                            'killing the container. Once killed it will then '
+                            'be restarted. Default is 10 seconds.')),
+        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
+                      action='store',
+                      help='Container ID or name to use.',
+                      nargs='+'),
     ],
     'rm': [
         CommandOption(CommandOption.TYPE_CONTAINER, 'container',

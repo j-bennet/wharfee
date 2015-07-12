@@ -61,6 +61,7 @@ class DockerClient(object):
             'inspect': (self.inspect, "Return low-level information on a " +
                         "container or image."),
             'logs': (self.logs, "Fetch the logs of a container."),
+            'restart': (self.restart, "Restart a running container."),
             'run': (self.run, "Run a command in a new container."),
             'rm': (self.rm, "Remove one or more containers."),
             'rmi': (self.rmi, "Remove one or more images."),
@@ -414,6 +415,22 @@ class DockerClient(object):
                     })
                     return self.start(**start_args)
             return ['There was a problem running the container.']
+
+    def restart(self, *args, **kwargs):
+        """
+        Restart a running container. Equivalent of docker restart.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+        if not args:
+            return ['Container name is required.']
+
+        def stream():
+            for container in args:
+                self.instance.restart(container, **kwargs)
+                yield container
+
+        return stream()
 
     def _add_volumes(self, params):
         """
