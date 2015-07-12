@@ -71,4 +71,7 @@ def step_see_help(context):
     Expect to see help lines.
     """
     for expected_line in context.fixture_lines['help.txt']:
-        context.cli.expect_exact(expected_line)
+        try:
+            context.cli.expect_exact(expected_line, timeout=1)
+        except Exception:
+            raise Exception('Expected: ' + expected_line)
