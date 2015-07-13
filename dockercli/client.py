@@ -69,6 +69,7 @@ class DockerClient(object):
             'shell': (self.shell, "Get shell into a running container."),
             'start': (self.start, "Restart a stopped container."),
             'stop': (self.stop, "Stop a running container."),
+            'tag': (self.tag, "Tag an image into a repository."),
             'top': (self.top, "Display the running processes of a container."),
             'unpause': (self.unpause, ("Unpause all processes within a "
                                        "container.")),
@@ -393,11 +394,11 @@ class DockerClient(object):
             kwargs['image'] = args[0]
             kwargs['command'] = args[1:] if len(args) > 1 else []
 
-            self._add_port_bindings(kwargs)
-            self._add_exposed_ports(kwargs)
-            self._add_link_bindings(kwargs)
-            self._add_volumes_from(kwargs)
-            self._add_volumes(kwargs)
+            kwargs = self._add_port_bindings(kwargs)
+            kwargs = self._add_exposed_ports(kwargs)
+            kwargs = self._add_link_bindings(kwargs)
+            kwargs = self._add_volumes_from(kwargs)
+            kwargs = self._add_volumes(kwargs)
 
             runargs = allowed_args('run', **kwargs)
             result = self.instance.create_container(**runargs)
@@ -432,32 +433,57 @@ class DockerClient(object):
 
         return stream()
 
+    def tag(self, *args, **kwargs):
+        """
+        Tag an image into repository. Equivalent of docker tag.
+        :param kwargs:
+        :return: Iamge ID.
+        """
+        if not args or len(args) < 2:
+            return ['Image name and repository name are required.']
+
+        img = args[0]
+        repo, tag = args[1].split(':', 2)
+
+        result = self.instance.tag(
+            image=img, repository=repo, tag=tag, **kwargs)
+
+        if result:
+            return ['Tagged {0} into {1}.'.format(*args)]
+        else:
+            return ['Error tagging {0} into {1}.'.format(*args)]
+
     def _add_volumes(self, params):
         """
         Update kwargs if volumes are present.
         :param params: dict
+        :return dict
         """
         if 'volumes' in params and params['volumes']:
             binds = parse_volume_bindings(params['volumes'])
             params['volumes'] = [x['bind'] for x in binds.values()]
             conf = create_host_config(binds=binds)
             self._update_host_config(params, conf)
+        return params
 
     def _add_volumes_from(self, params):
         """
         Update kwargs if volumes-from are present.
         :param params: dict
+        :return dict
         """
         if 'volumes_from' in params and params['volumes_from']:
             cs = ','.join(params['volumes_from'])
             cs = [x.strip() for x in cs.split(',') if x]
             conf = create_host_config(volumes_from=cs)
             self._update_host_config(params, conf)
+        return params
 
     def _add_link_bindings(self, params):
         """
         Update kwargs if user wants to link containers.
         :param params: dict
+        :return dict
         """
         if 'links' in params and params['links']:
             links = {}
@@ -466,11 +492,13 @@ class DockerClient(object):
                 links[link_name] = link_alias
             link_conf = create_host_config(links=links)
             self._update_host_config(params, link_conf)
+        return params
 
     def _add_port_bindings(self, params):
         """
         Update kwargs if user wants to bind some ports.
         :param params: dict
+        :return dict
         """
         if 'port_bindings' in params and params['port_bindings']:
             port_bindings = parse_port_bindings(params['port_bindings'])
@@ -483,10 +511,13 @@ class DockerClient(object):
 
             self._update_host_config(params, port_conf)
 
+        return params
+
     def _add_exposed_ports(self, params):
         """
         Update kwargs if user wants to expose some ports.
         :param params: dict
+        :return dict
         """
         if 'expose' in params and params['expose']:
             ports = parse_exposed_ports(params['expose'])
@@ -499,16 +530,20 @@ class DockerClient(object):
 
             self._update_host_config(params, port_conf)
 
+        return params
+
     def _update_host_config(self, params, config_to_merge):
         """
         Update config dictionary in kwargs with another dictionary.
         :param params: dict
         :param config_to_merge: dict with new values
+        :return dict
         """
         if 'host_config' in params and params['host_config']:
             params['host_config'].update(config_to_merge)
         else:
             params['host_config'] = config_to_merge
+        return params
 
     def execute(self, *args, **kwargs):
         """

@@ -8,21 +8,23 @@ class CommandOption(object):
     useful to do autocompletion in context of this option.
     """
 
-    TYPE_FILEPATH = 0
-    TYPE_DIRPATH = 1
-    TYPE_BOOLEAN = 2
-    TYPE_NUMERIC = 3
-    TYPE_CONTAINER = 4
-    TYPE_CONTAINER_RUN = 5
-    TYPE_IMAGE = 6
-    TYPE_IMAGE_TAG = 7
-    TYPE_COMMAND = 8
-    TYPE_COMMAND_ARG = 9
-    TYPE_CHOICE = 10
-    TYPE_KEYVALUE = 11
-    TYPE_PORT_BINDING = 12
-    TYPE_PORT_RANGE = 13
-    TYPE_OBJECT = 14
+    TYPE_FILEPATH, \
+        TYPE_DIRPATH, \
+        TYPE_BOOLEAN, \
+        TYPE_NUMERIC, \
+        TYPE_CONTAINER, \
+        TYPE_CONTAINER_RUN, \
+        TYPE_IMAGE, \
+        TYPE_IMAGE_TAGGED, \
+        TYPE_IMAGE_TAG, \
+        TYPE_COMMAND, \
+        TYPE_COMMAND_ARG, \
+        TYPE_CHOICE, \
+        TYPE_KEYVALUE, \
+        TYPE_PORT_BINDING, \
+        TYPE_PORT_RANGE, \
+        TYPE_OBJECT = \
+        range(16)
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -41,6 +43,7 @@ class CommandOption(object):
             CommandOption.TYPE_CONTAINER,
             CommandOption.TYPE_CONTAINER_RUN,
             CommandOption.TYPE_IMAGE,
+            CommandOption.TYPE_IMAGE_TAGGED,
             CommandOption.TYPE_IMAGE_TAG,
             CommandOption.TYPE_COMMAND,
             CommandOption.TYPE_COMMAND_ARG,
@@ -137,7 +140,7 @@ class CommandOption(object):
         Should this option suggest tagged image name?
         :return: boolean
         """
-        return self.option_type == CommandOption.TYPE_IMAGE_TAG
+        return self.option_type == CommandOption.TYPE_IMAGE_TAGGED
 
     def is_type_filepath(self):
         """

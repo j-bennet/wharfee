@@ -25,6 +25,7 @@ COMMAND_NAMES = [
     'shell',
     'start',
     'stop',
+    'tag',
     'top',
     'unpause',
     'version',
@@ -197,7 +198,8 @@ COMMAND_OPTIONS = {
                       help=('Expose a port or a range of ports (e.g. '
                             '--expose=3300-3310) from the container without '
                             'publishing it to your host.'),
-                      nargs='*'),
+                      nargs='*',
+                      api_match=False),
         CommandOption(CommandOption.TYPE_CONTAINER, '--name',
                       action='store',
                       dest='name',
@@ -329,7 +331,7 @@ COMMAND_OPTIONS = {
                       cli_match=False),
     ],
     'rmi': [
-        CommandOption(CommandOption.TYPE_IMAGE_TAG, 'image',
+        CommandOption(CommandOption.TYPE_IMAGE_TAGGED, 'image',
                       action='store',
                       help='Image name name to remove.',
                       nargs='+'),
@@ -349,6 +351,19 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
                       action='store',
                       help='Container ID or name to use.'),
+    ],
+    'tag': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-f', '--force',
+                      action='store_true',
+                      dest='force',
+                      help='Force.'),
+        CommandOption(CommandOption.TYPE_IMAGE, 'image',
+                      action='store',
+                      help='The image to tag (format: "image[:tag]").'),
+        CommandOption(CommandOption.TYPE_IMAGE_TAG, 'name',
+                      action='store',
+                      help=('The tag name (format: "[registryhost/]'
+                            '[username/]name[:tag]").')),
     ],
     'top': [
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
