@@ -443,7 +443,10 @@ class DockerClient(object):
             return ['Image name and repository name are required.']
 
         img = args[0]
-        repo, tag = args[1].split(':', 2)
+        if ':' in args[1]:
+            repo, tag = args[1].split(':', 2)
+        else:
+            repo, tag = args[1], None
 
         result = self.instance.tag(
             image=img, repository=repo, tag=tag, **kwargs)
