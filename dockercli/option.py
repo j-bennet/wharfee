@@ -23,8 +23,9 @@ class CommandOption(object):
         TYPE_KEYVALUE, \
         TYPE_PORT_BINDING, \
         TYPE_PORT_RANGE, \
-        TYPE_OBJECT = \
-        range(16)
+        TYPE_OBJECT, \
+        TYPE_STRING = \
+        range(17)
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -51,7 +52,8 @@ class CommandOption(object):
             CommandOption.TYPE_KEYVALUE,
             CommandOption.TYPE_PORT_BINDING,
             CommandOption.TYPE_PORT_RANGE,
-            CommandOption.TYPE_OBJECT
+            CommandOption.TYPE_OBJECT,
+            CommandOption.TYPE_STRING
         ]:
             raise ValueError("Incorrect option_type.", option_type)
 
