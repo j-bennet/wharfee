@@ -554,6 +554,24 @@ class DockerClient(object):
             params['host_config'] = config_to_merge
         return params
 
+    def _is_repo_tag_valid(self, repo):
+        """
+        When an image is tagged into a repo, make sure only allowed symbols
+        are used.
+        :param repo:
+        :return: (boolean, "error message")
+        """
+        # Username: only [a-z0-9_] are allowed, size between 4 and 30
+        if '/' not in repo:
+            return False, 'Format: user_name/repository_name[:tag].'
+
+        user_name, repo_name = repo.split('/')
+        user_pattern = re.compile(r'^[a-z0-9_]{4,30}$')
+        if not user_pattern.match(user_name):
+            return False, 'Only [a-z0-9_] are allowed in user name, ' \
+                          'size between 4 and 30'
+        return True, None
+
     def execute(self, *args, **kwargs):
         """
         Execute a command in the container. Equivalent of docker exec.
@@ -814,7 +832,11 @@ class DockerClient(object):
         :return: interactive.
         """
         if not args or len(args) < 1:
-            return ['Image name is required.']
+            return ['Image name (tagged) is required.']
+
+        tag_valid, tag_message = self._is_repo_tag_valid(args[0])
+        if not tag_valid:
+            return [tag_message]
 
         self.after = lambda: ['\r']
 
