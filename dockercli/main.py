@@ -164,9 +164,9 @@ class DockerCli(object):
                 images = set([])
                 tagged = set([])
                 for im in ims:
-                    for name in im['RepoTags']:
-                        images.add(parse_image_name(name, im['Id']))
-                        tagged.add(format_tagged(name, im['Id']))
+                    repo_tag = '{0}:{1}'.format(im['Repository'], im['Tag'])
+                    images.add(parse_image_name(repo_tag, im['Id']))
+                    tagged.add(format_tagged(repo_tag, im['Id']))
                 self.completer.set_images(images)
                 self.completer.set_tagged(tagged)
 

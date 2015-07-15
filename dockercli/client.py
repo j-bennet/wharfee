@@ -740,20 +740,36 @@ class DockerClient(object):
         """
         result = self.instance.images(**kwargs)
         re_digits = re.compile('^[0-9]+$', re.UNICODE)
+
+        def convert_image_dict(a):
+            """
+            Drop some keys and change some values to pretty-print image dict.
+            """
+            b = {}
+            for k, v in a.items():
+                if k not in ['RepoTags', 'RepoDigests', 'Labels', 'Size']:
+                    b[k] = v
+                if k == 'Created' and v and re_digits.search(str(v)):
+                    b[k] = pretty.date(v)
+                if k == 'VirtualSize':
+                    b[k] = filesize(v)
+
+            # If we have more than one repo tag, return as many dicts
+            for rt in a['RepoTags']:
+                repo, tag = rt.split(':', 2)
+                c = {}
+                c.update(b)
+                c['Repository'] = repo
+                c['Tag'] = tag
+                yield c
+
         if len(result) > 0:
             if isinstance(result[0], dict):
-                # Drop some keys we're not interested in.
-                for i in range(len(result)):
-                    for unused_key in ['RepoDigests', 'Labels', 'Size']:
-                        if unused_key in result[i]:
-                            del result[i][unused_key]
-                    result[i]['VirtualSize'] = filesize(
-                        result[i]['VirtualSize'])
-                    if 'Created' in result[i] \
-                            and result[i]['Created'] \
-                            and re_digits.search(str(result[i]['Created'])):
-                        result[i]['Created'] = pretty.date(
-                            result[i]['Created'])
+                converted = []
+                for x in result:
+                    for y in convert_image_dict(x):
+                        converted.append(y)
+                return converted
             return result
         else:
             return ['There are no images to list.']
