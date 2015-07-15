@@ -18,6 +18,7 @@ COMMAND_NAMES = [
     'pull',
     'pause',
     'port',
+    'push',
     'restart',
     'run',
     'rm',
@@ -177,6 +178,11 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_IMAGE, 'image',
                       action='store',
                       help='Image name to pull.'),
+    ],
+    'push': [
+        CommandOption(CommandOption.TYPE_IMAGE_TAGGED, 'name',
+                      action='store',
+                      help='Image name to push (format: "name[:tag]").'),
     ],
     'images': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--all',

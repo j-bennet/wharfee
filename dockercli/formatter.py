@@ -397,6 +397,7 @@ ROW_FORMATTERS = {
 
 STREAM_FORMATTERS = {
     'pull': JsonStreamFormatter,
+    'push': JsonStreamFormatter,
     'build': JsonStreamFormatter,
     'inspect': JsonStreamDumper,
 }
