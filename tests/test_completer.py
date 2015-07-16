@@ -119,7 +119,7 @@ def test_command_completion(command, expected):
     assert result == expected
 
 @pytest.mark.parametrize("command, expected", [
-    ("h", ['help', 'shell', 'search']),
+    ("h", ['help', 'shell', 'push', 'search']),
     ("he", ['help', 'shell']),
     ("hel", ['help', 'shell']),
     ("help", ['help']),
