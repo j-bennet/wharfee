@@ -153,6 +153,12 @@ OPTION_COMMAND = CommandOption(CommandOption.TYPE_COMMAND, 'command',
     help='Command to run in a container.',
     nargs='*')
 
+OPTION_STDIN_OPEN = CommandOption(
+    CommandOption.TYPE_BOOLEAN, 'stdin_open', None,
+    action='store',
+    dest='stdin_open',
+    default=False)
+
 
 COMMAND_OPTIONS = {
     'build': [
@@ -473,11 +479,10 @@ HIDDEN_OPTIONS = {
         CommandOption(CommandOption.TYPE_OBJECT, 'host_config', None,
                       action='store',
                       dest='host_config'),
+        OPTION_STDIN_OPEN
     ],
     'create': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, 'stdin_open', None,
-                      action='store',
-                      dest='stdin_open')
+        OPTION_STDIN_OPEN
     ]
 }
 
@@ -571,8 +576,8 @@ def parse_command_options(cmd, params):
     :param params: list: all tokens after command name
     :return: parser, args, opts
     """
-    parser = OptParser(prog=cmd, add_help_option=False,
-                       conflict_handler='resolve')
+    parser = OptParser(
+        prog=cmd, add_help_option=False, conflict_handler='resolve')
     parser.disable_interspersed_args()
     for opt in all_options(cmd, include_hidden=True):
         if opt.name.startswith('-'):
@@ -580,6 +585,13 @@ def parse_command_options(cmd, params):
     popts, pargs = parser.parse_args(params)
     parser.assert_option_format()
     popts = vars(popts)
+
+    # Add hidden defaults
+    if cmd in HIDDEN_OPTIONS:
+        for opt in HIDDEN_OPTIONS[cmd]:
+            if opt.default is not None:
+                popts[opt.dest] = opt.default
+
     return parser, popts, pargs
 
 

@@ -86,6 +86,8 @@ class CommandOption(object):
         else:
             self.dest = short_name.strip('-')
 
+        self.default = kwargs['default'] if 'default' in kwargs else None
+
         if 'nargs' in kwargs:
             self.is_optional = (kwargs['nargs'] in ['?', '*'])
             self.is_multiple = (kwargs['nargs'] in ['+', '*'])
