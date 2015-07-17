@@ -462,19 +462,8 @@ COMMAND_OPTIONS = {
 # to the user.
 HIDDEN_OPTIONS = {
     'start': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-P', '--publish-all',
-                      action='store_true',
-                      dest='publish_all_ports',
-                      help=('Publish all exposed ports to the host '
-                            'interfaces.')),
-        CommandOption(CommandOption.TYPE_PORT_BINDING, '-p', '--publish',
-                      action='append',
-                      dest='port_bindings',
-                      help=('Publish a container\'s port to the host. '
-                            'Format: ip:hostPort:containerPort or '
-                            'ip::containerPort or hostPort:containerPort or '
-                            'containerPort'),
-                      nargs='*'),
+        OPTION_PUBLISH_ALL,
+        OPTION_PUBLISH,
     ],
     'run': [
         CommandOption(CommandOption.TYPE_NUMERIC, 'ports', None,
@@ -485,6 +474,11 @@ HIDDEN_OPTIONS = {
                       action='store',
                       dest='host_config'),
     ],
+    'create': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, 'stdin_open', None,
+                      action='store',
+                      dest='stdin_open')
+    ]
 }
 
 
