@@ -46,6 +46,7 @@ class DockerClient(object):
             'build': (self.build, ("Build a new image from the source"
                                    " code")),
             'clear': (clear_handler, "Clear the window."),
+            'create': (self.create, 'Create a new container.'),
             'exec': (self.execute, ("Run a command in a running"
                                     " container.")),
             'help': (self.help, "Help on available commands."),
@@ -406,8 +407,8 @@ class DockerClient(object):
             kwargs = self._add_volumes_from(kwargs)
             kwargs = self._add_volumes(kwargs)
 
-            runargs = allowed_args('run', **kwargs)
-            result = self.instance.create_container(**runargs)
+            create_args = allowed_args('create', **kwargs)
+            result = self.instance.create_container(**create_args)
 
             if result:
                 if "Warnings" in result and result['Warnings']:
@@ -422,6 +423,22 @@ class DockerClient(object):
                     })
                     return self.start(**start_args)
             return ['There was a problem running the container.']
+
+    def create(self, *args, **kwargs):
+        """
+        Create a container. Equivalent of docker create.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+        if not args:
+            return ['Image name is required.']
+
+        called, args, kwargs = self.call_external_cli('create', *args, **kwargs)
+        if not called:
+            kwargs['image'] = args[0]
+            kwargs['command'] = args[1:] if len(args) > 1 else []
+
+            # TODO
 
     def restart(self, *args, **kwargs):
         """

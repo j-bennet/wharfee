@@ -7,6 +7,7 @@ from .option import CommandOption
 COMMAND_NAMES = [
     'build',
     'clear',
+    'create',
     'exec',
     'help',
     'images',
@@ -40,6 +41,112 @@ OPTION_HELP = CommandOption(
     dest='help',
     help='Display help for this command.')
 
+OPTION_ENV = CommandOption(
+    CommandOption.TYPE_KEYVALUE, '-e', '--env',
+    action='append',
+    dest='environment',
+    help='Set environment variables.',
+    nargs='*')
+
+OPTION_EXPOSE = CommandOption(
+    CommandOption.TYPE_PORT_RANGE, None, '--expose',
+    action='append',
+    dest='expose',
+    help=('Expose a port or a range of ports (e.g. '
+          '--expose=3300-3310) from the container without '
+          'publishing it to your host.'),
+    nargs='*',
+    api_match=False)
+
+OPTION_CONTAINER_NAME = CommandOption(
+    CommandOption.TYPE_CONTAINER, None, '--name',
+    action='store',
+    dest='name',
+    help='Assign a name to the container.')
+
+OPTION_LINK = CommandOption(
+    CommandOption.TYPE_CONTAINER, None, '--link',
+    action='append',
+    dest='links',
+    help=('Add link to another container in the form of '
+          '<name|id>:alias. To add multiple links: --link '
+          'name1:alias1 --link name2:alias2...'),
+    nargs='*',
+    api_match=False)
+
+OPTION_PUBLISH_ALL = CommandOption(
+    CommandOption.TYPE_BOOLEAN, '-P', '--publish-all',
+    action='store_true',
+    dest='publish_all_ports',
+    help=('Publish all exposed ports to the host '
+          'interfaces.'),
+    api_match=False)
+
+OPTION_PUBLISH = CommandOption(
+    CommandOption.TYPE_PORT_BINDING, '-p', '--publish',
+    action='append',
+    dest='port_bindings',
+    help=('Publish a container\'s port to the host. '
+          'Format: ip:hostPort:containerPort or '
+          'ip::containerPort or hostPort:containerPort or '
+          'containerPort. To add multiple ports: --publish '
+          '1111:2222 --publish 3333:4444...'),
+    nargs='*',
+    api_match=False)
+
+OPTION_INTERACTIVE = CommandOption(
+    CommandOption.TYPE_BOOLEAN, '-i', '--interactive',
+    action='store_true',
+    dest='interactive',
+    default=False,
+    help='Keep STDIN open even if not attached.',
+    api_match=False)
+
+OPTION_TTY = CommandOption(
+    CommandOption.TYPE_BOOLEAN, '-t', '--tty',
+    action='store_true',
+    dest='tty',
+    default=False,
+    help='Allocate a pseudo-TTY.')
+
+OPTION_RM = CommandOption(
+    CommandOption.TYPE_BOOLEAN, None, '--rm',
+    action='store_true',
+    dest='remove',
+    help=('Remove the container when it exits. '
+          'Can\'t be used with --detach'),
+    api_match=False)
+
+OPTION_VOLUME = CommandOption(
+    CommandOption.TYPE_FILEPATH, '-v', '--volume',
+    action='append',
+    dest='volumes',
+    help=('Bind mount a volume (e.g., from the host: -v '
+          '/host-path:/container-path, from Docker: '
+          '-v /container-path).'),
+    nargs='*')
+
+OPTION_VOLUMES_FROM = CommandOption(
+    CommandOption.TYPE_CONTAINER, None, '--volumes-from',
+    action='append',
+    dest='volumes_from',
+    help=('Mount volumes from the specified containers. Can '
+          'be specified multiple times. Alternatively, can '
+          'accept a comma-separated string of container '
+          'names.'),
+    nargs='*',
+    api_match=False)
+
+OPTION_IMAGE = CommandOption(
+    CommandOption.TYPE_IMAGE, 'image',
+    action='store',
+    help='Image ID or name to use.')
+
+OPTION_COMMAND = CommandOption(CommandOption.TYPE_COMMAND, 'command',
+    action='store',
+    help='Command to run in a container.',
+    nargs='*')
+
 
 COMMAND_OPTIONS = {
     'build': [
@@ -68,6 +175,20 @@ COMMAND_OPTIONS = {
                       help='Path or URL where the Dockerfile is located.'),
     ],
     'clear': [],
+    'create': [
+        OPTION_ENV,
+        OPTION_EXPOSE,
+        OPTION_INTERACTIVE,
+        OPTION_LINK,
+        OPTION_CONTAINER_NAME,
+        OPTION_PUBLISH_ALL,
+        OPTION_PUBLISH,
+        OPTION_TTY,
+        OPTION_VOLUME,
+        OPTION_VOLUMES_FROM,
+        OPTION_IMAGE,
+        OPTION_COMMAND,
+    ],
     'exec': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
                       action='store_true',
@@ -205,87 +326,19 @@ COMMAND_OPTIONS = {
                       dest='detach',
                       help=('Detached mode: run the container in the '
                             'background and print the new container ID')),
-        CommandOption(CommandOption.TYPE_KEYVALUE, '-e', '--env',
-                      action='append',
-                      dest='environment',
-                      help='Set environment variables.',
-                      nargs='*'),
-        CommandOption(CommandOption.TYPE_PORT_RANGE, None, '--expose',
-                      action='append',
-                      dest='expose',
-                      help=('Expose a port or a range of ports (e.g. '
-                            '--expose=3300-3310) from the container without '
-                            'publishing it to your host.'),
-                      nargs='*',
-                      api_match=False),
-        CommandOption(CommandOption.TYPE_CONTAINER, '--name',
-                      action='store',
-                      dest='name',
-                      help='Assign a name to the container.'),
-        CommandOption(CommandOption.TYPE_CONTAINER, '--link',
-                      action='append',
-                      dest='links',
-                      help=('Add link to another container in the form of '
-                            '<name|id>:alias. To add multiple links: --link '
-                            'name1:alias1 --link name2:alias2...'),
-                      nargs='*',
-                      api_match=False),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-P', '--publish-all',
-                      action='store_true',
-                      dest='publish_all_ports',
-                      help=('Publish all exposed ports to the host '
-                            'interfaces.'),
-                      api_match=False),
-        CommandOption(CommandOption.TYPE_PORT_BINDING, '-p', '--publish',
-                      action='append',
-                      dest='port_bindings',
-                      help=('Publish a container\'s port to the host. '
-                            'Format: ip:hostPort:containerPort or '
-                            'ip::containerPort or hostPort:containerPort or '
-                            'containerPort. To add multiple ports: --publish '
-                            '1111:2222 --publish 3333:4444...'),
-                      nargs='*',
-                      api_match=False),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-i', '--interactive',
-                      action='store_true',
-                      dest='interactive',
-                      default=False,
-                      help='Keep STDIN open even if not attached.',
-                      api_match=False),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-t', '--tty',
-                      action='store_true',
-                      dest='tty',
-                      default=False,
-                      help='Allocate a pseudo-TTY.'),
-        CommandOption(CommandOption.TYPE_IMAGE, 'image',
-                      action='store',
-                      help='Image ID or name to use.'),
-        CommandOption(CommandOption.TYPE_COMMAND, 'command',
-                      action='store',
-                      help='Command to run in a container.',
-                      nargs='*'),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '--rm',
-                      action='store_true',
-                      dest='remove',
-                      help=('Remove the container when it exits. '
-                            'Can\'t be used with --detach'),
-                      api_match=False),
-        CommandOption(CommandOption.TYPE_FILEPATH, '-v', '--volume',
-                      action='append',
-                      dest='volumes',
-                      help=('Bind mount a volume (e.g., from the host: -v '
-                            '/host-path:/container-path, from Docker: '
-                            '-v /container-path).'),
-                      nargs='*'),
-        CommandOption(CommandOption.TYPE_CONTAINER, '--volumes-from',
-                      action='append',
-                      dest='volumes_from',
-                      help=('Mount volumes from the specified containers. Can '
-                            'be specified multiple times. Alternatively, can '
-                            'accept a comma-separated string of container '
-                            'names.'),
-                      nargs='*',
-                      api_match=False),
+        OPTION_ENV,
+        OPTION_EXPOSE,
+        OPTION_CONTAINER_NAME,
+        OPTION_LINK,
+        OPTION_PUBLISH_ALL,
+        OPTION_PUBLISH,
+        OPTION_INTERACTIVE,
+        OPTION_TTY,
+        OPTION_RM,
+        OPTION_VOLUME,
+        OPTION_VOLUMES_FROM,
+        OPTION_IMAGE,
+        OPTION_COMMAND,
     ],
     'shell': [
         CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
