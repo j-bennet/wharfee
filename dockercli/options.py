@@ -58,6 +58,12 @@ OPTION_EXPOSE = CommandOption(
     nargs='*',
     api_match=False)
 
+OPTION_CONTAINER_HOSTNAME = CommandOption(
+    CommandOption.TYPE_STRING, '-h', '--hostname',
+    action='store',
+    dest='hostname',
+    help='Container host name.')
+
 OPTION_CONTAINER_NAME = CommandOption(
     CommandOption.TYPE_CONTAINER, None, '--name',
     action='store',
@@ -180,6 +186,7 @@ COMMAND_OPTIONS = {
         OPTION_EXPOSE,
         OPTION_INTERACTIVE,
         OPTION_LINK,
+        OPTION_CONTAINER_HOSTNAME,
         OPTION_CONTAINER_NAME,
         OPTION_PUBLISH_ALL,
         OPTION_PUBLISH,
@@ -328,6 +335,7 @@ COMMAND_OPTIONS = {
                             'background and print the new container ID')),
         OPTION_ENV,
         OPTION_EXPOSE,
+        OPTION_CONTAINER_HOSTNAME,
         OPTION_CONTAINER_NAME,
         OPTION_LINK,
         OPTION_PUBLISH_ALL,
@@ -569,7 +577,8 @@ def parse_command_options(cmd, params):
     :param params: list: all tokens after command name
     :return: parser, args, opts
     """
-    parser = OptParser(prog=cmd, add_help_option=False)
+    parser = OptParser(prog=cmd, add_help_option=False,
+                       conflict_handler='resolve')
     parser.disable_interspersed_args()
     for opt in all_options(cmd, include_hidden=True):
         if opt.name.startswith('-'):
@@ -629,7 +638,8 @@ def format_command_help(cmd):
 
     usage = ' '.join(usage)
 
-    parser = OptParser(prog=cmd, add_help_option=False, usage=usage)
+    parser = OptParser(prog=cmd, add_help_option=False, usage=usage,
+                       conflict_handler='resolve')
 
     for opt in standards:
         if opt.name.startswith('-'):
