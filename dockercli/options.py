@@ -168,13 +168,23 @@ OPTION_IMAGE = CommandOption(
 OPTION_COMMAND = CommandOption(CommandOption.TYPE_COMMAND, 'command',
     action='store',
     help='Command to run in a container.',
-    nargs='*')
+    nargs='?')
 
 OPTION_STDIN_OPEN = CommandOption(
     CommandOption.TYPE_BOOLEAN, 'stdin_open', None,
     action='store',
     dest='stdin_open',
     default=False)
+
+OPTION_CONTAINER = CommandOption(
+    CommandOption.TYPE_CONTAINER, None, 'container',
+    action='store',
+    help='Container ID or name to use.')
+
+OPTION_CONTAINER_RUNNING = CommandOption(
+    CommandOption.TYPE_CONTAINER_RUN, None, 'container',
+    action='store',
+    help='Container ID or name to use.')
 
 
 COMMAND_OPTIONS = {
@@ -231,18 +241,9 @@ COMMAND_OPTIONS = {
                       default=False,
                       help='Keep STDIN open even if not attached.',
                       api_match=False),
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-t', '--tty',
-                      action='store_true',
-                      dest='tty',
-                      default=False,
-                      help='Allocate a pseudo-TTY.'),
-        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
-                      action='store',
-                      help='Container to run command in.',
-                      nargs='*'),
-        CommandOption(CommandOption.TYPE_COMMAND, 'command',
-                      action='store',
-                      help='Command to run.'),
+        OPTION_TTY,
+        OPTION_CONTAINER_RUNNING,
+        OPTION_COMMAND,
     ],
     'info': [
     ],
@@ -273,19 +274,13 @@ COMMAND_OPTIONS = {
                       action='store_true',
                       dest='stream',
                       help='Follow log output.'),
-        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
-                      action='store',
-                      help='Container to retrieve the logs from.'),
+        OPTION_CONTAINER,
     ],
     'pause': [
-        CommandOption(CommandOption.TYPE_CONTAINER_RUN, None, 'container',
-                      action='store',
-                      help='Container ID or name to use.'),
+        OPTION_CONTAINER_RUNNING,
     ],
     'port': [
-        CommandOption(CommandOption.TYPE_CONTAINER, None, 'container',
-                      action='store',
-                      help='Container ID or name to use.'),
+        OPTION_CONTAINER,
     ],
     'ps': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--all',
@@ -374,9 +369,7 @@ COMMAND_OPTIONS = {
         OPTION_COMMAND,
     ],
     'shell': [
-        CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
-                      action='store',
-                      help='Container ID or name to use.'),
+        OPTION_CONTAINER_RUNNING,
         CommandOption(CommandOption.TYPE_CHOICE, 'command',
                       action='store',
                       help='Shell command to execute.',
@@ -402,9 +395,7 @@ COMMAND_OPTIONS = {
                       default=False,
                       help='Attach container\'s STDIN.',
                       api_match=False),
-        CommandOption(CommandOption.TYPE_CONTAINER, 'container',
-                      action='store',
-                      help='Container ID or name to use.'),
+        OPTION_CONTAINER,
     ],
     'restart': [
         CommandOption(CommandOption.TYPE_NUMERIC, '-t', '--timeout',
@@ -447,9 +438,7 @@ COMMAND_OPTIONS = {
                       help='A term to search for.'),
     ],
     'stop': [
-        CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
-                      action='store',
-                      help='Container ID or name to use.'),
+        OPTION_CONTAINER_RUNNING,
     ],
     'tag': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-f', '--force',
@@ -465,14 +454,10 @@ COMMAND_OPTIONS = {
                             '[username/]name[:tag]").')),
     ],
     'top': [
-        CommandOption(CommandOption.TYPE_CONTAINER_RUN, 'container',
-                      action='store',
-                      help='Container ID or name to use.'),
+        OPTION_CONTAINER_RUNNING,
     ],
     'unpause': [
-        CommandOption(CommandOption.TYPE_CONTAINER_RUN, None, 'container',
-                      action='store',
-                      help='Container ID or name to use.'),
+        OPTION_CONTAINER_RUNNING,
     ]
 }
 
