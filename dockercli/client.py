@@ -911,6 +911,7 @@ class DockerClient(object):
 
         is_interactive = kwargs.pop('interactive', None)
         is_tty = kwargs.pop('tty', None)
+        is_attach = kwargs.pop('attach', None)
 
         def execute_external():
             """
@@ -918,20 +919,26 @@ class DockerClient(object):
             """
             kwargs['interactive'] = is_interactive
             kwargs['tty'] = is_tty
+            kwargs['attach'] = is_attach
 
             command = format_command_line(cmd, False, args, kwargs)
             process = pexpect.spawnu(command)
             process.interact()
 
-        def on_after():
+        def on_after_interactive():
             # \r is to make sure when there is some error output,
             # prompt is back to beginning of line
             self.is_refresh_containers = True
             self.is_refresh_running = True
             return ['\rInteractive terminal is closed.']
 
-        if is_interactive or is_tty:
-            self.after = on_after
+        def on_after_attach():
+            self.is_refresh_containers = True
+            self.is_refresh_running = True
+            return ['Container exited.\r']
+
+        if is_interactive or is_tty or is_attach:
+            self.after = on_after_attach if is_attach else on_after_interactive
             called = True
             execute_external()
 

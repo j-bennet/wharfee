@@ -41,6 +41,23 @@ OPTION_HELP = CommandOption(
     dest='help',
     help='Display help for this command.')
 
+OPTION_ATTACH_CHOICE = CommandOption(
+    CommandOption.TYPE_CHOICE, '-a', '--attach',
+    action='append',
+    dest='attach',
+    help='Attach to STDIN, STDOUT, or STDERR (can use multiple times).',
+    nargs='*',
+    choices=['stdin', 'stdout', 'stderr'],
+    api_match=False)
+
+OPTION_ATTACH_BOOLEAN = CommandOption(
+    CommandOption.TYPE_BOOLEAN, '-a', '--attach',
+    action='store_true',
+    dest='attach',
+    help='Attach container\'s STDOUT and STDERR and ' +
+         'forward all signals to the process.',
+    api_match=False)
+
 OPTION_ENV = CommandOption(
     CommandOption.TYPE_KEYVALUE, '-e', '--env',
     action='append',
@@ -188,6 +205,7 @@ COMMAND_OPTIONS = {
     ],
     'clear': [],
     'create': [
+        OPTION_ATTACH_CHOICE,
         OPTION_ENV,
         OPTION_EXPOSE,
         OPTION_INTERACTIVE,
@@ -339,6 +357,7 @@ COMMAND_OPTIONS = {
                       dest='detach',
                       help=('Detached mode: run the container in the '
                             'background and print the new container ID')),
+        OPTION_ATTACH_CHOICE,
         OPTION_ENV,
         OPTION_EXPOSE,
         OPTION_CONTAINER_HOSTNAME,
@@ -376,12 +395,7 @@ COMMAND_OPTIONS = {
                       nargs='?'),
     ],
     'start': [
-        CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--attach',
-                      action='store_true',
-                      dest='attach',
-                      help='Attach container\'s STDOUT and STDERR and ' +
-                           'forward all signals to the process.',
-                      api_match=False),
+        OPTION_ATTACH_BOOLEAN,
         CommandOption(CommandOption.TYPE_BOOLEAN, '-i', '--interactive',
                       action='store_true',
                       dest='interactive',
@@ -615,6 +629,9 @@ def format_command_line(cmd, is_long, args, kwargs):
             opt = opts[opt_dest]
             if opt.cli_match:
                 if isinstance(opt_value, bool):
+                    # skip appending if default
+                    if opt.default is not None and opt_value == opt.default:
+                        continue
                     comps.append(opt.get_name(is_long))
                 elif isinstance(opt_value, list):
                     comps.append(' '.join([kv(opt, val) for val in opt_value]))
