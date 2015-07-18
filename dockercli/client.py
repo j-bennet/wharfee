@@ -43,6 +43,7 @@ class DockerClient(object):
         assert callable(clear_handler)
 
         self.handlers = {
+            'attach': (self.attach, 'Attach to a running container.'),
             'build': (self.build, ("Build a new image from the source"
                                    " code")),
             'clear': (clear_handler, "Clear the window."),
@@ -178,6 +179,28 @@ class DockerClient(object):
                 self.output = handler()
         elif cmd:
             self.output = self.help()
+
+    def attach(self, *args, **kwargs):
+        """
+        Attach to a running container.
+        :param kwargs:
+        :return: None
+        """
+        if not args:
+            return ['Container name or ID is required.']
+
+        container = args[0]
+
+        def on_after():
+            self.is_refresh_containers = True
+            self.is_refresh_running = True
+            return ['\rDetached from {0}.'.format(container)]
+
+        self.after = on_after
+
+        command = format_command_line('attach', False, args, kwargs)
+        process = pexpect.spawnu(command)
+        process.interact()
 
     def help(self, *_):
         """
@@ -689,7 +712,7 @@ class DockerClient(object):
             attached = None
 
             if 'attach' in kwargs and kwargs['attach']:
-                attached = self.attach(
+                attached = self.view(
                     container=kwargs['container'],
                     stream=True,
                     stdout=True,
@@ -710,12 +733,10 @@ class DockerClient(object):
             else:
                 return [kwargs['container']]
 
-    def attach(self, *_, **kwargs):
+    def view(self, *_, **kwargs):
         """
         Attach to container STDOUT and / or STDERR.
         Docker-py does not allow attaching to STDIN.
-        TODO: look at ways to attach to STDIN
-        Equivalent of docker attach.
         :param kwargs:
         :return: Iterable output
         """

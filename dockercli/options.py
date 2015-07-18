@@ -5,6 +5,7 @@ from optparse import OptionParser, OptionError, OptionGroup
 from .option import CommandOption
 
 COMMAND_NAMES = [
+    'attach',
     'build',
     'clear',
     'create',
@@ -188,6 +189,21 @@ OPTION_CONTAINER_RUNNING = CommandOption(
 
 
 COMMAND_OPTIONS = {
+    'attach': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, None, '--no-stdin',
+                      action='store_true',
+                      dest='no_stdin',
+                      help='Do not attach STDIN.',
+                      default=False,
+                      api_match=False),
+        CommandOption(CommandOption.TYPE_BOOLEAN, None, '--sig-proxy',
+                      action='store_true',
+                      dest='sig_proxy',
+                      help='Proxy all received signals to the process.',
+                      default=True,
+                      api_match=False),
+        OPTION_CONTAINER_RUNNING
+    ],
     'build': [
         CommandOption(CommandOption.TYPE_IMAGE, '-t', '--tag',
                       dest='tag',
