@@ -166,7 +166,8 @@ OPTION_IMAGE = CommandOption(
     action='store',
     help='Image ID or name to use.')
 
-OPTION_COMMAND = CommandOption(CommandOption.TYPE_COMMAND, 'command',
+OPTION_COMMAND = CommandOption(
+    CommandOption.TYPE_COMMAND, 'command',
     action='store',
     help='Command to run in a container.',
     nargs='?')

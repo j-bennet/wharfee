@@ -193,8 +193,7 @@ class DockerCompleter(Completer):
                     Unless user may want to set them multiple times.
                     Example: -e VAR1=value1 -e VAR2=value2.
                     """
-                    return o.long_name not in params and \
-                           o.short_name not in params
+                    return o.long_name not in params and o.short_name not in params
 
                 def is_current(o):
                     return word in o.names

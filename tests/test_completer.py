@@ -24,6 +24,7 @@ im1 = ['ubuntu', 'hello-world', 'postgres', 'nginx']
 
 cs2 = ['desperate_hodgkin', 'desperate_torvalds', 'silly_fermat', 'some-percona']
 
+
 def test_empty_string_completion(completer, complete_event):
     """
     In the beginning of the line, all available commands are suggested.
@@ -118,6 +119,7 @@ def test_command_completion(command, expected):
 
     assert result == expected
 
+
 @pytest.mark.parametrize("command, expected", [
     ("h", ['help', 'shell', 'push', 'search']),
     ("he", ['help', 'shell']),
@@ -185,6 +187,7 @@ def option_map(cmd, is_long):
     }
 
 psm = option_map('ps', True)
+
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("ps ", sorted(psm.keys()), 0),
@@ -366,7 +369,7 @@ def test_options_image_completion_fuzzy(command, expected, expected_pos):
     position = len(command)
 
     result = list(c.get_completions(
-        Document(text=command, cursor_position=position), complete_event))
+        Document(text=command, cursor_position=position), e))
 
     expected = list(map(lambda t: Completion(t, expected_pos), expected))
 

@@ -65,9 +65,9 @@ class DockerClient(object):
             'inspect': (self.inspect, "Return low-level information on a " +
                         "container or image."),
             'login': (self.login, ("Register or log in to a Docker registry "
-                                  "server, if no server is specified "
-                                  "\"https://index.docker.io/v1/\" is the "
-                                  "default.")),
+                                   "server, if no server is specified "
+                                   "\"https://index.docker.io/v1/\" is the "
+                                   "default.")),
             'logs': (self.logs, "Fetch the logs of a container."),
             'restart': (self.restart, "Restart a running container."),
             'run': (self.run, "Run a command in a new container."),
