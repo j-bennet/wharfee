@@ -1,3 +1,42 @@
+0.3
+===
+
+Features:
+---------
+
+* More supported commands:
+
+::
+
+  attach
+  build
+  clear
+  create
+  exec
+  login
+  logs
+  pause
+  port
+  push
+  restart
+  shell (shortcat for "exec <container name> <shell command>")
+  tag
+  top
+  unpause
+
+* Implemented interactive terminal mode for "start", "run" and "exec".
+* Added fuzzy matching option to completion suggestions.
+* Completer can suggest either short or long option names.
+* Added more options to "run", including volumes, ports and and links.
+* Non-standard options are moved into a separate group in command help.
+* Prettier formatting of "images" and "ps" output.
+
+Bug fixes:
+----------
+
+* Completer crashing on unexpected characters.
+* Completer crashing inside an unfinished quoted string.
+
 0.2
 ====
 

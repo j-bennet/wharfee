@@ -121,7 +121,7 @@ def test_command_completion(command, expected):
 
 
 @pytest.mark.parametrize("command, expected", [
-    ("h", ['help', 'shell', 'push', 'search']),
+    ("h", ['help', 'shell', 'push', 'attach', 'search']),
     ("he", ['help', 'shell']),
     ("hel", ['help', 'shell']),
     ("help", ['help']),
@@ -142,7 +142,7 @@ def test_command_completion_fuzzy(command, expected):
         Document(text=command, cursor_position=position),
         e))
 
-    expected = map(lambda t: Completion(t, -len(command)), expected)
+    expected = list(map(lambda t: Completion(t, -len(command)), expected))
 
     assert result == expected
 

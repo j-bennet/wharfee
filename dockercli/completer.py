@@ -198,11 +198,15 @@ class DockerCompleter(Completer):
                 def is_current(o):
                     return word in o.names
 
+                def get_opt_name(t):
+                    return t.get_name(long_options)
+
                 positionals = []
                 possible_options = [x for x in all_options(command) if is_unused(x)
                                     or is_current(x)
                                     or x.is_multiple]
-                named_options = sorted([x for x in possible_options if x.name.startswith('-')])
+                named_options = sorted([x for x in possible_options if x.name.startswith('-')],
+                                       key=get_opt_name)
                 positional_options = [x for x in possible_options if not x.name.startswith('-')]
 
                 named_option_map = {}

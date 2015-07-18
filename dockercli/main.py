@@ -298,9 +298,9 @@ class DockerCli(object):
                 break
 
             # TODO: uncomment for release
-            # except Exception as ex:
-            #    click.secho("{0}".format(ex), fg='red')
-            #    break
+            except Exception as ex:
+                click.secho("{0}".format(ex), fg='red')
+                break
 
         self.revert_less_opts()
         self.write_config_file()
