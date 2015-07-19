@@ -1,4 +1,5 @@
 [![Stories in Ready](https://badge.waffle.io/j-bennet/dockercli.png?label=ready&title=Ready)](https://waffle.io/j-bennet/dockercli)
+[![PyPI version](https://badge.fury.io/py/dockercli.svg)](http://badge.fury.io/py/dockercli)
 # dockercli
 A CLI with autocompletion and syntax highlighting for Docker commands.
 
@@ -24,7 +25,11 @@ Boom! How about removing all stopped containers?
 
 ![rm-stopped](screenshots/rm-all-stopped.png)
 
-Ah, if only everything in life was so easy.
+## Installation
+
+Dockercli is a Python package hosted on pypi and installed with:
+
+    $ pip install dockercli
 
 ## What are you using?
 
