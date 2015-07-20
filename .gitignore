@@ -4,5 +4,6 @@
 *env/
 .docker*
 .tox/
+build/
 dist/
 .DS_Store

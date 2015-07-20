@@ -34,6 +34,7 @@ setup(
         'console_scripts': 'dockercli = dockercli.main:cli'
     },
     packages=['dockercli'],
+    data_files=[('', ['dockerclirc'])],
     scripts=[],
     name='dockercli',
     classifiers=[
