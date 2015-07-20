@@ -1,3 +1,11 @@
+0.4
+===
+
+Bug fixes:
+----------
+
+* Fix for missing file on startup (thanks `Frank Sachsenheim https://github.com/funkyfuture`_).
+
 0.3
 ===
 
