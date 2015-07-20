@@ -490,7 +490,7 @@ class DockerClient(object):
 
         img = args[0]
         if ':' in args[1]:
-            repo, tag = args[1].split(':', 2)
+            repo, tag = args[1].rsplit(':', 1)
         else:
             repo, tag = args[1], None
 
