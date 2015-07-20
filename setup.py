@@ -35,7 +35,6 @@ setup(
     },
     packages=['dockercli'],
     package_data={'dockercli': ['dockerclirc']},
-    data_files=[('', ['dockerclirc'])],
     scripts=[],
     name='dockercli',
     classifiers=[

@@ -4,7 +4,7 @@
 Bug fixes:
 ----------
 
-* Fix for missing file on startup (thanks `Frank Sachsenheim https://github.com/funkyfuture`_).
+* Fix for missing file on startup (thanks `Amjith https://github.com/amjith`_).
 
 0.3
 ===

@@ -45,8 +45,8 @@ class DockerCli(object):
     handler = None
     saved_less_opts = None
     config = None
-    config_template = os.path.join('..', 'dockerclirc')
-    config_name = os.path.join(os.path.expanduser('~'), '.dockerclirc')
+    config_template = 'dockerclirc'
+    config_name = '~/.dockerclirc'
 
     def __init__(self):
         """
