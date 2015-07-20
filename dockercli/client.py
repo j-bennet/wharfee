@@ -537,7 +537,7 @@ class DockerClient(object):
         if 'links' in params and params['links']:
             links = {}
             for link in params['links']:
-                link_name, link_alias = link.split(':', 2)
+                link_name, link_alias = link.split(':', 1)
                 links[link_name] = link_alias
             link_conf = create_host_config(links=links)
             self._update_host_config(params, link_conf)
@@ -794,7 +794,7 @@ class DockerClient(object):
 
             # If we have more than one repo tag, return as many dicts
             for rt in a['RepoTags']:
-                repo, tag = rt.split(':', 2)
+                repo, tag = rt.rsplit(':', 1)
                 c = {}
                 c.update(b)
                 c['Repository'] = repo

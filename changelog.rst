@@ -1,3 +1,16 @@
+0.6.1
+=====
+
+Bug fixes:
+----------
+
+* Fix for the crash on image names with ':' (thanks `Sean https://github.com/seanch87`_).
+
+0.5-0.6
+=======
+
+Version bumped up because of erroneous releases to PyPi.
+
 0.4
 ===
 
