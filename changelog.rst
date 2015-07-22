@@ -1,3 +1,16 @@
+0.6.2
+=====
+
+Features:
+---------
+
+* Added "refresh" command to force refresh of autocompletions.
+
+Bug fixes:
+----------
+
+* Fix for incorrect handling of "attach" in external CLI call.
+
 0.6.1
 =====
 
