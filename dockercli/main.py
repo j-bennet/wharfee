@@ -56,9 +56,12 @@ class DockerCli(object):
 
         self.config = self.read_configuration()
         self.theme = self.config['main']['theme']
+        
+        # set_completer_options refreshes all by default
         self.handler = DockerClient(
             self.config['main'].as_int('client_timeout'),
-            self.clear)
+            self.clear,
+            self.set_completer_options)
 
         self.completer = DockerCompleter(
             long_option_names=self.get_long_options(),

@@ -21,6 +21,7 @@ COMMAND_NAMES = [
     'pause',
     'port',
     'push',
+    'refresh',
     'restart',
     'run',
     'rm',
@@ -363,6 +364,7 @@ COMMAND_OPTIONS = {
                       dest='quiet',
                       help='Only show numeric IDs.')
     ],
+    'refresh': [],
     'run': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
                       action='store_true',

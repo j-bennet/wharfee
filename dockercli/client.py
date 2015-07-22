@@ -33,14 +33,16 @@ class DockerClient(object):
     is named "limit", some parameters are not implemented at all, etc.
     """
 
-    def __init__(self, timeout=None, clear_handler=None):
+    def __init__(self, timeout=None, clear_handler=None, refresh_handler=None):
         """
         Initialize the Docker wrapper.
         :param timeout: int
         :param clear_handler: callable
+        :param refresh_handler: callable
         """
 
         assert callable(clear_handler)
+        assert callable(refresh_handler)
 
         self.handlers = {
             'attach': (self.attach, 'Attach to a running container.'),
@@ -68,6 +70,7 @@ class DockerClient(object):
                                    "server (defaut "
                                    "\"https://index.docker.io/v1/\").")),
             'logs': (self.logs, "Fetch the logs of a container."),
+            'refresh': (refresh_handler, "Refresh autocompletions."),
             'restart': (self.restart, "Restart a running container."),
             'run': (self.run, "Run a command in a new container."),
             'rm': (self.rm, "Remove one or more containers."),
