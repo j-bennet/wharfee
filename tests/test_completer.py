@@ -121,7 +121,7 @@ def test_command_completion(command, expected):
 
 
 @pytest.mark.parametrize("command, expected", [
-    ("h", ['help', 'shell', 'push', 'attach', 'search']),
+    ("h", ['help', 'shell', 'push', 'attach', 'search', 'refresh']),
     ("he", ['help', 'shell']),
     ("hel", ['help', 'shell']),
     ("help", ['help']),
