@@ -65,9 +65,8 @@ class DockerClient(object):
             'inspect': (self.inspect, "Return low-level information on a " +
                         "container or image."),
             'login': (self.login, ("Register or log in to a Docker registry "
-                                   "server, if no server is specified "
-                                   "\"https://index.docker.io/v1/\" is the "
-                                   "default.")),
+                                   "server (defaut "
+                                   "\"https://index.docker.io/v1/\").")),
             'logs': (self.logs, "Fetch the logs of a container."),
             'restart': (self.restart, "Restart a running container."),
             'run': (self.run, "Run a command in a new container."),
@@ -930,18 +929,15 @@ class DockerClient(object):
         """
         called = False
 
-        is_interactive = kwargs.pop('interactive', None)
-        is_tty = kwargs.pop('tty', None)
-        is_attach = kwargs.pop('attach', None)
+        is_interactive = kwargs.get('interactive', None)
+        is_tty = kwargs.get('tty', None)
+        is_attach = kwargs.get('attach', None)
+        is_attach_bool = is_attach in [True, False]
 
         def execute_external():
             """
             Call the official cli
             """
-            kwargs['interactive'] = is_interactive
-            kwargs['tty'] = is_tty
-            kwargs['attach'] = is_attach
-
             command = format_command_line(cmd, False, args, kwargs)
             process = pexpect.spawnu(command)
             process.interact()
@@ -958,7 +954,7 @@ class DockerClient(object):
             self.is_refresh_running = True
             return ['Container exited.\r']
 
-        if is_interactive or is_tty or is_attach:
+        if is_interactive or is_tty or (is_attach and not is_attach_bool):
             self.after = on_after_attach if is_attach else on_after_interactive
             called = True
             execute_external()
