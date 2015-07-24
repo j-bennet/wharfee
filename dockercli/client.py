@@ -105,7 +105,8 @@ class DockerClient(object):
                 # hack from here:
                 # http://docker-py.readthedocs.org/en/latest/boot2docker/
                 # See also: https://github.com/docker/docker-py/issues/406
-                kwargs['tls'].assert_hostname = False
+                if 'tls' in kwargs:
+                    kwargs['tls'].assert_hostname = False
                 kwargs['timeout'] = timeout
                 self.instance = AutoVersionClient(**kwargs)
 
