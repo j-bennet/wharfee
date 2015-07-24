@@ -384,7 +384,9 @@ COMMAND_OPTIONS = {
         OPTION_RM,
         OPTION_VOLUME,
         OPTION_VOLUMES_FROM,
-        OPTION_IMAGE,
+        CommandOption(CommandOption.TYPE_IMAGE_TAGGED, None, 'image',
+                      action='store',
+                      help='Image name.'),
         OPTION_COMMAND,
     ],
     'shell': [
@@ -487,7 +489,6 @@ COMMAND_OPTIONS = {
 HIDDEN_OPTIONS = {
     'start': [
         OPTION_PUBLISH_ALL,
-        OPTION_PUBLISH,
     ],
     'run': [
         CommandOption(CommandOption.TYPE_NUMERIC, 'ports', None,
