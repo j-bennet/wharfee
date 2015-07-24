@@ -1,5 +1,5 @@
-0.6.2
-=====
+0.6.1-0.6.3
+===========
 
 Features:
 ---------
@@ -9,15 +9,9 @@ Features:
 Bug fixes:
 ----------
 
-* Fix for incorrect handling of "attach" in external CLI call.
-
-0.6.1
-=====
-
-Bug fixes:
-----------
-
 * Fix for the crash on image names with ':' (thanks `Sean https://github.com/seanch87`_).
+* Fix for incorrect handling of "attach" in external CLI call.
+* Fix for an error when running with --publish port:port and --detach (#80).
 
 0.5-0.6
 =======
