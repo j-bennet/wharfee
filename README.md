@@ -30,6 +30,10 @@ Boom! How about removing all stopped containers?
 Dockercli is a Python package hosted on pypi and installed with:
 
     $ pip install dockercli
+    
+Alternatively, you can install the latest from github and get all the bugfixes that didn't make it into pypi release yet:
+
+    $ pip install git+https://github.com/j-bennet/dockercli.git
 
 ## What are you using?
 
