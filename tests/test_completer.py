@@ -56,6 +56,7 @@ def test_build_path_completion_absolute(completer, complete_event):
     assert expected.issubset(result)
 
 
+@pytest.mark.skipif(True, reason='User path specific.')
 def test_build_path_completion_user(completer, complete_event):
     """
     Suggest build paths from user home directory.
@@ -75,6 +76,7 @@ def test_build_path_completion_user(completer, complete_event):
     assert expected.issubset(result)
 
 
+@pytest.mark.skipif(True, reason='User path specific.')
 def test_build_path_completion_user_dir(completer, complete_event):
     """
     Suggest build paths from user home directory.
