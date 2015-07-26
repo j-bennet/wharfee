@@ -123,8 +123,7 @@ class DockerCli(object):
         """
         Clear the screen.
         """
-        if self.dcli:
-            self.dcli.output.erase_screen()
+        click.clear()
 
     def set_completer_options(self, cons=True, runs=True, imgs=True):
         """
