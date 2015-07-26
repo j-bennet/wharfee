@@ -630,7 +630,9 @@ class DockerClient(object):
             kwargs['cmd'] = args[1:]
 
             is_detach = kwargs.pop('detach')
-            result = self.instance.exec_create(**kwargs)
+
+            exec_args = allowed_args('exec', **kwargs)
+            result = self.instance.exec_create(**exec_args)
 
             if result and 'Id' in result:
                 return self.instance.exec_start(

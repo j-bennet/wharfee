@@ -163,18 +163,24 @@ OPTION_VOLUMES_FROM = CommandOption(
     api_match=False)
 
 OPTION_IMAGE = CommandOption(
-    CommandOption.TYPE_IMAGE, 'image',
+    CommandOption.TYPE_IMAGE, None, 'image',
     action='store',
     help='Image ID or name to use.')
 
+OPTION_CMD = CommandOption(
+    CommandOption.TYPE_COMMAND, None, 'cmd',
+    action='store',
+    help='Command to run in a container.',
+    nargs='?')
+
 OPTION_COMMAND = CommandOption(
-    CommandOption.TYPE_COMMAND, 'command',
+    CommandOption.TYPE_COMMAND, None, 'command',
     action='store',
     help='Command to run in a container.',
     nargs='?')
 
 OPTION_STDIN_OPEN = CommandOption(
-    CommandOption.TYPE_BOOLEAN, 'stdin_open', None,
+    CommandOption.TYPE_BOOLEAN, None, 'stdin_open',
     action='store',
     dest='stdin_open',
     default=False)
@@ -261,7 +267,7 @@ COMMAND_OPTIONS = {
                       api_match=False),
         OPTION_TTY,
         OPTION_CONTAINER_RUNNING,
-        OPTION_COMMAND,
+        OPTION_CMD,
     ],
     'info': [
     ],
@@ -539,15 +545,15 @@ def find_option(command, name):
     return None
 
 
-def allowed_args(cmd, **kwargs):
+def allowed_args(command_name, **kwargs):
     """
     Return only arguments that the command accepts.
-    :param cmd: string
+    :param command_name: string
     :param kwargs: dict
     :return: dict
     """
     matches = {}
-    available = all_supported(cmd)
+    available = all_supported(command_name)
     if available:
         for k in kwargs:
             if k in available:
