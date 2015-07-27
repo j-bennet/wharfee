@@ -8,6 +8,9 @@ from __future__ import print_function
 import json
 import click
 from tabulate import tabulate
+from pygments import highlight
+from pygments.lexers.data import JsonLexer
+from pygments.formatters.terminal import TerminalFormatter
 
 # Python 3 has no 'basestring' or 'long' type we're checking for.
 try:
@@ -42,6 +45,9 @@ class StreamFormatter(object):
 
 class JsonStreamDumper(StreamFormatter):
 
+    lexer = JsonLexer()
+    term = TerminalFormatter()
+
     def output(self):
         """
         Process and output object by object.
@@ -50,9 +56,13 @@ class JsonStreamDumper(StreamFormatter):
         for obj in self.stream:
             self.counter += 1
             text = json.dumps(obj, indent=4)
+            text = self.colorize(text)
             for line in text.split('\n'):
-                click.echo(line)
+               click.echo(line)
         return self.counter
+
+    def colorize(self, text):
+        return highlight(text, self.lexer, self.term).rstrip('\r\n')
 
 
 class JsonStreamFormatter(StreamFormatter):
