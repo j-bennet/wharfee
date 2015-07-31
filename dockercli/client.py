@@ -8,6 +8,7 @@ import shlex
 import pretty
 import re
 import pexpect
+import ssl
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env, create_host_config
@@ -119,9 +120,11 @@ class DockerClient(object):
                     raise x
         else:
             # unix-based
-            self.instance = AutoVersionClient(
-                timeout=timeout,
-                base_url='unix://var/run/docker.sock')
+            kwargs = kwargs_from_env(
+                ssl_version=ssl.PROTOCOL_TLSv1,
+                assert_hostname=False)
+            kwargs['timeout'] = timeout
+            self.instance = AutoVersionClient(**kwargs)
 
     def handle_input(self, text):
         """
