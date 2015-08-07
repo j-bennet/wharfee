@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/j-bennet/wharfee.png?label=ready&title=Ready)](https://waffle.io/j-bennet/wharfee)
 [![PyPI version](https://badge.fury.io/py/wharfee.svg)](http://badge.fury.io/py/wharfee)
 # wharfee
 A CLI with autocompletion and syntax highlighting for Docker commands.
