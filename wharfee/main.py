@@ -35,7 +35,7 @@ from .options import OptionError
 from .__init__ import __version__
 
 
-class DockerCli(object):
+class WharfeeCli(object):
     """
     The CLI implementation.
     """
@@ -45,8 +45,8 @@ class DockerCli(object):
     handler = None
     saved_less_opts = None
     config = None
-    config_template = 'dockerclirc'
-    config_name = '~/.dockerclirc'
+    config_template = 'wharfeerc'
+    config_name = '~/.wharfeerc'
 
     def __init__(self):
         """
@@ -84,7 +84,7 @@ class DockerCli(object):
         Find out pakage root path.
         :return: string: path
         """
-        from dockercli import __file__ as package_root
+        from wharfee import __file__ as package_root
         return os.path.dirname(package_root)
 
     def set_less_opts(self):
@@ -216,13 +216,13 @@ class DockerCli(object):
         Run the main loop
         """
         print('Version:', __version__)
-        print('Home: http://dockercli.com')
+        print('Home: http://wharfee.com')
 
-        history = FileHistory(os.path.expanduser('~/.dockercli-history'))
+        history = FileHistory(os.path.expanduser('~/.wharfee-history'))
         toolbar_handler = create_toolbar_handler(self.get_long_options, self.get_fuzzy_match)
 
         layout = create_default_layout(
-            message='dockercli> ',
+            message='wharfee> ',
             reserve_space_for_menu=True,
             lexer=CommandLexer,
             get_bottom_toolbar_tokens=toolbar_handler,
@@ -315,8 +315,8 @@ def cli():
     Create and call the CLI
     """
     try:
-        dockercli = DockerCli()
-        dockercli.run_cli()
+        dcli = WharfeeCli()
+        dcli.run_cli()
     except DockerTimeoutException as ex:
         click.secho(ex.message, fg='red')
     except DockerSslException as ex:

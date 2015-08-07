@@ -5,9 +5,9 @@ import pytest
 import shlex
 from optparse import OptionError
 from textwrap import dedent
-from dockercli.options import parse_command_options, format_command_help, \
+from wharfee.options import parse_command_options, format_command_help, \
     format_command_line
-from dockercli.completer import DockerCompleter
+from wharfee.completer import DockerCompleter
 
 
 @pytest.mark.parametrize("help_opt_name", [

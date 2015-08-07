@@ -1,6 +1,5 @@
-[![Stories in Ready](https://badge.waffle.io/j-bennet/dockercli.png?label=ready&title=Ready)](https://waffle.io/j-bennet/dockercli)
-[![PyPI version](https://badge.fury.io/py/dockercli.svg)](http://badge.fury.io/py/dockercli)
-# dockercli
+[![PyPI version](https://badge.fury.io/py/wharfee.svg)](http://badge.fury.io/py/wharfee)
+# wharfee
 A CLI with autocompletion and syntax highlighting for Docker commands.
 
 ## Why?
@@ -27,13 +26,13 @@ Boom! How about removing all stopped containers?
 
 ## Installation
 
-Dockercli is a Python package hosted on pypi and installed with:
+Wharfee is a Python package hosted on pypi and installed with:
 
-    $ pip install dockercli
+    $ pip install wharfee
     
 Alternatively, you can install the latest from github and get all the bugfixes that didn't make it into pypi release yet:
 
-    $ pip install git+https://github.com/j-bennet/dockercli.git
+    $ pip install git+https://github.com/j-bennet/wharfee.git
 
 ## What are you using?
 
@@ -44,7 +43,7 @@ Alternatively, you can install the latest from github and get all the bugfixes t
 
 ## Can I contribute?
 
-Yes! Pull request or [issues](https://github.com/j-bennet/dockercli/issues) are welcome.
+Yes! Pull request or [issues](https://github.com/j-bennet/wharfee/issues) are welcome.
 
 ## How do you test it?
 

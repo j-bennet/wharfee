@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 import pytest
-from dockercli.helpers import parse_port_bindings, parse_volume_bindings
+from wharfee.helpers import parse_port_bindings, parse_volume_bindings
 
 
 @pytest.mark.parametrize("ports, expected", [

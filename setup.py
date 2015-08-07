@@ -1,4 +1,4 @@
-from dockercli.__init__ import __version__
+from wharfee.__init__ import __version__
 
 try:
     from setuptools import setup
@@ -6,10 +6,10 @@ except ImportError:
     from distutils.core import setup
 
 setup(
-    description='Docker-CLI',
+    description='Wharfee: a CLI for Docker',
     author='Iryna Cherniavska',
-    url='http://dockercli.com.',
-    download_url='http://github.com/j-bennet/dockercli.',
+    url='http://wharfee.com.',
+    download_url='http://github.com/j-bennet/wharfee.',
     author_email='i[dot]chernyavska[at]gmail[dot]com.',
     version=__version__,
     install_requires=[
@@ -31,12 +31,12 @@ setup(
         ],
     },
     entry_points={
-        'console_scripts': 'dockercli = dockercli.main:cli'
+        'console_scripts': 'wharfee = wharfee.main:cli'
     },
-    packages=['dockercli'],
-    package_data={'dockercli': ['dockerclirc']},
+    packages=['wharfee'],
+    package_data={'wharfee': ['wharfeerc']},
     scripts=[],
-    name='dockercli',
+    name='wharfee',
     classifiers=[
         'Intended Audience :: Developers',
         'Operating System :: Unix',

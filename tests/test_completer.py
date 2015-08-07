@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 import pytest
 from prompt_toolkit.completion import Completion
 from prompt_toolkit.document import Document
-from dockercli.options import all_options
-from dockercli.options import COMMAND_NAMES
+from wharfee.options import all_options
+from wharfee.options import COMMAND_NAMES
 
 
 @pytest.fixture
 def completer():
-    import dockercli.completer as cmp
+    import wharfee.completer as cmp
     return cmp.DockerCompleter()
 
 

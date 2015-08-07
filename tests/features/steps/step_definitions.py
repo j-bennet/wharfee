@@ -7,21 +7,21 @@ import pexpect
 from behave import given, when, then
 
 
-@given('we have dockercli installed')
+@given('we have wharfee installed')
 def step_cli_installed(context):
     """
-    Make sure dockercli is in installed packages.
+    Make sure wharfee is in installed packages.
     """
     dists = set([di.key for di in pip.get_installed_distributions()])
-    assert 'dockercli' in dists
+    assert 'wharfee' in dists
 
 
-@when('we run dockercli')
+@when('we run wharfee')
 def step_run_cli(context):
     """
     Run the process using pexpect.
     """
-    context.cli = pexpect.spawnu('dockercli')
+    context.cli = pexpect.spawnu('wharfee')
 
 
 @when('we wait for prompt')
@@ -29,7 +29,7 @@ def step_expect_prompt(context):
     """
     Expect to see prompt.
     """
-    context.cli.expect('dockercli> ')
+    context.cli.expect('wharfee> ')
 
 
 @when('we send "help" command')
@@ -49,7 +49,7 @@ def step_send_ctrld(context):
     context.exit_sent = True
 
 
-@then('dockercli exits')
+@then('wharfee exits')
 def step_expect_exit(context):
     """
     Expect cli to exit.
@@ -57,12 +57,12 @@ def step_expect_exit(context):
     context.cli.expect(pexpect.EOF)
 
 
-@then('we see dockercli prompt')
+@then('we see wharfee prompt')
 def step_see_prompt(context):
     """
     Expect to see prompt.
     """
-    context.cli.expect('dockercli> ')
+    context.cli.expect('wharfee> ')
 
 
 @then('we see help output')

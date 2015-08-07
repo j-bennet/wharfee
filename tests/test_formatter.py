@@ -4,10 +4,10 @@ from __future__ import print_function
 import os
 import pytest
 from time import sleep
-from dockercli.formatter import format_data
-from dockercli.formatter import format_struct
-from dockercli.formatter import format_top
-from dockercli.formatter import JsonStreamFormatter
+from wharfee.formatter import format_data
+from wharfee.formatter import format_struct
+from wharfee.formatter import format_top
+from wharfee.formatter import JsonStreamFormatter
 
 
 def test_top_formatting():

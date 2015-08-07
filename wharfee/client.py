@@ -905,7 +905,7 @@ class DockerClient(object):
         # TODO: this command didn't have to use pexpect.
         # But it was easier to call the official CLI than try and figure out
         # why requests throw this error:
-        # File "venv/dockercli/lib/python2.7/site-packages/requests/packages/
+        # File "venv/wharfee/lib/python2.7/site-packages/requests/packages/
         # urllib3/response.py", line 267, in read
         # raise ReadTimeoutError(self._pool, None, 'Read timed out.')
         # requests.packages.urllib3.exceptions.ReadTimeoutError:
