@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(
-    description='Wharfee: a CLI for Docker',
+    description='Wharfee: a shell for Docker',
     author='Iryna Cherniavska',
     url='http://wharfee.com.',
     download_url='http://github.com/j-bennet/wharfee.',
