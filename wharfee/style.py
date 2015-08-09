@@ -24,6 +24,11 @@ def style_factory(name):
             Token.Toolbar: 'bg:#222222 #cccccc',
             Token.Toolbar.Off: 'bg:#222222 #004444',
             Token.Toolbar.On: 'bg:#222222 #ffffff',
+            Token.Toolbar.Search: 'noinherit bold',
+            Token.Toolbar.Search.Text: 'nobold',
+            Token.Toolbar.System: 'noinherit bold',
+            Token.Toolbar.Arg: 'noinherit bold',
+            Token.Toolbar.Arg.Text: 'nobold'
         })
 
     return CliStyle

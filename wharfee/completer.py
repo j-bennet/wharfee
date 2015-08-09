@@ -352,10 +352,14 @@ class DockerCompleter(Completer):
         if text is not None:
             text = text.strip()
             if len(text) > 0:
-                lexer = shlex.shlex(text)
-                word = lexer.get_token()
-                word = word.strip()
-                return word
+                try:
+                    lexer = shlex.shlex(text)
+                    word = lexer.get_token()
+                    word = word.strip()
+                    return word
+                except:
+                    # no error, just do not complete
+                    pass
         return ''
 
     @staticmethod

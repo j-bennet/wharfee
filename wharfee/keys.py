@@ -17,7 +17,7 @@ def get_key_manager(set_long_options, get_long_options, set_fuzzy_match, get_fuz
     assert callable(set_fuzzy_match)
     assert callable(get_fuzzy_match)
 
-    manager = KeyBindingManager()
+    manager = KeyBindingManager(enable_system_bindings=True)
 
     @manager.registry.add_binding(Keys.F2)
     def _(event):

@@ -1,3 +1,15 @@
+0.6.5
+=====
+
+* Updated `Python Prompt Toolkit http://github.com/jonathanslenders/python-prompt-toolkit`_
+  to 0.46. This adds the following features:
+  - Ctrl + Z puts the application into background (suspends it). Use "fg" command
+    to bring it back.
+  - Meta + ! brings up "system prompt".
+* Fixed completer crashing when trying to autocomplete Unicode characters.
+* Support for using TLS and DOCKER_* variables with Swarm (thanks `achied https://github.com/achied`_).
+* Colorized output of "inspect".
+
 0.6.1-0.6.4
 ===========
 
