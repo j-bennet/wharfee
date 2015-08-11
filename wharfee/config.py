@@ -1,3 +1,4 @@
+# -*- coding: utf-8
 import shutil
 from os.path import expanduser, exists
 

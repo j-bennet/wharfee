@@ -518,7 +518,7 @@ def all_option_names():
     long or short.
     :return: iterable
     """
-    opts = {OPTION_HELP.short_name, OPTION_HELP.long_name}
+    opts = set([OPTION_HELP.short_name, OPTION_HELP.long_name])
     for command in COMMAND_OPTIONS:
         for opt in COMMAND_OPTIONS[command]:
             if opt.short_name and opt.short_name.startswith('-'):
@@ -582,7 +582,7 @@ def all_supported(command):
     :param command: string
     :return: set of CommandOption
     """
-    result = {OPTION_HELP}
+    result = set([OPTION_HELP])
 
     if command in COMMAND_OPTIONS:
         result.update(
@@ -629,7 +629,8 @@ def format_command_line(cmd, is_long, args, kwargs):
     :param kwargs: named parameters
     :return: string
     """
-    opts = {x.dest: x for x in all_options(cmd) if x.name.startswith('-')}
+    opts = dict([(x.dest, x) for x in all_options(cmd)
+                 if x.name.startswith('-')])
     comps = ['docker', cmd]
 
     def kve(o, v):

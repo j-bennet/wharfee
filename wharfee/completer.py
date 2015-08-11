@@ -1,7 +1,6 @@
 # -*- coding: utf-8
 from __future__ import unicode_literals
 
-import shlex
 import fuzzyfinder
 
 from itertools import chain
@@ -11,6 +10,7 @@ from .options import COMMAND_NAMES
 from .options import all_options
 from .options import find_option
 from .helpers import list_dir, parse_path, complete_path
+from .utils import shlex_split, shlex_first_token
 
 
 class DockerCompleter(Completer):
@@ -353,8 +353,7 @@ class DockerCompleter(Completer):
             text = text.strip()
             if len(text) > 0:
                 try:
-                    lexer = shlex.shlex(text)
-                    word = lexer.get_token()
+                    word = shlex_first_token(text)
                     word = word.strip()
                     return word
                 except:
@@ -383,7 +382,7 @@ class DockerCompleter(Completer):
         Shlex can't always split. For example, "\" crashes the completer.
         """
         try:
-            words = shlex.split(text)
+            words = shlex_split(text)
             return words
         except:
             return text

@@ -13,6 +13,7 @@ setup(
     author_email='i[dot]chernyavska[at]gmail[dot]com.',
     version=__version__,
     install_requires=[
+        'six>=1.9.0',
         'pygments>=2.0.2',
         'prompt-toolkit==0.46',
         'docker-py>=1.2.0',

@@ -1,3 +1,4 @@
+# -*- coding: utf-8
 from pygments.token import Token
 from pygments.style import Style
 from pygments.util import ClassNotFound

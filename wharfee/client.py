@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import sys
-import shlex
 import pretty
 import re
 import pexpect
@@ -23,6 +22,7 @@ from .options import COMMAND_NAMES
 from .options import OptionError
 from .helpers import filesize, parse_port_bindings, parse_volume_bindings, \
     parse_exposed_ports
+from .utils import shlex_split
 
 
 class DockerClient(object):
@@ -148,7 +148,7 @@ class DockerClient(object):
             self.after = None
             self.logs = None
 
-        tokens = shlex.split(text) if text else ['']
+        tokens = shlex_split(text) if text else ['']
         cmd = tokens[0]
         params = tokens[1:] if len(tokens) > 1 else None
 

@@ -1,3 +1,8 @@
+0.6.6
+=====
+
+* Fixes to support python 2.6.
+
 0.6.5
 =====
 
