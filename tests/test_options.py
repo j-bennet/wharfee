@@ -155,8 +155,11 @@ def test_help_formatting():
     (('run --name some-percona --env MYSQL_ROOT_PASSWORD=masterkey '
       '--publish 9999:3306 --interactive --tty percona'),
      False,
-     ('run --name=some-percona -e=MYSQL_ROOT_PASSWORD=masterkey '
-      '-p=9999:3306 -i -t percona'))
+     ('run --name=some-percona -e MYSQL_ROOT_PASSWORD=masterkey '
+      '-p=9999:3306 -i -t percona')),
+    ('run -e TWO_ENVS="boo hoo" -e ONE_VAR=foo -i -t some-image',
+     False,
+     'run -e TWO_ENVS="boo hoo" -e ONE_VAR=foo -i -t some-image')
 ])
 def test_external_command_line(text, is_long, expected):
     """

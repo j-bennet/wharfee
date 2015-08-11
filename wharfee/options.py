@@ -632,7 +632,15 @@ def format_command_line(cmd, is_long, args, kwargs):
     opts = {x.dest: x for x in all_options(cmd) if x.name.startswith('-')}
     comps = ['docker', cmd]
 
+    def kve(o, v):
+        v1, v2 = v.split('=', 1)
+        if ' ' in v2:
+            return '{0} {1}="{2}"'.format(o.get_name(is_long), v1, v2)
+        return '{0} {1}={2}'.format(o.get_name(is_long), v1, v2)
+
     def kv(o, v):
+        if o.dest == 'environment':
+            return kve(o, v)
         return '{0}={1}'.format(o.get_name(is_long), v)
 
     for opt_dest, opt_value in kwargs.items():
