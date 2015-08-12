@@ -117,6 +117,8 @@ class JsonStreamFormatter(StreamFormatter):
         Format and output a JSON line.
         :param data: json
         """
+        if data:
+            data = data.rstrip()
 
         if 'id' in data and data['id']:
             line = "{0} {1}".format(data['status'], data['id'])
@@ -169,6 +171,9 @@ def format_data(command, data):
         f = DATA_FORMATTERS[command]
         assert callable(f)
         return f(data)
+
+    if command and command in DATA_FILTERS:
+        data = DATA_FILTERS[command](data)
 
     if isinstance(data, list) and len(data) > 0:
         if isinstance(data[0], tuple):
@@ -395,6 +400,29 @@ def format_top(data):
                 result.append(process)
     result = tabulate(result, headers='firstrow').split('\n')
     return result
+
+
+def filter_ps(data):
+    """
+    Strip out some of the dictionary fields.
+    :param data: dict
+    :return: dict
+    """
+    display_keys = [
+        'status', 'created', 'image', 'id', 'command', 'names', 'ports']
+    if data and isinstance(data, list) and isinstance(data[0], dict):
+        result = []
+        for item in data:
+            filtered = {k: v for k, v in item.items()
+                        if k.lower() in display_keys}
+            result.append(filtered)
+        return result
+    return data
+
+
+DATA_FILTERS = {
+    'ps': filter_ps
+}
 
 
 DATA_FORMATTERS = {
