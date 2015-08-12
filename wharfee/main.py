@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import os
 import click
+import traceback
 
 from types import GeneratorType
 from prompt_toolkit import AbortAction
@@ -32,6 +33,7 @@ from .style import style_factory
 from .keys import get_key_manager
 from .toolbar import create_toolbar_handler
 from .options import OptionError
+from .logger import create_logger
 from .__init__ import __version__
 
 
@@ -56,6 +58,10 @@ class WharfeeCli(object):
 
         self.config = self.read_configuration()
         self.theme = self.config['main']['theme']
+
+        log_file = self.config['main']['log_file']
+        log_level = self.config['main']['log_level']
+        self.logger = create_logger(__name__, log_file, log_level)
         
         # set_completer_options refreshes all by default
         self.handler = DockerClient(
@@ -282,6 +288,8 @@ class WharfeeCli(object):
                 self.refresh_completions()
 
             except OptionError as ex:
+                self.logger.debug('Error: %r.', ex)
+                self.logger.error("traceback: %r", traceback.format_exc())
                 click.secho(ex.msg, fg='red')
 
             except KeyboardInterrupt:
@@ -294,6 +302,8 @@ class WharfeeCli(object):
                 self.refresh_completions()
 
             except DockerPermissionException as ex:
+                self.logger.debug('Permission exception: %r.', ex)
+                self.logger.error("traceback: %r", traceback.format_exc())
                 click.secho(ex.message, fg='red')
 
             except EOFError:
@@ -302,6 +312,8 @@ class WharfeeCli(object):
 
             # TODO: uncomment for release
             except Exception as ex:
+                self.logger.debug('Exception: %r.', ex)
+                self.logger.error("traceback: %r", traceback.format_exc())
                 click.secho("{0}".format(ex), fg='red')
                 break
 
