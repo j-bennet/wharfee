@@ -281,18 +281,28 @@ class DockerClient(object):
         if 'trunc' in kwargs and kwargs['trunc'] is None:
             kwargs['trunc'] = True
 
+        def format_names(names):
+            """
+            Container names start with /.
+            Let's strip this for readability.
+            """
+            if isinstance(names, list):
+                formatted = []
+                for name in names:
+                    if isinstance(name, basestring):
+                        formatted.append(name.lstrip('/'))
+                    else:
+                        formatted.append(name)
+                return formatted
+            return names
+
         csdict = self.instance.containers(**kwargs)
         if len(csdict) > 0:
 
             if 'quiet' not in kwargs or not kwargs['quiet']:
-                # Container names start with /.
-                # Let's strip this for readability.
                 for i in range(len(csdict)):
-                    csdict[i]['Names'] = list(map(
-                        lambda x: x.lstrip('/'), csdict[i]['Names']))
+                    csdict[i]['Names'] = format_names(csdict[i]['Names'])
                     csdict[i]['Created'] = pretty.date(csdict[i]['Created'])
-                    if 'Labels' in csdict[i]:
-                        del csdict[i]['Labels']
 
             return csdict
         else:

@@ -2,6 +2,7 @@
 =====
 
 * Fixes to support python 2.6.
+* Added logging (finally - boo me).
 
 0.6.5
 =====

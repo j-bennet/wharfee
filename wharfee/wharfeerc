@@ -14,3 +14,10 @@ suggest_long_option_names = True
 
 # Use fuzzy matching mode (default is to use simple substring match).
 fuzzy_match = False
+
+# log_file location.
+log_file = ~/.wharfee.log
+
+# Default log level. Possible values: "CRITICAL", "ERROR", "WARNING", "INFO"
+# and "DEBUG".
+log_level = INFO
