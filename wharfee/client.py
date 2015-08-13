@@ -338,6 +338,11 @@ class DockerClient(object):
         result = self.instance.port(*port_args)
         if result:
             return result
+
+        result = self.instance.inspect_container(port_args[0])
+        if result:
+            return result.get('NetworkSettings', {}).get('Ports', None)
+
         return ['There are no port mappings for {0}.'.format(args[0])]
 
     def rm(self, *args, **kwargs):

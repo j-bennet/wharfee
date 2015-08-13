@@ -1,3 +1,8 @@
+0.6.8
+=====
+
+* Fix for "port" command not returning anything.
+
 0.6.7
 =====
 

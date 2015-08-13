@@ -291,6 +291,17 @@ def flatten_dict(data):
     return ', '.join(["{0}: {1}".format(x, y) for x, y in data.iteritems()])
 
 
+def format_port_lines(ports):
+    """
+    Return ports as list of strings
+    :param ports: list of dicts
+    :return: list of strings
+    """
+    port_s = format_ports(ports)
+    result = port_s.split(', ')
+    return result
+
+
 def format_ports(ports):
     """
     Ports get special treatment.
@@ -314,6 +325,12 @@ def format_ports(ports):
     :param ports: list of dicts
     :return: string
     """
+
+    def format_port_list(l):
+        if isinstance(l, list):
+            return ', '.join([format_port(x) for x in l])
+        return '{0}'.format(l)
+
     def format_port(port):
         """
         Format port dictionary and return string.
@@ -324,10 +341,21 @@ def format_ports(ports):
                 port.get('PublicPort', '0000'),
                 port.get('PrivatePort', '0000'),
                 port.get('Type', 'type'))
-        return '{0}/{1}'.format(
-            port.get('PrivatePort', '0000'),
-            port.get('Type', 'type'))
+        if 'HostPort' in port:
+            return "{0}:{1}".format(
+                port.get('HostIp', '0.0.0.0'),
+                port.get('HostPort', '0000')
+            )
+        if 'PrivatePort' in port:
+            return '{0}/{1}'.format(
+                port.get('PrivatePort', '0000'),
+                port.get('Type', 'type'))
+        # Fallback to formatting "as is"
+        return "{0}".format(port)
 
+    if isinstance(ports, dict):
+        return ', '.join(['{0}->{1}'.format(k, format_port_list(v))
+                          for k, v in ports.items()])
     return ', '.join(format_port(x) for x in ports)
 
 
@@ -428,7 +456,8 @@ DATA_FILTERS = {
 
 
 DATA_FORMATTERS = {
-    'top': format_top
+    'top': format_top,
+    'port': format_port_lines
 }
 
 ROW_FORMATTERS = {

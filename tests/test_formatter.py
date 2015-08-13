@@ -7,7 +7,22 @@ from time import sleep
 from wharfee.formatter import format_data
 from wharfee.formatter import format_struct
 from wharfee.formatter import format_top
+from wharfee.formatter import format_port_lines
 from wharfee.formatter import JsonStreamFormatter
+
+
+@pytest.mark.parametrize("data, expected", [
+    ([{'HostPort': '8888', 'HostIp': '0.0.0.0'}],
+     ["0.0.0.0:8888"]),
+    ({u'80/tcp': [{u'HostPort': u'8888', u'HostIp': u'0.0.0.0'}]},
+     ["80/tcp->0.0.0.0:8888"])
+])
+def test_ports_formatting(data, expected):
+    """
+    Test ports formatting
+    """
+    result = format_port_lines(data)
+    assert result == expected
 
 
 def test_top_formatting():

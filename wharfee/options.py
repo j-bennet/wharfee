@@ -305,6 +305,10 @@ COMMAND_OPTIONS = {
     ],
     'port': [
         OPTION_CONTAINER,
+        CommandOption(CommandOption.TYPE_STRING, None, 'port',
+                      action='store',
+                      dest='port',
+                      help='Port number (optionally with protocol).'),
     ],
     'ps': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-a', '--all',
