@@ -1,7 +1,8 @@
 0.6.8
 =====
 
-* Fix for "port" command not returning anything.
+* Fix for "port" command not returning anything (#100).
+* Fix for "--publish" not publishing the ports (#90).
 
 0.6.7
 =====

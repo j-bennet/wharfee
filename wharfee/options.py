@@ -195,6 +195,17 @@ OPTION_CONTAINER_RUNNING = CommandOption(
     action='store',
     help='Container ID or name to use.')
 
+OPTION_HOST_CONFIG = CommandOption(
+    CommandOption.TYPE_OBJECT, None, 'host_config',
+    action='store',
+    dest='host_config')
+
+OPTION_PORTS = CommandOption(
+    CommandOption.TYPE_NUMERIC, None, 'ports',
+    action='append',
+    dest='ports',
+    nargs='*')
+
 
 COMMAND_OPTIONS = {
     'attach': [
@@ -501,16 +512,13 @@ HIDDEN_OPTIONS = {
         OPTION_PUBLISH_ALL,
     ],
     'run': [
-        CommandOption(CommandOption.TYPE_NUMERIC, 'ports', None,
-                      action='append',
-                      dest='ports',
-                      nargs='*'),
-        CommandOption(CommandOption.TYPE_OBJECT, 'host_config', None,
-                      action='store',
-                      dest='host_config'),
+        OPTION_PORTS,
+        OPTION_HOST_CONFIG,
         OPTION_STDIN_OPEN
     ],
     'create': [
+        OPTION_PORTS,
+        OPTION_HOST_CONFIG,
         OPTION_STDIN_OPEN
     ]
 }
