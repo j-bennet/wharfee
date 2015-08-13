@@ -2,11 +2,11 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import pytest
-import shlex
 from optparse import OptionError
 from textwrap import dedent
 from wharfee.options import parse_command_options, format_command_help, \
     format_command_line
+from wharfee.utils import shlex_split
 from wharfee.completer import DockerCompleter
 
 
@@ -116,7 +116,7 @@ def test_parse_multiple_args_without_equal():
     :return:
     """
     text = 'run --name boo -e FOO 1 -e BOO 2 ubuntu'
-    tokens = shlex.split(text) if text else ['']
+    tokens = shlex_split(text) if text else ['']
     cmd = tokens[0]
     params = tokens[1:]
 
@@ -166,7 +166,7 @@ def test_external_command_line(text, is_long, expected):
     Parse and reconstruct the command line.
     """
     cmd, params = text.split(' ', 1)
-    params = shlex.split(params)
+    params = shlex_split(params)
 
     parser, popts, pargs = parse_command_options(cmd, params)
 

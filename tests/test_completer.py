@@ -184,9 +184,12 @@ def test_options_completion_long(command, expected, expected_pos):
 
 
 def option_map(cmd, is_long):
-    return {
-        x.get_name(is_long): x.display for x in all_options(cmd) if x.name.startswith('-')
-    }
+    result = {}
+    for x in all_options(cmd):
+        if x.name.startswith('-'):
+            result[x.get_name(is_long)] = x.display
+    return result
+
 
 psm = option_map('ps', True)
 

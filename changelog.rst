@@ -1,3 +1,8 @@
+0.6.7
+=====
+
+Fixes and travis updates.
+
 0.6.6
 =====
 

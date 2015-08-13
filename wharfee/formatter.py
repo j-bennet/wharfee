@@ -413,8 +413,10 @@ def filter_ps(data):
     if data and isinstance(data, list) and isinstance(data[0], dict):
         result = []
         for item in data:
-            filtered = {k: v for k, v in item.items()
-                        if k.lower() in display_keys}
+            filtered = {}
+            for k, v in item.items():
+                if k.lower() in display_keys:
+                    filtered[k] = v
             result.append(filtered)
         return result
     return data
