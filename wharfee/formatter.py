@@ -117,9 +117,6 @@ class JsonStreamFormatter(StreamFormatter):
         Format and output a JSON line.
         :param data: json
         """
-        if data:
-            data = data.rstrip()
-
         if 'id' in data and data['id']:
             line = "{0} {1}".format(data['status'], data['id'])
         elif 'status' in data:
@@ -133,6 +130,9 @@ class JsonStreamFormatter(StreamFormatter):
             line = "{0}".format(data['error'])
         else:
             line = "{0}".format(data)
+
+        if line:
+            line = line.rstrip()
 
         click.echo(line)
 
