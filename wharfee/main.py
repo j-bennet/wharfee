@@ -36,6 +36,9 @@ from .options import OptionError
 from .logger import create_logger
 from .__init__ import __version__
 
+# Added this to avoid the annoying warning: http://click.pocoo.org/5/python3/
+click.disable_unicode_literals_warning = True
+
 
 class WharfeeCli(object):
     """
