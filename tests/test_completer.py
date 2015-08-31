@@ -56,7 +56,7 @@ def test_build_path_completion_absolute(completer, complete_event):
     assert expected.issubset(result)
 
 
-@pytest.mark.skipif(True, reason='User path specific.')
+@pytest.mark.skipif(True, reason='User path specificompleter.')
 def test_build_path_completion_user(completer, complete_event):
     """
     Suggest build paths from user home directory.
@@ -76,7 +76,7 @@ def test_build_path_completion_user(completer, complete_event):
     assert expected.issubset(result)
 
 
-@pytest.mark.skipif(True, reason='User path specific.')
+@pytest.mark.skipif(True, reason='User path specificompleter.')
 def test_build_path_completion_user_dir(completer, complete_event):
     """
     Suggest build paths from user home directory.
@@ -103,19 +103,16 @@ def test_build_path_completion_user_dir(completer, complete_event):
     ("help", ['help']),
     ('run -d ubuntu:14.04 /bin/sh -c "w', [])  # not complete in quoted string
 ])
-def test_command_completion(command, expected):
+def test_command_completion(completer, complete_event, command, expected):
     """
     Test command suggestions.
     :param command: string: text that user started typing
     :param expected: list: expected completions
     """
-    c = completer()
-    e = complete_event()
-
     position = len(command)
-    result = set(c.get_completions(
+    result = set(completer.get_completions(
         Document(text=command, cursor_position=position),
-        e))
+        complete_event))
 
     expected = set(map(lambda t: Completion(t, -len(command)), expected))
 
@@ -129,20 +126,18 @@ def test_command_completion(command, expected):
     ("help", ['help']),
     ('run -d ubuntu:14.04 /bin/sh -c "w', [])  # not complete in quoted string
 ])
-def test_command_completion_fuzzy(command, expected):
+def test_command_completion_fuzzy(completer, complete_event, command, expected):
     """
     Test command suggestions.
     :param command: string: text that user started typing
     :param expected: list: expected completions
     """
-    c = completer()
-    e = complete_event()
-    c.set_fuzzy_match(True)
+    completer.set_fuzzy_match(True)
 
     position = len(command)
-    result = list(c.get_completions(
+    result = list(completer.get_completions(
         Document(text=command, cursor_position=position),
-        e))
+        complete_event))
 
     expected = list(map(lambda t: Completion(t, -len(command)), expected))
 
@@ -163,19 +158,16 @@ pso = list(filter(lambda x: x.name.startswith('-'), all_options('ps')))
     ("ps --all --quiet ", list(filter(
         lambda x: x.long_name not in ['--all', '--quiet'], pso)), 0),
 ])
-def test_options_completion_long(command, expected, expected_pos):
+def test_options_completion_long(completer, complete_event, command, expected, expected_pos):
     """
     Test command options suggestions.
     :param command: string: text that user started typing
     :param expected: list: expected completions
     """
-    c = completer()
-    e = complete_event()
-
     position = len(command)
 
-    result = set(c.get_completions(
-        Document(text=command, cursor_position=position), e))
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
 
     expected = set(map(lambda t: Completion(
         t.get_name(is_long=True), expected_pos, t.display), expected))
@@ -200,20 +192,18 @@ psm = option_map('ps', True)
     ("ps i", ['--since', '--size', '--quiet'], -1),
     ("ps ze", ['--size'], -2),
 ])
-def test_options_completion_long_fuzzy(command, expected, expected_pos):
+def test_options_completion_long_fuzzy(completer, complete_event, command, expected, expected_pos):
     """
     Test command options suggestions.
     :param command: string: text that user started typing
     :param expected: list: expected completions
     """
-    c = completer()
-    e = complete_event()
-    c.set_fuzzy_match(True)
+    completer.set_fuzzy_match(True)
 
     position = len(command)
 
-    result = list(c.get_completions(
-        Document(text=command, cursor_position=position), e))
+    result = list(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
 
     expected = list(map(lambda t: Completion(
         t, expected_pos, psm[t]), expected))
@@ -228,24 +218,22 @@ def test_options_completion_long_fuzzy(command, expected, expected_pos):
     ("ps -h", filter(
         lambda x: x.short_name and x.short_name.startswith('-h'), pso), -2),
 ])
-def test_options_completion_short(command, expected, expected_pos):
+def test_options_completion_short(completer, complete_event, command, expected, expected_pos):
     """
     Test command options suggestions.
     :param command: string: text that user started typing
     :param expected: list: expected completions
     """
-    c = completer()
-    e = complete_event()
-    c.set_long_options(False)
+    completer.set_long_options(False)
 
     position = len(command)
 
-    result = set(c.get_completions(
-        Document(text=command, cursor_position=position), e))
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
 
     expected = set(map(lambda t: Completion(
         t.get_name(
-            is_long=c.get_long_options()), expected_pos, t.display), expected))
+            is_long=completer.get_long_options()), expected_pos, t.display), expected))
 
     assert result == expected
 
@@ -255,19 +243,16 @@ def test_options_completion_short(command, expected, expected_pos):
     ("ps --before e", filter(lambda x: x.startswith('e'), cs1), -1),
     ("ps --before ei", filter(lambda x: x.startswith('ei'), cs1), -2),
 ])
-def test_options_container_completion(command, expected, expected_pos):
+def test_options_container_completion(completer, complete_event, command, expected, expected_pos):
     """
     Suggest container names in relevant options (ps --before)
     """
-    c = completer()
-    e = complete_event()
-
-    c.set_containers(cs1)
+    completer.set_containers(cs1)
 
     position = len(command)
 
-    result = set(c.get_completions(
-        Document(text=command, cursor_position=position), e))
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
 
     expected = set(map(lambda t: Completion(t, expected_pos), expected))
 
@@ -280,20 +265,17 @@ def test_options_container_completion(command, expected, expected_pos):
     ("top e", map(
         lambda x: (x, x), filter(lambda x: x.startswith('e'), rs1)), -1),
 ])
-def test_options_container_running_completion(command, expected, expected_pos):
+def test_options_container_running_completion(completer, complete_event, command, expected, expected_pos):
     """
     Suggest running container names (top [container])
     """
-    c = completer()
-    e = complete_event()
-
-    c.set_containers(cs1)
-    c.set_running(rs1)
+    completer.set_containers(cs1)
+    completer.set_running(rs1)
 
     position = len(command)
 
-    result = set(c.get_completions(
-        Document(text=command, cursor_position=position), e))
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
 
     expected_completions = set()
     for text, display in expected:
@@ -309,21 +291,18 @@ def test_options_container_running_completion(command, expected, expected_pos):
     ("rm ", ['--all-stopped', ('--help', '-h/--help')] + cs2, 0),
     ("rm spe", ['--all-stopped', 'desperate_hodgkin', 'desperate_torvalds', 'some-percona'], -3),
 ])
-def test_options_container_completion_fuzzy(command, expected, expected_pos):
+def test_options_container_completion_fuzzy(completer, complete_event, command, expected, expected_pos):
     """
     Suggest running container names (top [container])
     """
-    c = completer()
-    e = complete_event()
+    completer.set_containers(cs2)
 
-    c.set_containers(cs2)
-
-    c.set_fuzzy_match(True)
+    completer.set_fuzzy_match(True)
 
     position = len(command)
 
-    result = list(c.get_completions(
-        Document(text=command, cursor_position=position), e))
+    result = list(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
 
     expected_completions = []
     for x in expected:
@@ -360,21 +339,18 @@ def test_options_image_completion(completer, complete_event):
     ('images --filter g', ['nginx', 'postgres'], -1),
     ('images --filter u', ['ubuntu'], -1),
 ])
-def test_options_image_completion_fuzzy(command, expected, expected_pos):
+def test_options_image_completion_fuzzy(completer, complete_event, command, expected, expected_pos):
     """
     Suggest image names in relevant options (images --filter)
     """
-    c = completer()
-    e = complete_event()
+    completer.set_images(im1)
 
-    c.set_images(im1)
-
-    c.set_fuzzy_match(True)
+    completer.set_fuzzy_match(True)
 
     position = len(command)
 
-    result = list(c.get_completions(
-        Document(text=command, cursor_position=position), e))
+    result = list(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
 
     expected = list(map(lambda t: Completion(t, expected_pos), expected))
 
