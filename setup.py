@@ -8,9 +8,9 @@ except ImportError:
 setup(
     description='Wharfee: a shell for Docker',
     author='Iryna Cherniavska',
-    url='http://wharfee.com.',
-    download_url='http://github.com/j-bennet/wharfee.',
-    author_email='i[dot]chernyavska[at]gmail[dot]com.',
+    url='http://wharfee.com',
+    download_url='http://github.com/j-bennet/wharfee',
+    author_email='i[dot]chernyavska[at]gmail[dot]com',
     version=__version__,
     install_requires=[
         'six>=1.9.0',
