@@ -12,7 +12,7 @@ python:
   - "3.4"
 
 install:
-  - pip install . pytest mock codecov
+  - pip install . pytest mock codecov behave pexpect
   - pip install -e .
 
 script:
