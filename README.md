@@ -1,8 +1,8 @@
 [![Stories in Ready](https://badge.waffle.io/j-bennet/wharfee.png?label=ready&title=Ready)](https://waffle.io/j-bennet/wharfee)
 [![PyPI version](https://badge.fury.io/py/wharfee.svg)](http://badge.fury.io/py/wharfee)
+[![Join the chat at https://gitter.im/j-bennet/wharfee](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/j-bennet/wharfee?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 # wharfee
 
-[![Join the chat at https://gitter.im/j-bennet/wharfee](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/j-bennet/wharfee?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 A shell for Docker that can do autocompletion and syntax highlighting.
 
 ## Why?
