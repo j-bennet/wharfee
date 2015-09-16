@@ -8,6 +8,8 @@ class CommandOption(object):
     useful to do autocompletion in context of this option.
     """
 
+    choices = None
+
     TYPE_FILEPATH, \
         TYPE_DIRPATH, \
         TYPE_BOOLEAN, \
@@ -104,6 +106,8 @@ class CommandOption(object):
 
         if 'choices' in kwargs:
             self.choices = kwargs['choices']
+            if option_type != CommandOption.TYPE_CHOICE:
+                kwargs.pop('choices')
 
         self.option_type = option_type
         self.short_name = short_name
@@ -116,7 +120,7 @@ class CommandOption(object):
         If this option is a list of choices.
         :return: boolean
         """
-        return self.option_type == CommandOption.TYPE_CHOICE
+        return self.option_type == CommandOption.TYPE_CHOICE or self.choices
 
     def is_type_container(self):
         """

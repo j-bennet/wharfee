@@ -162,6 +162,15 @@ OPTION_VOLUMES_FROM = CommandOption(
     nargs='*',
     api_match=False)
 
+OPTION_NET = CommandOption(
+    CommandOption.TYPE_STRING, None, '--net',
+    action='store',
+    dest='net',
+    help='Network mode for the container. Possible values are "bridge", '
+         '"none", "container:<name|id>", "host".',
+    choices=['bridge', 'none', 'container:', 'host'],
+    api_match=False)
+
 OPTION_IMAGE = CommandOption(
     CommandOption.TYPE_IMAGE, None, 'image',
     action='store',
@@ -264,6 +273,7 @@ COMMAND_OPTIONS = {
         OPTION_VOLUMES_FROM,
         OPTION_IMAGE,
         OPTION_COMMAND,
+        OPTION_NET,
     ],
     'exec': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
@@ -409,6 +419,7 @@ COMMAND_OPTIONS = {
                       action='store',
                       help='Image name.'),
         OPTION_COMMAND,
+        OPTION_NET,
     ],
     'shell': [
         OPTION_CONTAINER_RUNNING,

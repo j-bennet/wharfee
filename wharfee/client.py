@@ -10,7 +10,7 @@ import pexpect
 import ssl
 
 from docker import AutoVersionClient
-from docker.utils import kwargs_from_env, create_host_config
+from docker.utils import kwargs_from_env
 from docker.errors import APIError
 from docker.errors import DockerException
 from requests.exceptions import ConnectionError
@@ -450,6 +450,7 @@ class DockerClient(object):
             kwargs = self._add_link_bindings(kwargs)
             kwargs = self._add_volumes_from(kwargs)
             kwargs = self._add_volumes(kwargs)
+            kwargs = self._add_network_mode(kwargs)
 
             create_args = allowed_args('create', **kwargs)
             result = self.instance.create_container(**create_args)
@@ -532,7 +533,7 @@ class DockerClient(object):
         if 'volumes' in params and params['volumes']:
             binds = parse_volume_bindings(params['volumes'])
             params['volumes'] = [x['bind'] for x in binds.values()]
-            conf = create_host_config(binds=binds)
+            conf = self.instance.create_host_config(binds=binds)
             self._update_host_config(params, conf)
         return params
 
@@ -545,7 +546,18 @@ class DockerClient(object):
         if 'volumes_from' in params and params['volumes_from']:
             cs = ','.join(params['volumes_from'])
             cs = [x.strip() for x in cs.split(',') if x]
-            conf = create_host_config(volumes_from=cs)
+            conf = self.instance.create_host_config(volumes_from=cs)
+            self._update_host_config(params, conf)
+        return params
+
+    def _add_network_mode(self, params):
+        """
+        Update kwargs if --net is present.
+        :param params: dict
+        :return: dict
+        """
+        if 'net' in params:
+            conf = self.instance.create_host_config(network_mode=params['net'])
             self._update_host_config(params, conf)
         return params
 
@@ -560,7 +572,7 @@ class DockerClient(object):
             for link in params['links']:
                 link_name, link_alias = link.split(':', 1)
                 links[link_name] = link_alias
-            link_conf = create_host_config(links=links)
+            link_conf = self.instance.create_host_config(links=links)
             self._update_host_config(params, link_conf)
         return params
 
@@ -577,7 +589,8 @@ class DockerClient(object):
             params['ports'] = port_bindings.keys()
 
             # Have to provide host config with port mappings.
-            port_conf = create_host_config(port_bindings=port_bindings)
+            port_conf = self.instance.create_host_config(
+                port_bindings=port_bindings)
 
             self._update_host_config(params, port_conf)
 
@@ -596,7 +609,8 @@ class DockerClient(object):
             params['ports'] = ports.keys()
 
             # Have to provide host config with port mappings.
-            port_conf = create_host_config(port_bindings=ports)
+            port_conf = self.instance.create_host_config(
+                port_bindings=ports)
 
             self._update_host_config(params, port_conf)
 
