@@ -19,7 +19,7 @@ Same goes for image names.
 
 ![rmi](screenshots/rmi-images.png)
 
-There are some handy shortcuts too. What was that command ro remove all dangling images? OMG, what was it? docker rmi $(docker ps --all --quiet)? Oh, there you go:
+There are some handy shortcuts too. What was that command to remove all dangling images? OMG, what was it? docker rmi $(docker ps --all --quiet)? Oh, there you go:
 
 ![rmi-dangling](screenshots/rmi-all-dangling.png)
 
