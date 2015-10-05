@@ -5,6 +5,8 @@
 
 A shell for Docker that can do autocompletion and syntax highlighting.
 
+![ps](screenshots/wharfee-demo.gif)
+
 ## Why?
 
 Docker commands have tons of options. They are hard to remember.
