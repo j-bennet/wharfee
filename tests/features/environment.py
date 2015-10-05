@@ -28,6 +28,5 @@ def after_scenario(context, _):
     """
 
     if hasattr(context, 'cli') and not context.exit_sent:
-        # Send Ctrl + D into cli
-        context.cli.sendcontrol('d')
-        context.cli.expect(pexpect.EOF)
+        # Terminate the cli nicely.
+        context.cli.terminate()
