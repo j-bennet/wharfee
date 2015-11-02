@@ -1,4 +1,3 @@
-importlib>=1.0.3
 pytest>=2.7.0
 mock>=1.0.1
 tox>=1.9.2
