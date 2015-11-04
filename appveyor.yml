@@ -18,7 +18,10 @@ init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
 
 install:
-  - "%PYTHON%/Scripts/pip.exe install . pytest mock codecov"
+  - "%PYTHON%/Scripts/pip.exe install -r requirements-win.txt"
+  - "%PYTHON%/Scripts/pip.exe install ."
 
 test_script:
   - "%PYTHON%/Scripts/py.test"
+  - "cd tests"
+  - "%PYTHON%/Scripts/behave"

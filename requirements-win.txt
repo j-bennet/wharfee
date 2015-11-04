@@ -1,0 +1,5 @@
+pytest>=2.7.0
+mock>=1.0.1
+behave>=1.2.4
+flake8==2.4.1
+pexpect>=3.3
