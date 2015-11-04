@@ -23,5 +23,3 @@ install:
 
 test_script:
   - "%PYTHON%/Scripts/py.test"
-  - "cd tests"
-  - "%PYTHON%/Scripts/behave"
