@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
 
+import os
 import pytest
 from prompt_toolkit.completion import Completion
 from prompt_toolkit.document import Document
 from wharfee.options import all_options
 from wharfee.options import COMMAND_NAMES
+from mock import patch
 
 
 @pytest.fixture
@@ -45,18 +47,20 @@ def test_build_path_completion_absolute(completer, complete_event):
 
     position = len(command)
 
-    result = set(completer.get_completions(
-        Document(text=command, cursor_position=position),
-        complete_event))
+    with patch('wharfee.completer.list_dir',
+               return_value=['etc', 'home', 'tmp', 'usr', 'var']):
 
-    expected = ['etc', 'home', 'tmp', 'usr', 'var']
+        result = set(completer.get_completions(
+            Document(text=command, cursor_position=position),
+            complete_event))
 
-    expected = set(map(lambda t: Completion(t, 0), expected))
+        expected = ['etc', 'home', 'tmp', 'usr', 'var']
 
-    assert expected.issubset(result)
+        expected = set(map(lambda t: Completion(t, 0), expected))
+
+        assert expected.issubset(result)
 
 
-@pytest.mark.skipif(True, reason='User path specificompleter.')
 def test_build_path_completion_user(completer, complete_event):
     """
     Suggest build paths from user home directory.
@@ -65,18 +69,20 @@ def test_build_path_completion_user(completer, complete_event):
 
     position = len(command)
 
-    result = set(completer.get_completions(
-        Document(text=command, cursor_position=position),
-        complete_event))
+    with patch('wharfee.completer.list_dir',
+               return_value=['Documents', 'Downloads', 'Pictures']):
 
-    expected = ['~/Documents', '~/Downloads']
+        result = set(completer.get_completions(
+            Document(text=command, cursor_position=position),
+            complete_event))
 
-    expected = set(map(lambda t: Completion(t, -1), expected))
+        expected = ['~{0}{1}'.format(os.path.sep, d) for d in ['Documents', 'Downloads']]
 
-    assert expected.issubset(result)
+        expected = set(map(lambda t: Completion(t, -1), expected))
+
+        assert expected.issubset(result)
 
 
-@pytest.mark.skipif(True, reason='User path specificompleter.')
 def test_build_path_completion_user_dir(completer, complete_event):
     """
     Suggest build paths from user home directory.
@@ -85,15 +91,18 @@ def test_build_path_completion_user_dir(completer, complete_event):
 
     position = len(command)
 
-    result = set(completer.get_completions(
-        Document(text=command, cursor_position=position),
-        complete_event))
+    with patch('wharfee.completer.list_dir',
+               return_value=['.config', 'db-dumps', 'src', 'venv']):
 
-    expected = ['src']
+        result = set(completer.get_completions(
+            Document(text=command, cursor_position=position),
+            complete_event))
 
-    expected = set(map(lambda t: Completion(t, -1), expected))
+        expected = ['src']
 
-    assert expected.issubset(result)
+        expected = set(map(lambda t: Completion(t, -1), expected))
+
+        assert expected.issubset(result)
 
 
 @pytest.mark.parametrize("command, expected", [
