@@ -39,6 +39,20 @@ Alternatively, you can install the latest from github and get all the bugfixes t
 
     $ pip install git+https://github.com/j-bennet/wharfee.git
 
+## Running
+
+Wharfee is a console application. You run it from terminal by typing the program name into
+the command line:
+
+    $ wharfee
+    
+If you're on Windows, you may be not so familiar with using the terminal. But if you installed
+Docker (Docker Toolbox), you'll have Docker Quickstart Terminal as part of you installation. So,
+just as above, you'll run Docker Quickstart Terminal and type `wharfee` into your command prompt.
+After you hit `Enter`, you'll see wharfee prompt:
+
+    wharfee>
+
 ## What are you using?
 
 * To talk to Docker: [docker-py](https://github.com/docker/docker-py).
