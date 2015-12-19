@@ -881,10 +881,16 @@ class DockerClient(object):
         if not args:
             return ['Container name is required.']
 
-        container = args[0]
-        self.instance.stop(container, **kwargs)
-        self.is_refresh_running = True
-        return [container]
+        def stream():
+            for container in args:
+                try:
+                    self.instance.stop(container, **kwargs)
+                    self.is_refresh_running = True
+                    yield container
+                except APIError as ex:
+                    yield '{0:.25}: {1}'.format(container, ex.explanation)
+
+        return stream()
 
     def top(self, *args, **kwargs):
         """
