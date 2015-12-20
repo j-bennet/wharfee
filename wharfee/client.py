@@ -85,11 +85,11 @@ class DockerClient(object):
             'unpause': (self.unpause, ("Unpause all processes within a "
                                        "container.")),
             'version': (self.version, "Show the Docker version information."),
-            'volume create': (self.not_implemented, "Create a new volume."),
+            'volume create': (self.volume_create, "Create a new volume."),
             'volume inspect': (self.not_implemented, "Inspect one or more "
                                                      "volumes."),
             'volume ls': (self.not_implemented, "List volumes."),
-            'volume rm': (self.not_implemented, "Remove a volume."),
+            'volume rm': (self.volume_rm, "Remove a volume."),
         }
 
         self.output = None
@@ -532,6 +532,44 @@ class DockerClient(object):
             for container in args:
                 self.instance.restart(container, **kwargs)
                 yield container
+
+        return stream()
+
+    def volume_create(self, *args, **kwargs):
+        """
+        Create a volume. Equivalent of docker volume create.
+        :param kwargs:
+        :return: Volume name.
+        """
+        if not kwargs:
+            return ['Volume name is required.']
+
+        allowed = allowed_args('volume create', **kwargs)
+
+        result = self.instance.create_volume(**allowed)
+        return [result['Name']]
+
+    def volume_rm(self, *args, **kwargs):
+        """
+        Remove a volume. Equivalent of docker volume rm.
+        :param kwargs:
+        :return: Volume name.
+        """
+        if not args:
+            return ['Volume name is required.']
+
+        def stream():
+            for volume in args:
+                try:
+                    result = self.instance.remove_volume(volume)
+                    if result:
+                        yield volume
+                    else:
+                        yield 'Could not remove volume {0}.'.format(volume)
+                except APIError as x:
+                    yield 'Could not remove volume {0}: {1}.'.format(
+                            volume,
+                            x.explanation)
 
         return stream()
 

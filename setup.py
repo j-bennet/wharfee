@@ -17,7 +17,7 @@ setup(
         'six>=1.9.0',
         'pygments>=2.0.2',
         'prompt-toolkit==0.46',
-        'docker-py>=1.4.0',
+        'docker-py>=1.6.0',
         'tabulate>=0.7.5',
         'click>=4.0',
         'py-pretty>-0.1',
