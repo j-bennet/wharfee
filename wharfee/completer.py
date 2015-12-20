@@ -5,10 +5,8 @@ import fuzzyfinder
 
 from itertools import chain
 from prompt_toolkit.completion import Completer, Completion
-from .options import COMMAND_OPTIONS
-from .options import COMMAND_NAMES
-from .options import all_options
-from .options import find_option
+from .options import COMMAND_OPTIONS, COMMAND_NAMES, all_options, find_option, \
+    split_command_and_args
 from .helpers import list_dir, parse_path, complete_path
 from .utils import shlex_split, shlex_first_token
 
@@ -99,12 +97,13 @@ class DockerCompleter(Completer):
         if DockerCompleter.in_quoted_string(document.text):
             return []
 
+
         word_before_cursor = document.get_word_before_cursor(WORD=True)
-        first_word = DockerCompleter.first_token(document.text).lower()
         words = DockerCompleter.get_tokens(document.text)
+        command_name = split_command_and_args(words)[0]
 
         in_command = (len(words) > 1) or \
-                     ((not word_before_cursor) and first_word)
+                     ((not word_before_cursor) and command_name)
 
         if in_command:
             previous_word = ''
@@ -120,7 +119,7 @@ class DockerCompleter(Completer):
 
             params = words[1:] if (len(words) > 1) else []
             completions = DockerCompleter.find_command_matches(
-                first_word,
+                command_name,
                 word_before_cursor,
                 previous_word,
                 params,

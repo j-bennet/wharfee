@@ -18,7 +18,7 @@ from requests.packages.urllib3 import disable_warnings
 from .options import allowed_args
 from .options import parse_command_options
 from .options import format_command_help, format_command_line
-from .options import COMMAND_NAMES
+from .options import COMMAND_NAMES, split_command_and_args
 from .options import OptionError
 from .helpers import filesize, parse_port_bindings, parse_volume_bindings, \
     parse_exposed_ports
@@ -85,6 +85,11 @@ class DockerClient(object):
             'unpause': (self.unpause, ("Unpause all processes within a "
                                        "container.")),
             'version': (self.version, "Show the Docker version information."),
+            'volume create': (self.not_implemented, "Create a new volume."),
+            'volume inspect': (self.not_implemented, "Inspect one or more "
+                                                     "volumes."),
+            'volume ls': (self.not_implemented, "List volumes."),
+            'volume rm': (self.not_implemented, "Remove a volume."),
         }
 
         self.output = None
@@ -149,8 +154,7 @@ class DockerClient(object):
             self.logs = None
 
         tokens = shlex_split(text) if text else ['']
-        cmd = tokens[0]
-        params = tokens[1:] if len(tokens) > 1 else None
+        cmd, params = split_command_and_args(tokens)
 
         reset_output()
 
@@ -218,7 +222,7 @@ class DockerClient(object):
                      for key in COMMAND_NAMES]
         return help_rows
 
-    def not_implemented(self, *_):
+    def not_implemented(self, *_, **kw):
         """
         Placeholder for commands to be implemented.
         :return: iterable

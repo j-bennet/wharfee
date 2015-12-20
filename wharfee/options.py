@@ -34,7 +34,17 @@ COMMAND_NAMES = [
     'top',
     'unpause',
     'version',
+    'volume create',
+    'volume inspect',
+    'volume ls',
+    'volume rm',
 ]
+
+COMMAND_LENGTH = {
+    'volume create': 2,
+    'volume inspect': 2,
+    'volume rm': 2
+}
 
 
 OPTION_HELP = CommandOption(
@@ -85,6 +95,12 @@ OPTION_CONTAINER_HOSTNAME = CommandOption(
 
 OPTION_CONTAINER_NAME = CommandOption(
     CommandOption.TYPE_CONTAINER, None, '--name',
+    action='store',
+    dest='name',
+    help='Specify volume name.')
+
+OPTION_VOLUME_NAME = CommandOption(
+    CommandOption.TYPE_VOLUME, None, '--name',
     action='store',
     dest='name',
     help='Assign a name to the container.')
@@ -523,7 +539,13 @@ COMMAND_OPTIONS = {
     ],
     'unpause': [
         OPTION_CONTAINER_RUNNING,
-    ]
+    ],
+    'volume create': [
+        OPTION_VOLUME_NAME
+    ],
+    'volume inspect': [],
+    'volume ls': [],
+    'volume rm': [],
 }
 
 
@@ -695,6 +717,25 @@ def format_command_line(cmd, is_long, args, kwargs):
     comps.extend(args)
     external_command = ' '.join(comps)
     return external_command
+
+
+def split_command_and_args(tokens):
+    """
+    Take all tokens from command line, return command part and args part.
+    Command can be more than 1 words.
+    :param tokens: list
+    :return: tuple of (string, list)
+    """
+    command, args = None, None
+    if tokens:
+        length = 1
+        for cmd_name in COMMAND_LENGTH:
+            if ' '.join(tokens).startswith(cmd_name):
+                length = COMMAND_LENGTH[cmd_name]
+                break
+        command = ' '.join(tokens[:length])
+        args = tokens[length:] if len(tokens) >= length else None
+    return command, args
 
 
 def format_command_help(cmd):

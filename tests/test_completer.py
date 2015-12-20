@@ -364,3 +364,21 @@ def test_options_image_completion_fuzzy(completer, complete_event, command, expe
     expected = list(map(lambda t: Completion(t, expected_pos), expected))
 
     assert result == expected
+
+
+def test_options_volume_completion(completer, complete_event):
+    """
+    Suggest options in volume commands
+    """
+    command = 'volume create '
+    expected = ['--name']
+    expected_pos = 0
+
+    position = len(command)
+
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
+
+    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+
+    assert result == expected
