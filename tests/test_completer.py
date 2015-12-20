@@ -371,7 +371,7 @@ def test_options_volume_completion(completer, complete_event):
     Suggest options in volume commands
     """
     command = 'volume create '
-    expected = ['--name']
+    expected = [('--name',), ('--help', '-h/--help')]
     expected_pos = 0
 
     position = len(command)
@@ -379,6 +379,8 @@ def test_options_volume_completion(completer, complete_event):
     result = set(completer.get_completions(
         Document(text=command, cursor_position=position), complete_event))
 
-    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+    expected = set(map(
+            lambda t: Completion(t[0], expected_pos, t[1] if len(t) > 1 else t[0]),
+            expected))
 
     assert result == expected
