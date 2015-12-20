@@ -139,6 +139,7 @@ def test_help_formatting():
 
           Non-standard options:
             --all-dangling  Shortcut to remove all dangling images.
+            --all           Shortcut to remove all images.
     """).strip()
 
     print(output)
