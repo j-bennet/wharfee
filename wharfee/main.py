@@ -134,13 +134,14 @@ class WharfeeCli(object):
         """
         click.clear()
 
-    def set_completer_options(self, cons=True, runs=True, imgs=True):
+    def set_completer_options(self, cons=True, runs=True, imgs=True, vols=True):
         """
         Set image and container names in Completer.
         Re-read if needed after a command.
         :param cons: boolean: need to refresh containers
         :param runs: boolean: need to refresh running containers
         :param imgs: boolean: need to refresh images
+        :param vols: boolean: need to refresh volumes
         """
 
         if cons:
@@ -181,6 +182,10 @@ class WharfeeCli(object):
                 self.completer.set_images(images)
                 self.completer.set_tagged(tagged)
 
+        if vols:
+            vs = self.handler.volume_ls(quiet=True)
+            self.completer.set_volumes(vs)
+
     def set_fuzzy_match(self, is_fuzzy):
         """
         Setter for fuzzy matching mode
@@ -218,7 +223,8 @@ class WharfeeCli(object):
         """
         self.set_completer_options(self.handler.is_refresh_containers,
                                    self.handler.is_refresh_running,
-                                   self.handler.is_refresh_images)
+                                   self.handler.is_refresh_images,
+                                   self.handler.is_refresh_volumes)
 
     def run_cli(self):
         """

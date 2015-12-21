@@ -88,7 +88,7 @@ class DockerClient(object):
             'volume create': (self.volume_create, "Create a new volume."),
             'volume inspect': (self.not_implemented, "Inspect one or more "
                                                      "volumes."),
-            'volume ls': (self.not_implemented, "List volumes."),
+            'volume ls': (self.volume_ls, "List volumes."),
             'volume rm': (self.volume_rm, "Remove a volume."),
         }
 
@@ -100,6 +100,7 @@ class DockerClient(object):
         self.is_refresh_containers = False
         self.is_refresh_running = False
         self.is_refresh_images = False
+        self.is_refresh_volumes = False
 
         disable_warnings()
 
@@ -150,6 +151,7 @@ class DockerClient(object):
             self.is_refresh_containers = False
             self.is_refresh_running = False
             self.is_refresh_images = False
+            self.is_refresh_volumes = False
             self.after = None
             self.logs = None
 
@@ -547,7 +549,26 @@ class DockerClient(object):
         allowed = allowed_args('volume create', **kwargs)
 
         result = self.instance.create_volume(**allowed)
+        self.is_refresh_volumes = True
         return [result['Name']]
+
+    def volume_ls(self, *args, **kwargs):
+        """
+        List volumes. Equivalent of docker volume ls.
+        :param kwargs:
+        :return: Iterable.
+        """
+        quiet = kwargs.pop('quiet', False)
+
+        vdict = self.instance.volumes(**kwargs)
+        result = vdict['Volumes']
+
+        if vdict and 'Volumes' in vdict:
+            if quiet:
+                result = [volume['Name'] for volume in result]
+            return result
+        else:
+            return ['There are no volumes to list.']
 
     def volume_rm(self, *args, **kwargs):
         """
@@ -563,6 +584,7 @@ class DockerClient(object):
                 try:
                     result = self.instance.remove_volume(volume)
                     if result:
+                        self.is_refresh_volumes = True
                         yield volume
                     else:
                         yield 'Could not remove volume {0}.'.format(volume)

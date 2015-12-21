@@ -41,9 +41,7 @@ COMMAND_NAMES = [
 ]
 
 COMMAND_LENGTH = {
-    'volume create': 2,
-    'volume inspect': 2,
-    'volume rm': 2
+    k: len(k.split(' ')) for k in COMMAND_NAMES if ' ' in k
 }
 
 
@@ -544,8 +542,18 @@ COMMAND_OPTIONS = {
         OPTION_VOLUME_NAME
     ],
     'volume inspect': [],
-    'volume ls': [],
-    'volume rm': [],
+    'volume ls': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-q', '--quiet',
+                      action='store_true',
+                      dest='quiet',
+                      help='Only display volume names.'),
+
+    ],
+    'volume rm': [
+        CommandOption(CommandOption.TYPE_VOLUME, 'name',
+                      help='Volume name.',
+                      nargs='+')
+    ],
 }
 
 

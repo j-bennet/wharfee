@@ -135,6 +135,13 @@ class CommandOption(object):
         """
         return self.option_type == CommandOption.TYPE_IMAGE_TAGGED
 
+    def is_type_volume(self):
+        """
+        Should this option suggest volume name?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_VOLUME
+
     def is_type_filepath(self):
         """
         Should this option suggest filename?

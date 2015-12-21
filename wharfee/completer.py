@@ -17,7 +17,7 @@ class DockerCompleter(Completer):
     """
 
     def __init__(self, containers=None, running=None, images=None, tagged=None,
-                 long_option_names=True, fuzzy=False):
+                 volumes = None, long_option_names=True, fuzzy=False):
         """
         Initialize the completer
         :return:
@@ -27,8 +27,16 @@ class DockerCompleter(Completer):
         self.running = set(running) if running else set()
         self.images = set(images) if images else set()
         self.tagged = set(tagged) if tagged else set()
+        self.volumes = set(volumes) if volumes else set()
         self.long_option_mode = long_option_names
         self.fuzzy = fuzzy
+
+    def set_volumes(self, volumes):
+        """
+        Setter for list of available volumes.
+        :param volumes: list
+        """
+        self.volumes = set(volumes) if volumes else set()
 
     def set_containers(self, containers):
         """
@@ -97,7 +105,6 @@ class DockerCompleter(Completer):
         if DockerCompleter.in_quoted_string(document.text):
             return []
 
-
         word_before_cursor = document.get_word_before_cursor(WORD=True)
         words = DockerCompleter.get_tokens(document.text)
         command_name = split_command_and_args(words)[0]
@@ -127,6 +134,7 @@ class DockerCompleter(Completer):
                 self.running,
                 self.images,
                 self.tagged,
+                self.volumes,
                 self.long_option_mode,
                 self.fuzzy)
         else:
@@ -140,7 +148,8 @@ class DockerCompleter(Completer):
     @staticmethod
     def find_command_matches(command, word='', prev='', params=None,
                              containers=None, running=None, images=None,
-                             tagged=None, long_options=True, fuzzy=False):
+                             tagged=None, volumes=None, long_options=True,
+                             fuzzy=False):
         """
         Find all matches in context of the given command.
         :param command: string: command keyword (such as "ps", "images")
@@ -151,6 +160,7 @@ class DockerCompleter(Completer):
         :param running: list of running containers
         :param images: list of images
         :param tagged: list of tagged images
+        :param volumes: list of volumes
         :param long_options: boolean
         :param fuzzy: boolean
         :return: iterable
@@ -173,6 +183,8 @@ class DockerCompleter(Completer):
                     opt_suggestions = images
                 elif current_opt.is_type_tagged():
                     opt_suggestions = tagged
+                elif current_opt.is_type_volume():
+                    opt_suggestions = volumes
                 elif current_opt.is_type_choice():
                     opt_suggestions = current_opt.choices
                 elif current_opt.is_type_dirname():
@@ -228,6 +240,8 @@ class DockerCompleter(Completer):
                         positionals = chain(positionals, running)
                     elif opt.is_type_tagged():
                         positionals = chain(positionals, tagged)
+                    elif opt.is_type_volume():
+                        positionals = chain(positionals, volumes)
                     elif opt.is_type_choice():
                         positionals = chain(positionals, opt.choices)
                     elif opt.is_type_dirname():
