@@ -12,7 +12,7 @@ import ssl
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
 from docker.errors import APIError
-from docker.errors import DockerException
+from docker.errors import DockerException, InvalidVersion
 from requests.exceptions import ConnectionError
 from requests.packages.urllib3 import disable_warnings
 from .options import allowed_args
@@ -23,6 +23,7 @@ from .options import OptionError
 from .helpers import filesize, parse_port_bindings, parse_volume_bindings, \
     parse_exposed_ports
 from .utils import shlex_split
+from .decorators import if_exception_return
 
 
 class DockerClient(object):
@@ -44,6 +45,8 @@ class DockerClient(object):
 
         assert callable(clear_handler)
         assert callable(refresh_handler)
+
+        self.exception = None
 
         self.handlers = {
             'attach': (self.attach, 'Attach to a running container.'),
@@ -154,6 +157,7 @@ class DockerClient(object):
             self.is_refresh_volumes = False
             self.after = None
             self.logs = None
+            self.exception = None
 
         tokens = shlex_split(text) if text else ['']
         cmd, params = split_command_and_args(tokens)
@@ -537,6 +541,7 @@ class DockerClient(object):
 
         return stream()
 
+    @if_exception_return(InvalidVersion, None)
     def volume_create(self, *args, **kwargs):
         """
         Create a volume. Equivalent of docker volume create.
@@ -552,6 +557,7 @@ class DockerClient(object):
         self.is_refresh_volumes = True
         return [result['Name']]
 
+    @if_exception_return(InvalidVersion, None)
     def volume_ls(self, *args, **kwargs):
         """
         List volumes. Equivalent of docker volume ls.
@@ -570,6 +576,7 @@ class DockerClient(object):
         else:
             return ['There are no volumes to list.']
 
+    @if_exception_return(InvalidVersion, None)
     def volume_rm(self, *args, **kwargs):
         """
         Remove a volume. Equivalent of docker volume rm.

@@ -294,6 +294,9 @@ class WharfeeCli(object):
                     for line in self.handler.after():
                         click.echo(line)
 
+                if self.handler.exception:
+                    click.secho(self.handler.exception.message, fg='red')
+
                 self.refresh_completions()
 
             except OptionError as ex:
