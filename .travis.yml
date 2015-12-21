@@ -16,6 +16,7 @@ install:
   - pip install -r requirements-dev.txt
   - pip install codecov
   - pip install -e .
+  - docker --version
 
 script:
   - coverage run --source wharfee -m py.test
