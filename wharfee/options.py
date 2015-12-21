@@ -40,9 +40,8 @@ COMMAND_NAMES = [
     'volume rm',
 ]
 
-COMMAND_LENGTH = {
-    k: len(k.split(' ')) for k in COMMAND_NAMES if ' ' in k
-}
+
+COMMAND_LENGTH = dict((k, len(k.split(' '))) for k in COMMAND_NAMES if ' ' in k)
 
 
 OPTION_HELP = CommandOption(
