@@ -11,12 +11,14 @@ python:
   - "3.3"
   - "3.4"
 
+before_install:
+  - docker --version
+
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install importlib; fi
   - pip install -r requirements-dev.txt
   - pip install codecov
   - pip install -e .
-  - docker --version
 
 script:
   - coverage run --source wharfee -m py.test
