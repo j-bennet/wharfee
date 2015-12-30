@@ -184,6 +184,13 @@ OPTION_NET = CommandOption(
     choices=['bridge', 'none', 'container:', 'host'],
     api_match=False)
 
+OPTION_FILTERS = CommandOption(
+    CommandOption.TYPE_STRING, None, '--filter',
+    action='append',
+    dest='filters',
+    nargs='+',
+    help='Provide filter values (i.e. "dangling=true").')
+
 OPTION_IMAGE = CommandOption(
     CommandOption.TYPE_IMAGE, None, 'image',
     action='store',
@@ -546,7 +553,7 @@ COMMAND_OPTIONS = {
                       action='store_true',
                       dest='quiet',
                       help='Only display volume names.'),
-
+        OPTION_FILTERS
     ],
     'volume rm': [
         CommandOption(CommandOption.TYPE_VOLUME, 'name',

@@ -3,6 +3,24 @@ import os
 import math
 
 
+def parse_filters(filters):
+    """
+    Parse list of "key=value" into dict
+    :param filters: list
+    :return: dict
+    """
+    result = {}
+    if filters:
+        for x in filters:
+            k, v = x.split('=', 2)
+            if v.lower() == 'true':
+                v = True
+            elif v.lower() == 'false':
+                v = False
+            result[k] = v
+    return result
+
+
 def parse_volume_bindings(volumes):
     """
     Parse volumes into a dict.

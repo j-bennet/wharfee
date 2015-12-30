@@ -21,7 +21,7 @@ from .options import format_command_help, format_command_line
 from .options import COMMAND_NAMES, split_command_and_args
 from .options import OptionError
 from .helpers import filesize, parse_port_bindings, parse_volume_bindings, \
-    parse_exposed_ports
+    parse_exposed_ports, parse_filters
 from .utils import shlex_split
 from .decorators import if_exception_return
 
@@ -566,6 +566,8 @@ class DockerClient(object):
         """
         quiet = kwargs.pop('quiet', False)
 
+        kwargs = self._add_filters(kwargs)
+
         vdict = self.instance.volumes(**kwargs)
         result = vdict['Volumes']
 
@@ -624,6 +626,17 @@ class DockerClient(object):
             return ['Tagged {0} into {1}.'.format(*args)]
         else:
             return ['Error tagging {0} into {1}.'.format(*args)]
+
+    def _add_filters(self, params):
+        """
+        Update kwargs if filters are present.
+        :param params: dict
+        :return dict
+        """
+        if 'filters' in params and params['filters']:
+            filters = parse_filters(params['filters'])
+            params['filters'] = filters
+        return params
 
     def _add_volumes(self, params):
         """
