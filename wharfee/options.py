@@ -547,7 +547,11 @@ COMMAND_OPTIONS = {
     'volume create': [
         OPTION_VOLUME_NAME
     ],
-    'volume inspect': [],
+    'volume inspect': [
+        CommandOption(CommandOption.TYPE_VOLUME, 'name',
+                      help='Volume name.',
+                      nargs='+')
+    ],
     'volume ls': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-q', '--quiet',
                       action='store_true',

@@ -366,15 +366,21 @@ def test_options_image_completion_fuzzy(completer, complete_event, command, expe
     assert result == expected
 
 
-def test_options_volume_completion(completer, complete_event):
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ('volume create ', [('--name',), ('--help', '-h/--help')], 0),
+    ('volume rm ', [('--help', '-h/--help'), ('abc',), ('def',)], 0),
+    ('volume ls ', [('--help', '-h/--help'), ('--filter',), ('--quiet', '-q/--quiet')], 0),
+    ('volume inspect ', [('--help', '-h/--help'), ('abc',), ('def',)], 0),
+])
+def test_options_volume_completion(completer, complete_event, command, expected, expected_pos):
     """
     Suggest options in volume commands
     """
-    command = 'volume create '
-    expected = [('--name',), ('--help', '-h/--help')]
-    expected_pos = 0
-
     position = len(command)
+
+    completer.set_volumes(['abc', 'def'])
+
+    completer.set_fuzzy_match(True)
 
     result = set(completer.get_completions(
         Document(text=command, cursor_position=position), complete_event))
