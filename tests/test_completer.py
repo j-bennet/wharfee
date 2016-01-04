@@ -367,7 +367,7 @@ def test_options_image_completion_fuzzy(completer, complete_event, command, expe
 
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
-    ('volume create ', [('--name',), ('--help', '-h/--help')], 0),
+    ('volume create ', [('--name',), ('--help', '-h/--help'), ('--opt', '-o/--opt')], 0),
     ('volume rm ', [('--help', '-h/--help'), ('abc',), ('def',)], 0),
     ('volume ls ', [('--help', '-h/--help'), ('--filter',), ('--quiet', '-q/--quiet')], 0),
     ('volume inspect ', [('--help', '-h/--help'), ('abc',), ('def',)], 0),

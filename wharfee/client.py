@@ -21,7 +21,7 @@ from .options import format_command_help, format_command_line
 from .options import COMMAND_NAMES, split_command_and_args
 from .options import OptionError
 from .helpers import filesize, parse_port_bindings, parse_volume_bindings, \
-    parse_exposed_ports, parse_filters
+    parse_exposed_ports, parse_kv_as_dict
 from .utils import shlex_split
 from .decorators import if_exception_return
 
@@ -553,6 +553,8 @@ class DockerClient(object):
 
         allowed = allowed_args('volume create', **kwargs)
 
+        allowed = self._add_opts(allowed)
+
         result = self.instance.create_volume(**allowed)
         self.is_refresh_volumes = True
         return [result['Name']]
@@ -634,8 +636,19 @@ class DockerClient(object):
         :return dict
         """
         if 'filters' in params and params['filters']:
-            filters = parse_filters(params['filters'])
+            filters = parse_kv_as_dict(params['filters'], True)
             params['filters'] = filters
+        return params
+
+    def _add_opts(self, params):
+        """
+        Update kwargs if opts are present.
+        :param params: dict
+        :return dict
+        """
+        if 'opt' in params and params['opt']:
+            opts = parse_kv_as_dict(params['opt'], False)
+            params['opt'] = opts
         return params
 
     def _add_volumes(self, params):

@@ -102,6 +102,10 @@ OPTION_VOLUME_NAME = CommandOption(
     dest='name',
     help='Assign a name to the container.')
 
+OPTION_VOLUME_NAME_POS = CommandOption(CommandOption.TYPE_VOLUME, 'name',
+    help='Volume name.',
+    nargs='+')
+
 OPTION_LINK = CommandOption(
     CommandOption.TYPE_CONTAINER, None, '--link',
     action='append',
@@ -190,6 +194,13 @@ OPTION_FILTERS = CommandOption(
     dest='filters',
     nargs='+',
     help='Provide filter values (i.e. "dangling=true").')
+
+OPTION_OPT = CommandOption(
+    CommandOption.TYPE_STRING, '-o', '--opt',
+    action='append',
+    dest='opt',
+    nargs='+',
+    help='Set driver specific options (e.g. "tardis=blue").')
 
 OPTION_IMAGE = CommandOption(
     CommandOption.TYPE_IMAGE, None, 'image',
@@ -545,12 +556,11 @@ COMMAND_OPTIONS = {
         OPTION_CONTAINER_RUNNING,
     ],
     'volume create': [
-        OPTION_VOLUME_NAME
+        OPTION_VOLUME_NAME,
+        OPTION_OPT
     ],
     'volume inspect': [
-        CommandOption(CommandOption.TYPE_VOLUME, 'name',
-                      help='Volume name.',
-                      nargs='+')
+        OPTION_VOLUME_NAME_POS
     ],
     'volume ls': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-q', '--quiet',
@@ -560,9 +570,7 @@ COMMAND_OPTIONS = {
         OPTION_FILTERS
     ],
     'volume rm': [
-        CommandOption(CommandOption.TYPE_VOLUME, 'name',
-                      help='Volume name.',
-                      nargs='+')
+        OPTION_VOLUME_NAME_POS
     ],
 }
 
