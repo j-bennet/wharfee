@@ -89,7 +89,7 @@ class DockerClient(object):
                                        "container.")),
             'version': (self.version, "Show the Docker version information."),
             'volume create': (self.volume_create, "Create a new volume."),
-            'volume inspect': (self.not_implemented, "Inspect one or more "
+            'volume inspect': (self.volume_inspect, "Inspect one or more "
                                                      "volumes."),
             'volume ls': (self.volume_ls, "List volumes."),
             'volume rm': (self.volume_rm, "Remove a volume."),
@@ -605,6 +605,22 @@ class DockerClient(object):
                             x.explanation)
 
         return stream()
+
+    @if_exception_return(InvalidVersion, None)
+    def volume_inspect(self, *args, **_):
+        """
+        Return volume info. Equivalent of docker volume ls.
+        :return: dict
+        """
+
+        if not args or len(args) == 0:
+            yield 'Volume name is required.'
+
+        vnames = self.volume_ls(quiet=True)
+
+        for vname in [_ for _ in args if _ in vnames]:
+            info = self.instance.inspect_volume(vname)
+            yield info
 
     def tag(self, *args, **kwargs):
         """

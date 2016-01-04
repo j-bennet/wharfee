@@ -480,6 +480,7 @@ STREAM_FORMATTERS = {
     'push': JsonStreamFormatter,
     'build': JsonStreamFormatter,
     'inspect': JsonStreamDumper,
+    'volume inspect': JsonStreamDumper,
 }
 
 
