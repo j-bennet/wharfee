@@ -12,17 +12,18 @@ import ssl
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
 from docker.errors import APIError
-from docker.errors import DockerException
+from docker.errors import DockerException, InvalidVersion
 from requests.exceptions import ConnectionError
 from requests.packages.urllib3 import disable_warnings
 from .options import allowed_args
 from .options import parse_command_options
 from .options import format_command_help, format_command_line
-from .options import COMMAND_NAMES
+from .options import COMMAND_NAMES, split_command_and_args
 from .options import OptionError
 from .helpers import filesize, parse_port_bindings, parse_volume_bindings, \
-    parse_exposed_ports
+    parse_exposed_ports, parse_kv_as_dict
 from .utils import shlex_split
+from .decorators import if_exception_return
 
 
 class DockerClient(object):
@@ -44,6 +45,8 @@ class DockerClient(object):
 
         assert callable(clear_handler)
         assert callable(refresh_handler)
+
+        self.exception = None
 
         self.handlers = {
             'attach': (self.attach, 'Attach to a running container.'),
@@ -85,6 +88,11 @@ class DockerClient(object):
             'unpause': (self.unpause, ("Unpause all processes within a "
                                        "container.")),
             'version': (self.version, "Show the Docker version information."),
+            'volume create': (self.volume_create, "Create a new volume."),
+            'volume inspect': (self.volume_inspect, "Inspect one or more "
+                               "volumes."),
+            'volume ls': (self.volume_ls, "List volumes."),
+            'volume rm': (self.volume_rm, "Remove a volume."),
         }
 
         self.output = None
@@ -95,6 +103,7 @@ class DockerClient(object):
         self.is_refresh_containers = False
         self.is_refresh_running = False
         self.is_refresh_images = False
+        self.is_refresh_volumes = False
 
         disable_warnings()
 
@@ -145,12 +154,13 @@ class DockerClient(object):
             self.is_refresh_containers = False
             self.is_refresh_running = False
             self.is_refresh_images = False
+            self.is_refresh_volumes = False
             self.after = None
             self.logs = None
+            self.exception = None
 
         tokens = shlex_split(text) if text else ['']
-        cmd = tokens[0]
-        params = tokens[1:] if len(tokens) > 1 else None
+        cmd, params = split_command_and_args(tokens)
 
         reset_output()
 
@@ -218,7 +228,7 @@ class DockerClient(object):
                      for key in COMMAND_NAMES]
         return help_rows
 
-    def not_implemented(self, *_):
+    def not_implemented(self, *_, **kw):
         """
         Placeholder for commands to be implemented.
         :return: iterable
@@ -531,6 +541,90 @@ class DockerClient(object):
 
         return stream()
 
+    @if_exception_return(InvalidVersion, None)
+    def volume_create(self, *args, **kwargs):
+        """
+        Create a volume. Equivalent of docker volume create.
+        :param kwargs:
+        :return: Volume name.
+        """
+        if not kwargs:
+            return ['Volume name is required.']
+
+        allowed = allowed_args('volume create', **kwargs)
+
+        allowed = self._add_opts(allowed)
+
+        result = self.instance.create_volume(**allowed)
+        self.is_refresh_volumes = True
+        return [result['Name']]
+
+    @if_exception_return(InvalidVersion, None)
+    def volume_ls(self, *args, **kwargs):
+        """
+        List volumes. Equivalent of docker volume ls.
+        :param kwargs:
+        :return: Iterable.
+        """
+        quiet = kwargs.pop('quiet', False)
+
+        kwargs = self._add_filters(kwargs)
+
+        vdict = self.instance.volumes(**kwargs)
+        result = vdict['Volumes']
+
+        if vdict and 'Volumes' in vdict:
+            if quiet:
+                result = [volume['Name'] for volume in result]
+            return result
+        else:
+            return ['There are no volumes to list.']
+
+    @if_exception_return(InvalidVersion, None)
+    def volume_rm(self, *args, **kwargs):
+        """
+        Remove a volume. Equivalent of docker volume rm.
+        :param kwargs:
+        :return: Volume name.
+        """
+        if not args:
+            return ['Volume name is required.']
+
+        def stream():
+            for volume in args:
+                try:
+                    result = self.instance.remove_volume(volume)
+                    if result:
+                        self.is_refresh_volumes = True
+                        yield volume
+                    else:
+                        yield 'Could not remove volume {0}.'.format(volume)
+                except APIError as x:
+                    yield 'Could not remove volume {0}: {1}.'.format(
+                        volume,
+                        x.explanation)
+
+        return stream()
+
+    @if_exception_return(InvalidVersion, None)
+    def volume_inspect(self, *args, **_):
+        """
+        Return volume info. Equivalent of docker volume ls.
+        :return: dict
+        """
+
+        if not args or len(args) == 0:
+            yield 'Volume name is required.'
+
+        vnames = self.volume_ls(quiet=True)
+
+        for vname in args:
+            if vname in vnames:
+                info = self.instance.inspect_volume(vname)
+                yield info
+            else:
+                yield "Volume not found: {0}".format(vname)
+
     def tag(self, *args, **kwargs):
         """
         Tag an image into repository. Equivalent of docker tag.
@@ -554,13 +648,35 @@ class DockerClient(object):
         else:
             return ['Error tagging {0} into {1}.'.format(*args)]
 
+    def _add_filters(self, params):
+        """
+        Update kwargs if filters are present.
+        :param params: dict
+        :return dict
+        """
+        if params.get('filters', None):
+            filters = parse_kv_as_dict(params['filters'], True)
+            params['filters'] = filters
+        return params
+
+    def _add_opts(self, params):
+        """
+        Update kwargs if opts are present.
+        :param params: dict
+        :return dict
+        """
+        if params.get('driver_opts', None):
+            opts = parse_kv_as_dict(params['driver_opts'], False)
+            params['driver_opts'] = opts
+        return params
+
     def _add_volumes(self, params):
         """
         Update kwargs if volumes are present.
         :param params: dict
         :return dict
         """
-        if 'volumes' in params and params['volumes']:
+        if params.get('volumes', None):
             binds = parse_volume_bindings(params['volumes'])
             params['volumes'] = [x['bind'] for x in binds.values()]
             conf = self.instance.create_host_config(binds=binds)
@@ -573,7 +689,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'volumes_from' in params and params['volumes_from']:
+        if params.get('volumes_from', None):
             cs = ','.join(params['volumes_from'])
             cs = [x.strip() for x in cs.split(',') if x]
             conf = self.instance.create_host_config(volumes_from=cs)
@@ -597,7 +713,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'links' in params and params['links']:
+        if params.get('links', None):
             links = {}
             for link in params['links']:
                 link_name, link_alias = link.split(':', 1)
@@ -612,7 +728,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'port_bindings' in params and params['port_bindings']:
+        if params.get('port_bindings', None):
             port_bindings = parse_port_bindings(params['port_bindings'])
 
             # Have to provide list of ports to open in create_container.
@@ -632,7 +748,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'expose' in params and params['expose']:
+        if params.get('expose', None):
             ports = parse_exposed_ports(params['expose'])
 
             # Have to provide list of ports to open in create_container.
@@ -653,7 +769,7 @@ class DockerClient(object):
         :param config_to_merge: dict with new values
         :return dict
         """
-        if 'host_config' in params and params['host_config']:
+        if params.get('host_config', None):
             params['host_config'].update(config_to_merge)
         else:
             params['host_config'] = config_to_merge

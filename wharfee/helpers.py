@@ -3,6 +3,26 @@ import os
 import math
 
 
+def parse_kv_as_dict(filters, convert_boolean=False):
+    """
+    Parse list of "key=value" into dict
+    :param filters: list
+    :param convert_boolean: boolean
+    :return: dict
+    """
+    result = {}
+    if filters:
+        for x in filters:
+            k, v = x.split('=', 2)
+            if convert_boolean:
+                if v.lower() == 'true':
+                    v = True
+                elif v.lower() == 'false':
+                    v = False
+            result[k] = v
+    return result
+
+
 def parse_volume_bindings(volumes):
     """
     Parse volumes into a dict.

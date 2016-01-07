@@ -55,10 +55,13 @@ class JsonStreamDumper(StreamFormatter):
         """
         for obj in self.stream:
             self.counter += 1
-            text = json.dumps(obj, indent=4)
-            text = self.colorize(text)
-            for line in text.split('\n'):
-               click.echo(line)
+            if isinstance(obj, basestring):
+                click.echo(obj)
+            else:
+                text = json.dumps(obj, indent=4)
+                text = self.colorize(text)
+                for line in text.split('\n'):
+                    click.echo(line)
         return self.counter
 
     def colorize(self, text):
@@ -430,14 +433,13 @@ def format_top(data):
     return result
 
 
-def filter_ps(data):
+def filter_dict(data, display_keys):
     """
     Strip out some of the dictionary fields.
+    :param display_keys: set
     :param data: dict
     :return: dict
     """
-    display_keys = [
-        'status', 'created', 'image', 'id', 'command', 'names', 'ports']
     if data and isinstance(data, list) and isinstance(data[0], dict):
         result = []
         for item in data:
@@ -450,8 +452,20 @@ def filter_ps(data):
     return data
 
 
+def filter_ps(data):
+    display_keys = set([
+        'status', 'created', 'image', 'id', 'command', 'names', 'ports'])
+    return filter_dict(data, display_keys)
+
+
+def filter_volume_ls(data):
+    display_keys = set(['driver', 'name'])
+    return filter_dict(data, display_keys)
+
+
 DATA_FILTERS = {
-    'ps': filter_ps
+    'ps': filter_ps,
+    'volume ls': filter_volume_ls,
 }
 
 
@@ -469,6 +483,7 @@ STREAM_FORMATTERS = {
     'push': JsonStreamFormatter,
     'build': JsonStreamFormatter,
     'inspect': JsonStreamDumper,
+    'volume inspect': JsonStreamDumper,
 }
 
 

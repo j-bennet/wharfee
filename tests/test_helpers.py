@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
 import pytest
-from wharfee.helpers import parse_port_bindings, parse_volume_bindings
+from wharfee.helpers import (parse_port_bindings, parse_volume_bindings,
+                             parse_kv_as_dict)
 
 
 @pytest.mark.parametrize("ports, expected", [
@@ -32,5 +33,21 @@ def test_volume_parsing(volumes, expected):
     :param expected: dict
     """
     result = parse_volume_bindings(volumes)
+
+    assert result == expected
+
+
+@pytest.mark.parametrize("kvalues, convert_boolean, expected", [
+    (['boo=foo', 'is_ok=true'], True, {'boo': 'foo', 'is_ok': True}),
+    (['boo=foo', 'is_ok=true'], False, {'boo': 'foo', 'is_ok': 'true'}),
+])
+def test_kv_parsing_true(kvalues, convert_boolean, expected):
+    """
+    Parse key=value mappings.
+    :param kvalues: list of strings
+    :param process_boolean: boolean
+    :param expected: dict
+    """
+    result = parse_kv_as_dict(kvalues, convert_boolean)
 
     assert result == expected

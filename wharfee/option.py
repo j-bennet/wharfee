@@ -10,6 +10,8 @@ class CommandOption(object):
 
     choices = None
 
+    OPTION_VALUES = range(18)
+
     TYPE_FILEPATH, \
         TYPE_DIRPATH, \
         TYPE_BOOLEAN, \
@@ -26,8 +28,9 @@ class CommandOption(object):
         TYPE_PORT_BINDING, \
         TYPE_PORT_RANGE, \
         TYPE_OBJECT, \
-        TYPE_STRING = \
-        range(17)
+        TYPE_STRING,\
+        TYPE_VOLUME = \
+        OPTION_VALUES
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
         """
@@ -38,25 +41,7 @@ class CommandOption(object):
         :param kwargs: keyword args
         :return:
         """
-        if option_type not in [
-            CommandOption.TYPE_FILEPATH,
-            CommandOption.TYPE_DIRPATH,
-            CommandOption.TYPE_BOOLEAN,
-            CommandOption.TYPE_NUMERIC,
-            CommandOption.TYPE_CONTAINER,
-            CommandOption.TYPE_CONTAINER_RUN,
-            CommandOption.TYPE_IMAGE,
-            CommandOption.TYPE_IMAGE_TAGGED,
-            CommandOption.TYPE_IMAGE_TAG,
-            CommandOption.TYPE_COMMAND,
-            CommandOption.TYPE_COMMAND_ARG,
-            CommandOption.TYPE_CHOICE,
-            CommandOption.TYPE_KEYVALUE,
-            CommandOption.TYPE_PORT_BINDING,
-            CommandOption.TYPE_PORT_RANGE,
-            CommandOption.TYPE_OBJECT,
-            CommandOption.TYPE_STRING
-        ]:
+        if option_type not in self.OPTION_VALUES:
             raise ValueError("Incorrect option_type.", option_type)
 
         if long_name and short_name:
@@ -149,6 +134,13 @@ class CommandOption(object):
         :return: boolean
         """
         return self.option_type == CommandOption.TYPE_IMAGE_TAGGED
+
+    def is_type_volume(self):
+        """
+        Should this option suggest volume name?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_VOLUME
 
     def is_type_filepath(self):
         """

@@ -65,7 +65,7 @@ class WharfeeCli(object):
         log_file = self.config['main']['log_file']
         log_level = self.config['main']['log_level']
         self.logger = create_logger(__name__, log_file, log_level)
-        
+
         # set_completer_options refreshes all by default
         self.handler = DockerClient(
             self.config['main'].as_int('client_timeout'),
@@ -134,13 +134,14 @@ class WharfeeCli(object):
         """
         click.clear()
 
-    def set_completer_options(self, cons=True, runs=True, imgs=True):
+    def set_completer_options(self, cons=True, runs=True, imgs=True, vols=True):
         """
         Set image and container names in Completer.
         Re-read if needed after a command.
         :param cons: boolean: need to refresh containers
         :param runs: boolean: need to refresh running containers
         :param imgs: boolean: need to refresh images
+        :param vols: boolean: need to refresh volumes
         """
 
         if cons:
@@ -181,6 +182,10 @@ class WharfeeCli(object):
                 self.completer.set_images(images)
                 self.completer.set_tagged(tagged)
 
+        if vols:
+            vs = self.handler.volume_ls(quiet=True)
+            self.completer.set_volumes(vs)
+
     def set_fuzzy_match(self, is_fuzzy):
         """
         Setter for fuzzy matching mode
@@ -218,7 +223,8 @@ class WharfeeCli(object):
         """
         self.set_completer_options(self.handler.is_refresh_containers,
                                    self.handler.is_refresh_running,
-                                   self.handler.is_refresh_images)
+                                   self.handler.is_refresh_images,
+                                   self.handler.is_refresh_volumes)
 
     def run_cli(self):
         """
@@ -287,6 +293,9 @@ class WharfeeCli(object):
                 if self.handler.after:
                     for line in self.handler.after():
                         click.echo(line)
+
+                if self.handler.exception:
+                    click.secho(self.handler.exception.message, fg='red')
 
                 self.refresh_completions()
 
