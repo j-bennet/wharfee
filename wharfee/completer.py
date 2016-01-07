@@ -17,7 +17,7 @@ class DockerCompleter(Completer):
     """
 
     def __init__(self, containers=None, running=None, images=None, tagged=None,
-                 volumes = None, long_option_names=True, fuzzy=False):
+                 volumes=None, long_option_names=True, fuzzy=False):
         """
         Initialize the completer
         :return:

@@ -65,7 +65,7 @@ class WharfeeCli(object):
         log_file = self.config['main']['log_file']
         log_level = self.config['main']['log_level']
         self.logger = create_logger(__name__, log_file, log_level)
-        
+
         # set_completer_options refreshes all by default
         self.handler = DockerClient(
             self.config['main'].as_int('client_timeout'),

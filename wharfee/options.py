@@ -102,7 +102,8 @@ OPTION_VOLUME_NAME = CommandOption(
     dest='name',
     help='Assign a name to the container.')
 
-OPTION_VOLUME_NAME_POS = CommandOption(CommandOption.TYPE_VOLUME, 'name',
+OPTION_VOLUME_NAME_POS = CommandOption(
+    CommandOption.TYPE_VOLUME, 'name',
     help='Volume name.',
     nargs='+')
 

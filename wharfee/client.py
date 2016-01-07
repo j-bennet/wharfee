@@ -90,7 +90,7 @@ class DockerClient(object):
             'version': (self.version, "Show the Docker version information."),
             'volume create': (self.volume_create, "Create a new volume."),
             'volume inspect': (self.volume_inspect, "Inspect one or more "
-                                                     "volumes."),
+                               "volumes."),
             'volume ls': (self.volume_ls, "List volumes."),
             'volume rm': (self.volume_rm, "Remove a volume."),
         }
@@ -601,8 +601,8 @@ class DockerClient(object):
                         yield 'Could not remove volume {0}.'.format(volume)
                 except APIError as x:
                     yield 'Could not remove volume {0}: {1}.'.format(
-                            volume,
-                            x.explanation)
+                        volume,
+                        x.explanation)
 
         return stream()
 

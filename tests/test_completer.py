@@ -227,7 +227,8 @@ def test_options_completion_long_fuzzy(completer, complete_event, command, expec
     ("ps -h", filter(
         lambda x: x.short_name and x.short_name.startswith('-h'), pso), -2),
 ])
-def test_options_completion_short(completer, complete_event, command, expected, expected_pos):
+def test_options_completion_short(completer, complete_event, command, expected,
+                                  expected_pos):
     """
     Test command options suggestions.
     :param command: string: text that user started typing
@@ -241,8 +242,8 @@ def test_options_completion_short(completer, complete_event, command, expected, 
         Document(text=command, cursor_position=position), complete_event))
 
     expected = set(map(lambda t: Completion(
-        t.get_name(
-            is_long=completer.get_long_options()), expected_pos, t.display), expected))
+        t.get_name(is_long=completer.get_long_options()),
+        expected_pos, t.display), expected))
 
     assert result == expected
 
@@ -252,7 +253,8 @@ def test_options_completion_short(completer, complete_event, command, expected, 
     ("ps --before e", filter(lambda x: x.startswith('e'), cs1), -1),
     ("ps --before ei", filter(lambda x: x.startswith('ei'), cs1), -2),
 ])
-def test_options_container_completion(completer, complete_event, command, expected, expected_pos):
+def test_options_container_completion(completer, complete_event, command,
+                                      expected, expected_pos):
     """
     Suggest container names in relevant options (ps --before)
     """
@@ -274,7 +276,8 @@ def test_options_container_completion(completer, complete_event, command, expect
     ("top e", map(
         lambda x: (x, x), filter(lambda x: x.startswith('e'), rs1)), -1),
 ])
-def test_options_container_running_completion(completer, complete_event, command, expected, expected_pos):
+def test_options_container_running_completion(completer, complete_event,
+                                              command, expected, expected_pos):
     """
     Suggest running container names (top [container])
     """
@@ -298,9 +301,11 @@ def test_options_container_running_completion(completer, complete_event, command
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("rm ", ['--all', '--all-stopped', ('--help', '-h/--help')] + cs2, 0),
-    ("rm spe", ['--all-stopped', 'desperate_hodgkin', 'desperate_torvalds', 'some-percona'], -3),
+    ("rm spe", ['--all-stopped', 'desperate_hodgkin', 'desperate_torvalds',
+                'some-percona'], -3),
 ])
-def test_options_container_completion_fuzzy(completer, complete_event, command, expected, expected_pos):
+def test_options_container_completion_fuzzy(completer, complete_event, command,
+                                            expected, expected_pos):
     """
     Suggest running container names (top [container])
     """
@@ -348,7 +353,8 @@ def test_options_image_completion(completer, complete_event):
     ('images --filter g', ['nginx', 'postgres'], -1),
     ('images --filter u', ['ubuntu'], -1),
 ])
-def test_options_image_completion_fuzzy(completer, complete_event, command, expected, expected_pos):
+def test_options_image_completion_fuzzy(completer, complete_event, command,
+                                        expected, expected_pos):
     """
     Suggest image names in relevant options (images --filter)
     """
@@ -367,12 +373,15 @@ def test_options_image_completion_fuzzy(completer, complete_event, command, expe
 
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
-    ('volume create ', [('--name',), ('--help', '-h/--help'), ('--opt', '-o/--opt')], 0),
+    ('volume create ', [('--name',), ('--help', '-h/--help'),
+                        ('--opt', '-o/--opt')], 0),
     ('volume rm ', [('--help', '-h/--help'), ('abc',), ('def',)], 0),
-    ('volume ls ', [('--help', '-h/--help'), ('--filter',), ('--quiet', '-q/--quiet')], 0),
+    ('volume ls ', [('--help', '-h/--help'), ('--filter',),
+                    ('--quiet', '-q/--quiet')], 0),
     ('volume inspect ', [('--help', '-h/--help'), ('abc',), ('def',)], 0),
 ])
-def test_options_volume_completion(completer, complete_event, command, expected, expected_pos):
+def test_options_volume_completion(completer, complete_event, command,
+                                   expected, expected_pos):
     """
     Suggest options in volume commands
     """
@@ -386,7 +395,7 @@ def test_options_volume_completion(completer, complete_event, command, expected,
         Document(text=command, cursor_position=position), complete_event))
 
     expected = set(map(
-            lambda t: Completion(t[0], expected_pos, t[1] if len(t) > 1 else t[0]),
-            expected))
+        lambda t: Completion(t[0], expected_pos, t[1] if len(t) > 1 else t[0]),
+        expected))
 
     assert result == expected
