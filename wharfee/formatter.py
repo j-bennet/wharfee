@@ -55,10 +55,13 @@ class JsonStreamDumper(StreamFormatter):
         """
         for obj in self.stream:
             self.counter += 1
-            text = json.dumps(obj, indent=4)
-            text = self.colorize(text)
-            for line in text.split('\n'):
-               click.echo(line)
+            if isinstance(obj, basestring):
+                click.echo(obj)
+            else:
+                text = json.dumps(obj, indent=4)
+                text = self.colorize(text)
+                for line in text.split('\n'):
+                    click.echo(line)
         return self.counter
 
     def colorize(self, text):

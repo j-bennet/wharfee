@@ -618,9 +618,12 @@ class DockerClient(object):
 
         vnames = self.volume_ls(quiet=True)
 
-        for vname in [_ for _ in args if _ in vnames]:
-            info = self.instance.inspect_volume(vname)
-            yield info
+        for vname in args:
+            if vname in vnames:
+                info = self.instance.inspect_volume(vname)
+                yield info
+            else:
+                yield "Volume not found: {0}".format(vname)
 
     def tag(self, *args, **kwargs):
         """
@@ -651,7 +654,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'filters' in params and params['filters']:
+        if params.get('filters', None):
             filters = parse_kv_as_dict(params['filters'], True)
             params['filters'] = filters
         return params
@@ -662,9 +665,9 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'opt' in params and params['opt']:
-            opts = parse_kv_as_dict(params['opt'], False)
-            params['opt'] = opts
+        if params.get('driver_opts', None):
+            opts = parse_kv_as_dict(params['driver_opts'], False)
+            params['driver_opts'] = opts
         return params
 
     def _add_volumes(self, params):
@@ -673,7 +676,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'volumes' in params and params['volumes']:
+        if params.get('volumes', None):
             binds = parse_volume_bindings(params['volumes'])
             params['volumes'] = [x['bind'] for x in binds.values()]
             conf = self.instance.create_host_config(binds=binds)
@@ -686,7 +689,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'volumes_from' in params and params['volumes_from']:
+        if params.get('volumes_from', None):
             cs = ','.join(params['volumes_from'])
             cs = [x.strip() for x in cs.split(',') if x]
             conf = self.instance.create_host_config(volumes_from=cs)
@@ -710,7 +713,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'links' in params and params['links']:
+        if params.get('links', None):
             links = {}
             for link in params['links']:
                 link_name, link_alias = link.split(':', 1)
@@ -725,7 +728,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'port_bindings' in params and params['port_bindings']:
+        if params.get('port_bindings', None):
             port_bindings = parse_port_bindings(params['port_bindings'])
 
             # Have to provide list of ports to open in create_container.
@@ -745,7 +748,7 @@ class DockerClient(object):
         :param params: dict
         :return dict
         """
-        if 'expose' in params and params['expose']:
+        if params.get('expose', None):
             ports = parse_exposed_ports(params['expose'])
 
             # Have to provide list of ports to open in create_container.
@@ -766,7 +769,7 @@ class DockerClient(object):
         :param config_to_merge: dict with new values
         :return dict
         """
-        if 'host_config' in params and params['host_config']:
+        if params.get('host_config', None):
             params['host_config'].update(config_to_merge)
         else:
             params['host_config'] = config_to_merge

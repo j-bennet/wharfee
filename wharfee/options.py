@@ -198,7 +198,7 @@ OPTION_FILTERS = CommandOption(
 OPTION_OPT = CommandOption(
     CommandOption.TYPE_STRING, '-o', '--opt',
     action='append',
-    dest='opt',
+    dest='driver_opts',
     nargs='+',
     help='Set driver specific options (e.g. "tardis=blue").')
 
