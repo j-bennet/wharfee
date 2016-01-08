@@ -2,7 +2,7 @@
 from pygments.token import Token
 from pygments.style import Style
 from pygments.util import ClassNotFound
-from prompt_toolkit.styles import default_style_extensions
+from prompt_toolkit.styles import default_style_extensions, PygmentsStyle
 import pygments.styles
 
 
@@ -32,4 +32,4 @@ def style_factory(name):
             Token.Toolbar.Arg.Text: 'nobold'
         })
 
-    return CliStyle
+    return PygmentsStyle(CliStyle)
