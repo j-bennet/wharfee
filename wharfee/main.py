@@ -16,7 +16,8 @@ from prompt_toolkit.filters import Always, HasFocus, IsDone
 from prompt_toolkit.layout.processors import \
     HighlightMatchingBracketProcessor, ConditionalProcessor
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.shortcuts import create_default_layout
+from prompt_toolkit.interface import AcceptAction
+from prompt_toolkit.shortcuts import create_prompt_layout
 from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.history import FileHistory
 
@@ -236,9 +237,8 @@ class WharfeeCli(object):
         history = FileHistory(os.path.expanduser('~/.wharfee-history'))
         toolbar_handler = create_toolbar_handler(self.get_long_options, self.get_fuzzy_match)
 
-        layout = create_default_layout(
+        layout = create_prompt_layout(
             message='wharfee> ',
-            reserve_space_for_menu=True,
             lexer=CommandLexer,
             get_bottom_toolbar_tokens=toolbar_handler,
             extra_input_processors=[
@@ -252,7 +252,8 @@ class WharfeeCli(object):
         cli_buffer = Buffer(
             history=history,
             completer=self.completer,
-            complete_while_typing=Always())
+            complete_while_typing=Always(),
+            accept_action=AcceptAction.RETURN_DOCUMENT)
 
         manager = get_key_manager(
             self.set_long_options,
@@ -266,6 +267,7 @@ class WharfeeCli(object):
             buffer=cli_buffer,
             key_bindings_registry=manager.registry,
             on_exit=AbortAction.RAISE_EXCEPTION,
+            on_abort=AbortAction.RETRY,
             ignore_case=True)
 
         eventloop = create_eventloop()

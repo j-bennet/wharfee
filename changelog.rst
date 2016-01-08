@@ -1,3 +1,22 @@
+0.7
+===
+
+Features:
+---------
+
+* Added "volume" commands:
+
+::
+
+  volume create
+  volume rm
+  volume ls
+  volume inspect
+
+* Added ``--all`` shortcut option to ``rm`` and ``rmi`` commands.
+* Internal fixes and updates (thanks: `Anthony DiSanti`_, `Arthur Skowronek`_).
+* Updated `Python Prompt Toolkit`_ to 0.57.
+
 0.6.8
 =====
 
@@ -13,7 +32,7 @@ Fixes and travis updates.
 =====
 
 * Fixes to support python 2.6.
-* Added logging (finally - boo me).
+* Added logging (finally).
 
 0.6.5
 =====
@@ -21,13 +40,12 @@ Fixes and travis updates.
 Features:
 ---------
 
-* Updated `Python Prompt Toolkit http://github.com/jonathanslenders/python-prompt-toolkit`_
-  to 0.46. This adds the following features:
+* Updated `Python Prompt Toolkit`_ to 0.46. This adds the following features:
 
   * Ctrl + Z puts the application into background (suspends it). Use "fg" command to bring it back.
   * Meta + ! brings up "system prompt".
 
-* Support for using TLS and DOCKER_* variables with Swarm (thanks `achied https://github.com/achied`_).
+* Support for using TLS and DOCKER_* variables with Swarm (thanks `achied`_).
 * Colorized output of "inspect".
 
 Bug fixes:
@@ -47,7 +65,7 @@ Features:
 Bug fixes:
 ----------
 
-* Fix for the crash on image names with ':' (thanks `Sean https://github.com/seanch87`_).
+* Fix for the crash on image names with ':' (thanks `Sean`_).
 * Fix for incorrect handling of "attach" in external CLI call.
 * Fix for an error when running with --publish port:port and --detach (#80).
 * Fix for "exec" failing because of "interactive" parameter passed in erroneously (#92).
@@ -63,7 +81,7 @@ Version bumped up because of erroneous releases to PyPi.
 Bug fixes:
 ----------
 
-* Fix for missing file on startup (thanks `Amjith https://github.com/amjith`_).
+* Fix for missing file on startup (thanks `Amjith`_).
 
 0.3
 ===
@@ -148,3 +166,10 @@ Not supported:
 --------------
 
 * "run" in tty/interactive mode.
+
+.. _`Amjith`: https://github.com/amjith
+.. _`Anthony DiSanti`: https://github.com/AnthonyDiSanti
+.. _`Arthur Skowronek`: https://github.com/eisensheng
+.. _`Sean`: https://github.com/seanch87
+.. _`achied`: https://github.com/achied
+.. _`Python Prompt Toolkit`: http://github.com/jonathanslenders/python-prompt-toolkit
