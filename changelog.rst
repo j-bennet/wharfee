@@ -15,6 +15,7 @@ Features:
 
 * Added ``--all`` shortcut option to ``rm`` and ``rmi`` commands.
 * Internal fixes and updates (thanks: `Anthony DiSanti`_, `Arthur Skowronek`_).
+* Updated `Python Prompt Toolkit`_ to 0.57.
 
 0.6.8
 =====
