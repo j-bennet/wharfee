@@ -297,7 +297,9 @@ class WharfeeCli(object):
                         click.echo(line)
 
                 if self.handler.exception:
-                    click.secho(self.handler.exception.message, fg='red')
+                    # This was handled, just log it.
+                    self.logger.warning('An error was handled: %r',
+                                        self.handler.exception)
 
                 self.refresh_completions()
 
