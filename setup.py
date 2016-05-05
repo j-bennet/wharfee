@@ -16,7 +16,7 @@ setup(
     install_requires=[
         'six>=1.9.0',
         'pygments>=2.0.2',
-        'prompt-toolkit==0.57',
+        'prompt-toolkit>=0.57',
         'docker-py>=1.6.0',
         'tabulate>=0.7.5',
         'click>=4.0',
