@@ -1,3 +1,8 @@
+0.8
+===
+
+* Updated `Python Prompt Toolkit`_ to 1.0.0.
+
 0.7
 ===
 
