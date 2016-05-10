@@ -8,17 +8,17 @@ import click
 import traceback
 
 from types import GeneratorType
-from prompt_toolkit import AbortAction
-from prompt_toolkit import Application
-from prompt_toolkit import CommandLineInterface
+from prompt_toolkit import (AbortAction,
+                            Application,
+                            CommandLineInterface)
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.filters import Always, HasFocus, IsDone
-from prompt_toolkit.layout.processors import \
-    HighlightMatchingBracketProcessor, ConditionalProcessor
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.interface import AcceptAction
-from prompt_toolkit.shortcuts import create_prompt_layout
-from prompt_toolkit.shortcuts import create_eventloop
+from prompt_toolkit.layout.processors import (
+    HighlightMatchingBracketProcessor,
+    ConditionalProcessor
+)
+from prompt_toolkit.buffer import (Buffer, AcceptAction)
+from prompt_toolkit.shortcuts import (create_prompt_layout, create_eventloop)
 from prompt_toolkit.history import FileHistory
 
 from .client import DockerClient
@@ -278,7 +278,7 @@ class WharfeeCli(object):
 
         while True:
             try:
-                document = self.dcli.run()
+                document = self.dcli.run(True)
                 self.handler.handle_input(document.text)
 
                 if isinstance(self.handler.output, GeneratorType):
