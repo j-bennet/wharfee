@@ -18,6 +18,7 @@ def get_key_manager(set_long_options, get_long_options, set_fuzzy_match, get_fuz
     assert callable(get_fuzzy_match)
 
     manager = KeyBindingManager(
+        enable_search=True,
         enable_system_bindings=True,
         enable_abort_and_exit_bindings=True)
 
