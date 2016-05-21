@@ -99,13 +99,15 @@ class JsonStreamFormatter(StreamFormatter):
         """
         for line in self.stream:
             self.counter += 1
-            data = json.loads(line)
+            parts = line.strip().split('\r\n')
+            for part in parts:
+                data = json.loads(part)
+                if self.is_progress(data):
+                    self.show_progress_line(data)
+                else:
+                    self.show_progress_end()
+                    self.show_line(data)
 
-            if self.is_progress(data):
-                self.show_progress_line(data)
-            else:
-                self.show_progress_end()
-                self.show_line(data)
         return self.counter
 
     def is_progress(self, data):

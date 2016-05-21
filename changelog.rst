@@ -1,3 +1,9 @@
+0.8.1
+=====
+
+* Fix a bug in ``volume ls``.
+* Fix a bug in ``pull`` output.
+
 0.8
 ===
 
