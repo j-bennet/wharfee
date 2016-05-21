@@ -571,9 +571,9 @@ class DockerClient(object):
         kwargs = self._add_filters(kwargs)
 
         vdict = self.instance.volumes(**kwargs)
-        result = vdict['Volumes']
+        result = vdict.get('Volumes', None)
 
-        if vdict and 'Volumes' in vdict:
+        if result:
             if quiet:
                 result = [volume['Name'] for volume in result]
             return result
