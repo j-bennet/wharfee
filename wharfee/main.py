@@ -193,7 +193,7 @@ class WharfeeCli(object):
         Getter for panels visibility
         :return: boolean
         """
-        return bool(self.config['main'].get('panels_on', True))
+        return bool(self.config['main'].get('panels_on', False))
 
     def set_panels_on(self, is_on):
         """
