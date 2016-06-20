@@ -166,7 +166,7 @@ def create_prompt_layout(message='',
     tokens_window = ConditionalContainer(
         Window(
             TokenListControl(get_prompt_tokens_1),
-            dont_extend_height=False),
+            dont_extend_height=True),
         Condition(has_before_tokens)
     )
 
