@@ -5,10 +5,11 @@ from __future__ import print_function
 from pygments.token import Token
 
 
-def create_toolbar_handler(is_long_option, is_fuzzy):
+def create_toolbar_handler(is_long_option, is_fuzzy, is_panels):
 
     assert callable(is_long_option)
     assert callable(is_fuzzy)
+    assert callable(is_panels)
 
     def get_toolbar_items(_):
         """
@@ -31,10 +32,16 @@ def create_toolbar_handler(is_long_option, is_fuzzy):
             fuzzy_token = Token.Toolbar.Off
             fuzzy = 'OFF'
 
+        if is_panels():
+            panels = 'ON'
+        else:
+            panels = 'OFF'
+
         return [
             (Token.Toolbar, ' [F2] Help '),
             (option_mode_token, ' [F3] Options: {0} '.format(option_mode)),
             (fuzzy_token, ' [F4] Fuzzy: {0} '.format(fuzzy)),
+            (Token.Toolbar, ' [Ctrl + O] Info: {} '.format(panels)),
             (Token.Toolbar, ' [F10] Exit ')
         ]
 

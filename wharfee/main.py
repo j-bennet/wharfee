@@ -18,9 +18,10 @@ from prompt_toolkit.layout.processors import (
     ConditionalProcessor
 )
 from prompt_toolkit.buffer import (Buffer, AcceptAction)
-from prompt_toolkit.shortcuts import (create_prompt_layout, create_eventloop)
+from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.history import FileHistory
 
+from .layout import create_prompt_layout
 from .client import DockerClient
 from .client import DockerPermissionException
 from .client import DockerTimeoutException
@@ -187,6 +188,20 @@ class WharfeeCli(object):
             vs = self.handler.volume_ls(quiet=True)
             self.completer.set_volumes(vs)
 
+    def get_panels_on(self):
+        """
+        Getter for panels visibility
+        :return: boolean
+        """
+        return bool(self.config['main'].get('panels_on', True))
+
+    def set_panels_on(self, is_on):
+        """
+        Setter for panels visibility
+        :param is_on: boolean
+        """
+        self.config['main']['panels_on'] = is_on
+
     def set_fuzzy_match(self, is_fuzzy):
         """
         Setter for fuzzy matching mode
@@ -235,12 +250,16 @@ class WharfeeCli(object):
         print('Home: http://wharfee.com')
 
         history = FileHistory(os.path.expanduser('~/.wharfee-history'))
-        toolbar_handler = create_toolbar_handler(self.get_long_options, self.get_fuzzy_match)
+        toolbar_handler = create_toolbar_handler(
+            self.get_long_options,
+            self.get_fuzzy_match,
+            self.get_panels_on)
 
         layout = create_prompt_layout(
             message='wharfee> ',
             lexer=CommandLexer,
             get_bottom_toolbar_tokens=toolbar_handler,
+            get_panels_on=self.get_panels_on,
             extra_input_processors=[
                 ConditionalProcessor(
                     processor=HighlightMatchingBracketProcessor(
@@ -259,7 +278,9 @@ class WharfeeCli(object):
             self.set_long_options,
             self.get_long_options,
             self.set_fuzzy_match,
-            self.get_fuzzy_match)
+            self.get_fuzzy_match,
+            self.set_panels_on,
+            self.get_panels_on)
 
         application = Application(
             style=style_factory(self.theme),

@@ -6,7 +6,13 @@ from prompt_toolkit.key_binding.manager import KeyBindingManager
 from prompt_toolkit.keys import Keys
 
 
-def get_key_manager(set_long_options, get_long_options, set_fuzzy_match, get_fuzzy_match):
+def get_key_manager(
+        set_long_options,
+        get_long_options,
+        set_fuzzy_match,
+        get_fuzzy_match,
+        set_panels_on,
+        get_panels_on):
     """
     Create and initialize keybinding manager
     :return: KeyBindingManager
@@ -16,6 +22,8 @@ def get_key_manager(set_long_options, get_long_options, set_fuzzy_match, get_fuz
     assert callable(get_long_options)
     assert callable(set_fuzzy_match)
     assert callable(get_fuzzy_match)
+    assert callable(set_panels_on)
+    assert callable(get_panels_on)
 
     manager = KeyBindingManager(
         enable_search=True,
@@ -42,6 +50,13 @@ def get_key_manager(set_long_options, get_long_options, set_fuzzy_match, get_fuz
         Enable/Disable fuzzy matching.
         """
         set_fuzzy_match(not get_fuzzy_match())
+
+    @manager.registry.add_binding(Keys.ControlO)
+    def _(_):
+        """
+        Enable/Disable informaion panels.
+        """
+        set_panels_on(not get_panels_on())
 
     @manager.registry.add_binding(Keys.F10)
     def _(event):
