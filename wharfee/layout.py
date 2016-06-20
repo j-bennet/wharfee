@@ -81,7 +81,8 @@ def create_prompt_layout(message='',
     if get_prompt_tokens is None:
         get_prompt_tokens = lambda _: [(Token.Prompt, message)]
 
-    get_prompt_tokens_1, get_prompt_tokens_2 = _split_multiline_prompt(get_prompt_tokens)
+    has_before_tokens, get_prompt_tokens_1, get_prompt_tokens_2 = \
+        _split_multiline_prompt(get_prompt_tokens)
 
     # `lexer` is supposed to be a `Lexer` instance. But if a Pygments lexer
     # class is given, turn it into a PygmentsLexer. (Important for
@@ -165,14 +166,15 @@ def create_prompt_layout(message='',
     tokens_window = ConditionalContainer(
         Window(
             TokenListControl(get_prompt_tokens_1),
-            dont_extend_height=True),
-        ~show_panels
+            dont_extend_height=False),
+        Condition(has_before_tokens)
     )
 
-    info_window = ConditionalContainer(
-        Window(FillControl('P', Token.Line)),
-        show_panels
-    )
+    info_float = Float(top=0, left=0, width=10, height=10,
+                       content=ConditionalContainer(
+                           Window(FillControl('P', Token.Line)),
+                           show_panels)
+                       )
 
     completion_float = Float(
         xcursor=True,
@@ -180,31 +182,32 @@ def create_prompt_layout(message='',
         content=CompletionsMenu(
             max_height=16,
             scroll_offset=1,
-            extra_filter=HasFocus(DEFAULT_BUFFER) &
-                         ~display_completions_in_columns))
+            extra_filter=HasFocus(DEFAULT_BUFFER) & ~display_completions_in_columns))
 
     completion_multi_float = Float(
         xcursor=True,
         ycursor=True,
         content=MultiColumnCompletionsMenu(
-          extra_filter=HasFocus(DEFAULT_BUFFER) &
-                       display_completions_in_columns,
-          show_meta=True))
+          extra_filter=HasFocus(DEFAULT_BUFFER) & display_completions_in_columns,
+          show_meta=True)
+    )
 
     # The right prompt.
     right_prompt_float = Float(right=0, top=0, hide_when_covering_content=True,
-                               content=_RPrompt(get_rprompt_tokens)),
+                               content=_RPrompt(get_rprompt_tokens))
 
     # Create and return Container instance.
     return HSplit([
           # The main input, with completion menus floating on top of it.
           FloatContainer(
               HSplit([
-                  info_window,
                   tokens_window,
                   buffer_window,
               ]),
               [
+                  # Info panel
+                  info_float,
+                  # info_float,
                   # Completion menus.
                   completion_float,
                   completion_multi_float,
