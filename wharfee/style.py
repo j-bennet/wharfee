@@ -27,7 +27,10 @@ def style_factory(name):
         Token.Toolbar.Search.Text: 'nobold',
         Token.Toolbar.System: 'noinherit bold',
         Token.Toolbar.Arg: 'noinherit bold',
-        Token.Toolbar.Arg.Text: 'nobold'
+        Token.Toolbar.Arg.Text: 'nobold',
+        Token.Panel: 'bg:#3366ff #ffffff',
+        Token.Panel.On: 'bg:#cccccc #ffffff',
+        Token.Panel.Off: 'bg:#666666 #cccccc',
     })
 
     return PygmentsStyle.from_defaults(style_dict=styles)

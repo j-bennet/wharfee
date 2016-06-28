@@ -3,14 +3,15 @@ from __future__ import unicode_literals
 from prompt_toolkit.filters import Condition
 from prompt_toolkit.enums import DEFAULT_BUFFER, SEARCH_BUFFER
 from prompt_toolkit.filters import IsDone, HasFocus, RendererHeightIsKnown, to_cli_filter
-from prompt_toolkit.layout import Window, HSplit, FloatContainer, Float
+from prompt_toolkit.layout import Window, HSplit, VSplit, FloatContainer, Float
 from prompt_toolkit.layout.containers import ConditionalContainer
-from prompt_toolkit.layout.controls import BufferControl, TokenListControl, FillControl
+from prompt_toolkit.layout.controls import BufferControl, TokenListControl
 from prompt_toolkit.layout.dimension import LayoutDimension as D
 from prompt_toolkit.layout.lexers import PygmentsLexer
 from prompt_toolkit.layout.margins import PromptMargin, ConditionalMargin
 from prompt_toolkit.layout.menus import CompletionsMenu, MultiColumnCompletionsMenu
-from prompt_toolkit.layout.processors import PasswordProcessor, ConditionalProcessor, AppendAutoSuggestion, HighlightSearchProcessor, HighlightSelectionProcessor
+from prompt_toolkit.layout.processors import (PasswordProcessor, ConditionalProcessor, AppendAutoSuggestion,
+                                              HighlightSearchProcessor, HighlightSelectionProcessor)
 from prompt_toolkit.layout.prompt import DefaultPrompt
 from prompt_toolkit.layout.screen import Char
 from prompt_toolkit.layout.toolbars import ValidationToolbar, SystemToolbar, ArgToolbar, SearchToolbar
@@ -128,18 +129,23 @@ def create_prompt_layout(message='',
     else:
         toolbars = []
 
-    def get_height(cli):
-        # If there is an autocompletion menu to be shown, make sure that our
-        # layout has at least a minimal height in order to display it.
-        if reserve_space_for_menu and not cli.is_done:
-            buff = cli.current_buffer
+    # def get_buffer_height(cli):
+    #     # If there is an autocompletion menu to be shown, make sure that our
+    #     # layout has at least a minimal height in order to display it.
+    #     if reserve_space_for_menu and not cli.is_done:
+    #         buff = cli.current_buffer
+    #
+    #         # Reserve the space, either when there are completions, or when
+    #         # `complete_while_typing` is true and we expect completions very
+    #         # soon.
+    #         if buff.complete_while_typing(cli) or buff.complete_state is not None:
+    #             return D(min=reserve_space_for_menu)
+    #
+    #     return D()
 
-            # Reserve the space, either when there are completions, or when
-            # `complete_while_typing` is true and we expect completions very
-            # soon.
-            if buff.complete_while_typing(cli) or buff.complete_state is not None:
-                return D(min=reserve_space_for_menu)
-
+    def get_buffer_height(cli):
+        if get_panels_on():
+            return D.exact(1)
         return D()
 
     show_panels = Condition(lambda cli: get_panels_on())
@@ -151,7 +157,7 @@ def create_prompt_layout(message='',
             # Enable preview_search, we want to have immediate feedback
             # in reverse-i-search mode.
             preview_search=True),
-        get_height=get_height,
+        get_height=get_buffer_height,
         left_margins=[
             # In multiline mode, use the window margin to display
             # the prompt and continuation tokens.
@@ -160,7 +166,7 @@ def create_prompt_layout(message='',
                 filter=multiline
             )
         ],
-        wrap_lines=wrap_lines
+        wrap_lines=wrap_lines,
     )
 
     tokens_window = ConditionalContainer(
@@ -170,11 +176,22 @@ def create_prompt_layout(message='',
         Condition(has_before_tokens)
     )
 
-    info_float = Float(top=0, left=0, width=10, height=10,
-                       content=ConditionalContainer(
-                           Window(FillControl('P', Token.Line)),
-                           show_panels)
-                       )
+    def info_token_factory(col):
+        def get_info_tokens(cli):
+            result = []
+            for i in range(1, 10):
+                result.append((Token.Panel, ' [Col {} item {}] '.format(col, i)))
+            return result
+        return get_info_tokens
+
+    info_window = ConditionalContainer(
+        VSplit([
+            Window(TokenListControl(info_token_factory(1), default_char=Char(' ', Token.Panel)),
+                   wrap_lines=True),
+            Window(TokenListControl(info_token_factory(2), default_char=Char(' ', Token.Panel)),
+                   wrap_lines=True),
+        ]),
+        show_panels)
 
     completion_float = Float(
         xcursor=True,
@@ -201,13 +218,12 @@ def create_prompt_layout(message='',
           # The main input, with completion menus floating on top of it.
           FloatContainer(
               HSplit([
+                  # Info panel
+                  info_window,
                   tokens_window,
                   buffer_window,
               ]),
               [
-                  # Info panel
-                  info_float,
-                  # info_float,
                   # Completion menus.
                   completion_float,
                   completion_multi_float,

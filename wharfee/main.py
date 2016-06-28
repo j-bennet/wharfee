@@ -289,7 +289,8 @@ class WharfeeCli(object):
             key_bindings_registry=manager.registry,
             on_exit=AbortAction.RAISE_EXCEPTION,
             on_abort=AbortAction.RETRY,
-            ignore_case=True)
+            ignore_case=True,
+            use_alternate_screen=True)
 
         eventloop = create_eventloop()
 
