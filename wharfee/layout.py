@@ -129,23 +129,21 @@ def create_prompt_layout(message='',
     else:
         toolbars = []
 
-    # def get_buffer_height(cli):
-    #     # If there is an autocompletion menu to be shown, make sure that our
-    #     # layout has at least a minimal height in order to display it.
-    #     if reserve_space_for_menu and not cli.is_done:
-    #         buff = cli.current_buffer
-    #
-    #         # Reserve the space, either when there are completions, or when
-    #         # `complete_while_typing` is true and we expect completions very
-    #         # soon.
-    #         if buff.complete_while_typing(cli) or buff.complete_state is not None:
-    #             return D(min=reserve_space_for_menu)
-    #
-    #     return D()
-
     def get_buffer_height(cli):
         if get_panels_on():
             return D.exact(1)
+
+        # If there is an autocompletion menu to be shown, make sure that our
+        # layout has at least a minimal height in order to display it.
+        if reserve_space_for_menu and not cli.is_done:
+            buff = cli.current_buffer
+
+            # Reserve the space, either when there are completions, or when
+            # `complete_while_typing` is true and we expect completions very
+            # soon.
+            if buff.complete_while_typing(cli) or buff.complete_state is not None:
+                return D(min=reserve_space_for_menu)
+
         return D()
 
     show_panels = Condition(lambda cli: get_panels_on())

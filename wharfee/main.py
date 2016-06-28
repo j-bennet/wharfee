@@ -290,7 +290,7 @@ class WharfeeCli(object):
             on_exit=AbortAction.RAISE_EXCEPTION,
             on_abort=AbortAction.RETRY,
             ignore_case=True,
-            use_alternate_screen=True)
+            use_alternate_screen=self.get_panels_on())
 
         eventloop = create_eventloop()
 
