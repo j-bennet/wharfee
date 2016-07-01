@@ -203,6 +203,11 @@ OPTION_OPT = CommandOption(
     nargs='+',
     help='Set driver specific options (e.g. "tardis=blue").')
 
+OPTION_DRIVER = CommandOption(
+    CommandOption.TYPE_STRING, '-d', '--driver',
+    action='store',
+    help='Specify volume driver name (--driver local).')
+
 OPTION_IMAGE = CommandOption(
     CommandOption.TYPE_IMAGE, None, 'image',
     action='store',
@@ -558,6 +563,7 @@ COMMAND_OPTIONS = {
     ],
     'volume create': [
         OPTION_VOLUME_NAME,
+        OPTION_DRIVER,
         OPTION_OPT
     ],
     'volume inspect': [
