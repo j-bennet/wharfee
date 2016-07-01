@@ -593,12 +593,9 @@ class DockerClient(object):
         def stream():
             for volume in args:
                 try:
-                    result = self.instance.remove_volume(volume)
-                    if result:
-                        self.is_refresh_volumes = True
-                        yield volume
-                    else:
-                        yield 'Could not remove volume {0}.'.format(volume)
+                    self.instance.remove_volume(volume)
+                    self.is_refresh_volumes = True
+                    yield volume
                 except APIError as x:
                     yield 'Could not remove volume {0}: {1}.'.format(
                         volume,
