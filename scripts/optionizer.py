@@ -15,6 +15,7 @@ Usage:
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import re
 import click
 import pexpect
 import wharfee.options as opts
@@ -30,7 +31,7 @@ def get_all_commands():
     """Retrieve all docker commands.
     :return: set of strings
     """
-    txt = pexpect.run('docker').splitlines(False)
+    txt = pexpect.run('docker').strip().splitlines(False)
     all_commands = set()
     in_commands = False
 
@@ -44,6 +45,52 @@ def get_all_commands():
             in_commands = True
 
     return all_commands
+
+
+def get_command_details(command):
+    """
+    Parse arguments, options and subcommands out of command docstring.
+    :param command: string main command
+    :return: tuple of (commands, options, arguments)
+    """
+    txt = pexpect.run('docker {} --help'.format(command)).strip().splitlines(False)
+    in_commands = False
+    in_options = False
+
+    commands = set()
+    options = set()
+    arguments = {}
+
+    arg_parts = re.split('\s+', txt[0])[3:]
+    for arg in arg_parts:
+        arg_name = arg.lstrip('[').rstrip('.]')
+        if arg_name in arguments:
+            arguments[arg_name]['mul'] = True
+        else:
+            arguments[arg_name] = {
+                'mul': '...' in arg,
+                'opt': arg.startswith('[')
+            }
+
+    for line in txt:
+        line = line.strip()
+
+        if not line:
+            in_commands, in_options = False, False
+        elif in_commands:
+            cmd, _ = re.split('\s{2,}', line, 1)
+            commands.add(cmd)
+        elif in_options:
+            opt, desc = re.split('\s{2,}', line, 1)
+            options.add((opt, desc))
+
+        if line.lower() == 'commands:':
+            in_commands = True
+
+        if line.lower() == 'options:':
+            in_options = True
+
+    return commands, options, arguments
 
 
 def check_commands(args):
@@ -71,7 +118,11 @@ def check_command(command):
     """
     Display information about implemented and unimplemented options.
     """
-    pass
+    commands, options, arguments = get_command_details(command)
+    from pprint import pprint
+    pprint(commands)
+    pprint(options)
+    pprint(arguments)
 
 
 def main():
