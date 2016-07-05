@@ -3,9 +3,7 @@
 Docker option checker / helper.
 
 Usage:
-    optionizer.py
-    optionizer.py <command>
-    optionizer.py [--implemented|--unimplemented]
+    optionizer.py [<command>] [--implemented|--unimplemented]
 
 -h --help           Show this help
 -i --implemented    Show implemented commands only
@@ -23,9 +21,26 @@ import wharfee.options as opts
 
 from docopt import docopt
 from tabulate import tabulate
+from jinja2 import Template
+from collections import namedtuple
 
 
 usage = __doc__
+
+
+OptInfo = namedtuple(
+    'OptInto',
+    [
+        'type_str',
+        'short_name',
+        'long_name',
+        'action',
+        'dest',
+        'help',
+        'default',
+        'nargs',
+    ]
+)
 
 
 def get_all_commands():
@@ -46,6 +61,38 @@ def get_all_commands():
             in_commands = True
 
     return all_commands
+
+
+def get_option_info(name, desc):
+    """
+    Create an instance of OptInfo out of option name and description.
+    :param name: str
+    :param desc: str
+    :return: OptInfo
+    """
+    short_name = long_name = arg = None
+    for token in name.split():
+        if token.startswith('--'):
+            long_name = token.strip(',')
+        elif token.startswith('-'):
+            short_name = token.strip(',')
+        else:
+            arg = token
+
+    action = 'store' if arg else 'store_true'
+    const_type = 'TYPE_STRING' if arg else 'TYPE_BOOLEAN'
+    dest = clean_name(long_name)
+    default = default_value(desc)
+    return OptInfo(
+        type_str=const_type,
+        short_name=short_name,
+        long_name=long_name,
+        action=action,
+        dest=dest,
+        default=default,
+        help=desc,
+        nargs=None
+    )
 
 
 def get_command_details(command):
@@ -131,38 +178,65 @@ def format_subcommands(commands):
     return '\n'.join(commands)
 
 
-def format_option(opt):
+def default_value(desc):
     """
-    Format code to create CommandOption.
-    :param opt: tuple of (name, description)
+    Parse default out of description.
+    :param desc: str
+    :return: str
+    """
+    subs = {
+        'true': True,
+        'false': False
+    }
+    if '(default' in desc:
+        _, result = desc.split('(default ')
+        result = result.rstrip(')')
+        result = subs.get(result, result)
+        return result
+    return None
+
+
+def clean_name(command_name):
+    """
+    Turn long option name into valid python identifier: "--all" -> "all".
+    :param command_name: str
     :return: string
     """
-    cmd, desc = opt
-    short_name = long_name = arg = None
-    for token in cmd.split():
-        if token.startswith('--'):
-            long_name = token.strip(',')
-        elif token.startswith('-'):
-            short_name = token.strip(',')
-        else:
-            arg = token
+    if '-' not in command_name:
+        return command_name
+    result = command_name.lstrip('-')
+    result = re.sub('\-', '_', result)
+    return result
 
-    action = 'store' if arg else 'store_true'
-    const_type = 'STRING' if arg else 'BOOLEAN'
 
-    return textwrap.dedent("""
+def format_option(info):
+    """
+    Format code to create CommandOption.
+    :param info: OptInfo
+    :return: string
+    """
+    quote = lambda x: "'{}'".format(x) if x is not None else x
+    tmpl = Template("""
     CommandOption(
-        CommandOption.{const_type},
-        {short_name},
-        {long_name},
-        action='{action}',
-        help='{help}.'
+        CommandOption.{{ const_type }},
+        {{ short_name }},
+        {{ long_name }},
+        action='{{ action }}',
+        dest='{{ dest }}',{% if default is not none %}
+        default={{ default }},{% endif %}
+        help='{{ help }}.'
     ),
-    """.format(const_type=const_type,
-               short_name=short_name,
-               long_name=long_name,
-               action=action,
-               help=desc.rstrip('.'))).strip()
+    """)
+    result = tmpl.render(
+        const_type=info.type_str,
+        short_name=quote(info.short_name),
+        long_name=quote(info.long_name),
+        action=info.action,
+        dest=info.dest,
+        default=info.default,
+        help=info.help.rstrip('.')
+    )
+    return textwrap.dedent(result).strip()
 
 
 def format_options(options):
@@ -171,8 +245,8 @@ def format_options(options):
     :param options: list of (name, description)
     :return: string
     """
-    return '\n'.join([format_option(opt)
-                      for opt in options])
+    return '\n'.join([format_option(get_option_info(name, desc))
+                      for name, desc in options])
 
 
 def format_arguments(arguments):
@@ -185,11 +259,15 @@ def format_arguments(arguments):
     return pformat(arguments)
 
 
-def check_command(command):
+def check_command(command, args):
     """
     Display information about implemented and unimplemented options.
+    :param command: str
+    :param args: dict
     """
     implemented = get_implemented_commands()
+    is_impl = args['--implemented']
+    is_unimpl = args['--unimplemented']
     help, commands, options, arguments = get_command_details(command)
     print(textwrap.dedent('''
     Command: [docker] {command}
@@ -226,7 +304,7 @@ def main():
     args = docopt(usage)
     command = args['<command>']
     if command:
-        check_command(command)
+        check_command(command, args)
     else:
         check_commands(args)
 
