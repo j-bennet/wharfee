@@ -123,6 +123,68 @@ def check_commands(args):
     click.echo_via_pager(tabulate(info, headers=('Command', 'Implemented')))
 
 
+def format_subcommands(commands):
+    """Format subcommands for display.
+    :param commands: list of strings
+    :return: string
+    """
+    return '\n'.join(commands)
+
+
+def format_option(opt):
+    """
+    Format code to create CommandOption.
+    :param opt: tuple of (name, description)
+    :return: string
+    """
+    cmd, desc = opt
+    short_name = long_name = arg = None
+    for token in cmd.split():
+        if token.startswith('--'):
+            long_name = token.strip(',')
+        elif token.startswith('-'):
+            short_name = token.strip(',')
+        else:
+            arg = token
+
+    action = 'store' if arg else 'store_true'
+    const_type = 'STRING' if arg else 'BOOLEAN'
+
+    return textwrap.dedent("""
+    CommandOption(
+        CommandOption.{const_type},
+        {short_name},
+        {long_name},
+        action='{action}',
+        help='{help}.'
+    ),
+    """.format(const_type=const_type,
+               short_name=short_name,
+               long_name=long_name,
+               action=action,
+               help=desc.rstrip('.'))).strip()
+
+
+def format_options(options):
+    """
+    Format options for display.
+    :param options: list of (name, description)
+    :return: string
+    """
+    return '\n'.join([format_option(opt)
+                      for opt in options])
+
+
+def format_arguments(arguments):
+    """
+    Format arguments for display.
+    :param arguments: dict
+    :return: string
+    """
+    from pprint import pformat
+    return pformat(arguments)
+
+
 def check_command(command):
     """
     Display information about implemented and unimplemented options.
@@ -133,24 +195,26 @@ def check_command(command):
     Command: [docker] {command}
     Help: {help}
     Subcommands: {subs}
-    Implemented: {implemented}
-    '''.format(command=command,
-               implemented='Yes' if command in implemented else 'No',
-               subs=len(commands) if commands else 0,
-               help=help)))
-
-    from pprint import pprint
+    Implemented: {implemented}'''.format(
+        command=command,
+        implemented='Yes' if command in implemented else 'No',
+        subs=len(commands) if commands else 'No',
+        help=help)))
 
     if commands:
         print('Subcommands:')
-        pprint(commands)
+        print(format_subcommands(commands))
+        print()
 
-    print('Options:')
-    pprint(options)
-    print()
+    print(textwrap.dedent('''
+    Options:
+    --------'''))
+    print(format_options(options))
 
-    print('Arguments:')
-    pprint(arguments)
+    print(textwrap.dedent('''
+    Arguments:
+    ----------'''))
+    print(format_arguments(arguments))
 
 
 def main():
