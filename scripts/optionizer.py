@@ -18,6 +18,7 @@ from __future__ import print_function
 import re
 import click
 import pexpect
+import textwrap
 import wharfee.options as opts
 
 from docopt import docopt
@@ -51,7 +52,7 @@ def get_command_details(command):
     """
     Parse arguments, options and subcommands out of command docstring.
     :param command: string main command
-    :return: tuple of (commands, options, arguments)
+    :return: tuple of (help, commands, options, arguments)
     """
     txt = pexpect.run('docker {} --help'.format(command)).strip().splitlines(False)
     in_commands = False
@@ -60,6 +61,7 @@ def get_command_details(command):
     commands = set()
     options = set()
     arguments = {}
+    help = txt[2]
 
     arg_parts = re.split('\s+', txt[0])[3:]
     for arg in arg_parts:
@@ -90,7 +92,14 @@ def get_command_details(command):
         if line.lower() == 'options:':
             in_options = True
 
-    return commands, options, arguments
+    return help, commands, options, arguments
+
+
+def get_implemented_commands():
+    """Get all implemented command names.
+    :return: set of strings
+    """
+    return set([c.split(' ', 1)[0] for c in opts.COMMAND_NAMES])
 
 
 def check_commands(args):
@@ -100,7 +109,7 @@ def check_commands(args):
     is_impl = args['--implemented']
     is_unimpl = args['--unimplemented']
     all_commands = get_all_commands()
-    implemented = set([c.split(' ', 1)[0] for c in opts.COMMAND_NAMES])
+    implemented = get_implemented_commands()
 
     if is_impl:
         result = implemented
@@ -118,10 +127,29 @@ def check_command(command):
     """
     Display information about implemented and unimplemented options.
     """
-    commands, options, arguments = get_command_details(command)
+    implemented = get_implemented_commands()
+    help, commands, options, arguments = get_command_details(command)
+    print(textwrap.dedent('''
+    Command: [docker] {command}
+    Help: {help}
+    Subcommands: {subs}
+    Implemented: {implemented}
+    '''.format(command=command,
+               implemented='Yes' if command in implemented else 'No',
+               subs=len(commands) if commands else 0,
+               help=help)))
+
     from pprint import pprint
-    pprint(commands)
+
+    if commands:
+        print('Subcommands:')
+        pprint(commands)
+
+    print('Options:')
     pprint(options)
+    print()
+
+    print('Arguments:')
     pprint(arguments)
 
 
