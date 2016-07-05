@@ -103,6 +103,65 @@ def get_option_info(name, desc):
     )
 
 
+def tokenize_usage(usage_str):
+    """
+    Split usage string into groups of arguments.
+    :param usage_str: str
+    :return: list
+    """
+    tokens = usage_str.split()[3:]
+    for i, token in enumerate(tokens):
+        if token == '|':
+            # next token is an OR of previous one. Skip it.
+            if i < len(tokens) - 1:
+                tokens[i + 1] = '|'
+    return [t for t in tokens if t != '|']
+
+
+def get_command_arguments(usage_str):
+    """
+    Get command arguments out of usage string.
+    :param usage_str: str
+    :return: list
+    """
+    # Usage:	docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+    ars = tokenize_usage(usage_str)
+    arg_dict = {}
+    result = []
+    for arg in ars:
+        if arg == '[OPTIONS]':
+            continue
+        long_name = clean_name(arg).lower()
+        is_optional = '[' in arg
+        is_multiple = '.' in arg
+        if long_name in arg_dict:
+            arg_dict[long_name]['mul'] = True
+        else:
+            arg_dict[long_name] = {
+                'mul': is_multiple,
+                'opt': is_optional
+            }
+    for long_name, props in arg_dict.items():
+        action = 'append' if props['mul'] else 'store'
+        if props['mul'] and props['opt']:
+            nargs = '*'
+        elif props['mul']:
+            nargs = '+'
+        else:
+            nargs = None
+        result.append(OptInfo(
+            type_str='TYPE_STRING',
+            short_name=None,
+            long_name=long_name,
+            action=action,
+            dest=long_name,
+            default=None,
+            help='<Add help here>',
+            nargs=nargs
+        ))
+    return result
+
+
 def get_command_details(command):
     """
     Parse arguments, options and subcommands out of command docstring.
@@ -115,19 +174,8 @@ def get_command_details(command):
 
     commands = set()
     options = set()
-    arguments = {}
-    help = txt[2]
-
-    arg_parts = re.split('\s+', txt[0])[3:]
-    for arg in arg_parts:
-        arg_name = arg.lstrip('[').rstrip('.]')
-        if arg_name in arguments:
-            arguments[arg_name]['mul'] = True
-        else:
-            arguments[arg_name] = {
-                'mul': '...' in arg,
-                'opt': arg.startswith('[')
-            }
+    descr = txt[2]
+    arguments = get_command_arguments(txt[0])
 
     for line in txt:
         line = line.strip()
@@ -147,7 +195,7 @@ def get_command_details(command):
         if line.lower() == 'options:':
             in_options = True
 
-    return help, commands, options, arguments
+    return descr, commands, options, arguments
 
 
 def get_implemented_commands():
@@ -204,16 +252,18 @@ def default_value(desc):
     return None
 
 
-def clean_name(command_name):
+def clean_name(opt_name):
     """
     Turn long option name into valid python identifier: "--all" -> "all".
-    :param command_name: str
+    :param opt_name: str
     :return: string
     """
-    if '-' not in command_name:
-        return command_name
-    result = command_name.lstrip('-')
-    result = re.sub('\-', '_', result)
+    if not re.match('[^A-Za-z_]', opt_name):
+        return opt_name
+    result = opt_name.strip('[]')
+    result = result.rstrip('.')
+    result = result.lstrip('-')
+    result = re.sub('[^A-Za-z_]', '_', result)
     return result
 
 
@@ -245,6 +295,21 @@ def format_option(info):
         help=info.help.rstrip('.')
     )
     return textwrap.dedent(result).strip()
+
+
+def get_implemented_arguments(command):
+    """
+    Get all implemented argument names for the command.
+    :param command: str
+    :return: set of str
+    """
+    if command not in opts.COMMAND_NAMES:
+        return []
+
+    result = set(o.name
+                 for o in opts.COMMAND_OPTIONS.get(command, [])
+                 if not o.name.startswith('-'))
+    return result
 
 
 def get_implemented_options(command):
@@ -289,6 +354,32 @@ def format_options(command, options, is_impl, is_unimpl, header=True):
     return result
 
 
+def format_arguments(command, arguments, is_impl, is_unimpl, header=True):
+    """
+    Format arguments for display.
+    :param command: str
+    :param arguments: list
+    :param is_impl: boolean only show implemented
+    :param is_unimpl: boolean only show unimplemented
+    :param header: boolean add header
+    :return: string
+    """
+    total_args = len(arguments)
+    implemented_args = get_implemented_arguments(command)
+    if is_impl:
+        arguments = [arg for arg in arguments if arg.long_name in implemented_args]
+    elif is_unimpl:
+        arguments = [arg for arg in arguments if arg.long_name not in implemented_args]
+    result = '\n'.join([
+        format_option(arg)
+        for arg in arguments])
+    if header:
+        result = format_header('Arguments', len(arguments), total_args, is_impl, is_unimpl) \
+                 + '\n' \
+                 + result
+    return result
+
+
 def format_header(what, length, total_length, is_impl, is_unimpl):
     """
     Format header string
@@ -312,25 +403,6 @@ def format_header(what, length, total_length, is_impl, is_unimpl):
         length,
         total_length
     )
-
-
-def format_arguments(command, arguments, is_impl, is_unimpl, header=True):
-    """
-    Format arguments for display.
-    :param command: str
-    :param arguments: dict
-    :param is_impl: boolean only show implemented
-    :param is_unimpl: boolean only show unimplemented
-    :param header: boolean add header
-    :return: string
-    """
-    from pprint import pformat
-    result = pformat(arguments)
-    if header:
-        result = format_header('Arguments', len(arguments), len(arguments), is_impl, is_unimpl) \
-                 + '\n' \
-                 + result
-    return result
 
 
 def check_command(command, args):
