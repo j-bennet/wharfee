@@ -4,3 +4,4 @@ tox>=1.9.2
 behave>=1.2.4
 flake8==2.4.1
 pexpect==3.3
+docopt==0.6.2

@@ -33,7 +33,10 @@ setup(
         ],
     },
     entry_points={
-        'console_scripts': 'wharfee = wharfee.main:cli'
+        'console_scripts': [
+            'wharfee = wharfee.main:cli',
+            'optionizer = scripts.optionizer:main',
+        ]
     },
     packages=['wharfee'],
     package_data={'wharfee': ['wharfeerc']},
