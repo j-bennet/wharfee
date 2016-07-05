@@ -14,7 +14,6 @@ from __future__ import unicode_literals
 from __future__ import print_function
 
 import re
-import click
 import pexpect
 import textwrap
 import wharfee.options as opts
@@ -79,10 +78,19 @@ def get_option_info(name, desc):
         else:
             arg = token
 
-    action = 'store' if arg else 'store_true'
+    default = default_value(desc)
+    nargs = None
+
+    if not arg:
+        action = 'store_true'
+    elif default == '[]':
+        action = 'append'
+        nargs = '*'
+    else:
+        action = 'store'
+
     const_type = 'TYPE_STRING' if arg else 'TYPE_BOOLEAN'
     dest = clean_name(long_name)
-    default = default_value(desc)
     return OptInfo(
         type_str=const_type,
         short_name=short_name,
@@ -91,7 +99,7 @@ def get_option_info(name, desc):
         dest=dest,
         default=default,
         help=desc,
-        nargs=None
+        nargs=nargs
     )
 
 
@@ -166,8 +174,8 @@ def check_commands(args):
         result = all_commands
 
     info = [(c, 'Y' if c in implemented else 'N')
-                for c in sorted(result)]
-    click.echo_via_pager(tabulate(info, headers=('Command', 'Implemented')))
+            for c in sorted(result)]
+    print(tabulate(info, headers=('Command', 'Implemented')))
 
 
 def format_subcommands(commands):
@@ -239,24 +247,90 @@ def format_option(info):
     return textwrap.dedent(result).strip()
 
 
-def format_options(options):
+def get_implemented_options(command):
+    """
+    Get all implemented option names for the command.
+    :param command: str
+    :return: set of tuples (short_name, long_name)
+    """
+    if command not in opts.COMMAND_NAMES:
+        return []
+
+    result = set([(o.short_name, o.long_name)
+                  for o in opts.COMMAND_OPTIONS.get(command, [])
+                  if o.name.startswith('-')])
+    result.add((None, '--help'))
+    result.add(('-h', '--help'))
+    return result
+
+
+def format_options(command, options, is_impl, is_unimpl, header=True):
     """
     Format options for display.
+    :param command: str
     :param options: list of (name, description)
-    :return: string
+    :param is_impl: boolean only show implemented
+    :param is_unimpl: boolean only show unimplemented
+    :param header: boolean add header
+    :return: str
     """
-    return '\n'.join([format_option(get_option_info(name, desc))
-                      for name, desc in options])
+    implemented_opts = get_implemented_options(command)
+    infos = [get_option_info(name, desc) for name, desc in options]
+    if is_impl:
+        infos = [i for i in infos if (i.short_name, i.long_name) in implemented_opts]
+    elif is_unimpl:
+        infos = [i for i in infos if (i.short_name, i.long_name) not in implemented_opts]
+    result = '\n'.join([format_option(info)
+                        for info in infos])
+    if header:
+        result = format_header('Options', len(infos), len(options), is_impl, is_unimpl) \
+                 + '\n' \
+                 + result
+    return result
 
 
-def format_arguments(arguments):
+def format_header(what, length, total_length, is_impl, is_unimpl):
+    """
+    Format header string
+    :param what: str
+    :param length: int
+    :param total_length: int
+    :param is_impl: boolean
+    :param is_unimpl: boolean
+    :return: str
+    """
+    mode = 'all'
+    if is_impl:
+        mode = 'implemented'
+    elif is_unimpl:
+        mode = 'unimplemented'
+    return textwrap.dedent('''
+    {} ({}): {}/{}
+    ------------------------------''').format(
+        what,
+        mode,
+        length,
+        total_length
+    )
+
+
+def format_arguments(command, arguments, is_impl, is_unimpl, header=True):
     """
     Format arguments for display.
+    :param command: str
     :param arguments: dict
+    :param is_impl: boolean only show implemented
+    :param is_unimpl: boolean only show unimplemented
+    :param header: boolean add header
     :return: string
     """
     from pprint import pformat
-    return pformat(arguments)
+    result = pformat(arguments)
+    if header:
+        result = format_header('Arguments', len(arguments), len(arguments), is_impl, is_unimpl) \
+                 + '\n' \
+                 + result
+    return result
 
 
 def check_command(command, args):
@@ -280,19 +354,14 @@ def check_command(command, args):
         help=help)))
 
     if commands:
-        print('Subcommands:')
+        print('''
+        Subcommands:
+        ------------------------------''')
         print(format_subcommands(commands))
         print()
 
-    print(textwrap.dedent('''
-    Options:
-    --------'''))
-    print(format_options(options))
-
-    print(textwrap.dedent('''
-    Arguments:
-    ----------'''))
-    print(format_arguments(arguments))
+    print(format_options(command, options, is_impl, is_unimpl))
+    print(format_arguments(command, arguments, is_impl, is_unimpl))
 
 
 def main():
