@@ -16,6 +16,7 @@ from __future__ import print_function
 import re
 import pexpect
 import textwrap
+import six
 import wharfee.options as opts
 
 from docopt import docopt
@@ -44,7 +45,7 @@ OptInfo = namedtuple(
 
 def get_all_commands():
     """Retrieve all docker commands.
-    :return: set of strings
+    :return: set of str
     """
     txt = pexpect.run('docker').strip().splitlines(False)
     all_commands = set()
@@ -103,13 +104,16 @@ def get_option_info(name, desc):
     )
 
 
-def tokenize_usage(usage_str):
+def tokenize_usage(command, usage_str):
     """
     Split usage string into groups of arguments.
+    :param command: str
     :param usage_str: str
     :return: list
     """
-    tokens = usage_str.split()[3:]
+    i_command_end = usage_str.find(command)
+    arg_str = usage_str[i_command_end + len(command) + 1:]
+    tokens = arg_str.split()
     for i, token in enumerate(tokens):
         if token == '|':
             # next token is an OR of previous one. Skip it.
@@ -118,14 +122,15 @@ def tokenize_usage(usage_str):
     return [t for t in tokens if t != '|']
 
 
-def get_command_arguments(usage_str):
+def get_command_arguments(command, usage_str):
     """
     Get command arguments out of usage string.
+    :param command: str
     :param usage_str: str
     :return: list
     """
     # Usage:	docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
-    ars = tokenize_usage(usage_str)
+    ars = tokenize_usage(command, usage_str)
     arg_dict = {}
     result = []
     for arg in ars:
@@ -165,8 +170,8 @@ def get_command_arguments(usage_str):
 def get_command_details(command):
     """
     Parse arguments, options and subcommands out of command docstring.
-    :param command: string main command
-    :return: tuple of (help, commands, options, arguments)
+    :param command: str main command
+    :return: tuple of (usage, help, commands, options, arguments)
     """
     txt = pexpect.run('docker {} --help'.format(command)).strip().splitlines(False)
     in_commands = False
@@ -174,8 +179,9 @@ def get_command_details(command):
 
     commands = set()
     options = set()
+    usage_str = txt[0]
     descr = txt[2]
-    arguments = get_command_arguments(txt[0])
+    arguments = get_command_arguments(command, txt[0])
 
     for line in txt:
         line = line.strip()
@@ -195,12 +201,12 @@ def get_command_details(command):
         if line.lower() == 'options:':
             in_options = True
 
-    return descr, commands, options, arguments
+    return usage_str, descr, commands, options, arguments
 
 
 def get_implemented_commands():
     """Get all implemented command names.
-    :return: set of strings
+    :return: set of str
     """
     return set([c.split(' ', 1)[0] for c in opts.COMMAND_NAMES])
 
@@ -228,8 +234,8 @@ def check_commands(args):
 
 def format_subcommands(commands):
     """Format subcommands for display.
-    :param commands: list of strings
-    :return: string
+    :param commands: list of str
+    :return: str
     """
     return '\n'.join(commands)
 
@@ -256,7 +262,7 @@ def clean_name(opt_name):
     """
     Turn long option name into valid python identifier: "--all" -> "all".
     :param opt_name: str
-    :return: string
+    :return: str
     """
     if not re.match('[^A-Za-z_]', opt_name):
         return opt_name
@@ -267,13 +273,27 @@ def clean_name(opt_name):
     return result
 
 
+def maybe_quote(x):
+    """
+    Quote if it looks like string
+    :param x: object
+    :return: object
+    """
+    if not isinstance(x, six.string_types):
+        return x
+    if x.lower() in ['true', 'false', 'none']:
+        return x
+    if re.match('^[0-9]+\.?[0-9]*$', x):
+        return x
+    return "'{}'".format(x)
+
+
 def format_option(info):
     """
     Format code to create CommandOption.
     :param info: OptInfo
-    :return: string
+    :return: str
     """
-    quote = lambda x: "'{}'".format(x) if x is not None else x
     tmpl = Template("""
     CommandOption(
         CommandOption.{{ const_type }},
@@ -287,11 +307,11 @@ def format_option(info):
     """)
     result = tmpl.render(
         const_type=info.type_str,
-        short_name=quote(info.short_name),
-        long_name=quote(info.long_name),
+        short_name=maybe_quote(info.short_name),
+        long_name=maybe_quote(info.long_name),
         action=info.action,
         dest=info.dest,
-        default=info.default,
+        default=maybe_quote(info.default),
         help=info.help.rstrip('.')
     )
     return textwrap.dedent(result).strip()
@@ -362,7 +382,7 @@ def format_arguments(command, arguments, is_impl, is_unimpl, header=True):
     :param is_impl: boolean only show implemented
     :param is_unimpl: boolean only show unimplemented
     :param header: boolean add header
-    :return: string
+    :return: str
     """
     total_args = len(arguments)
     implemented_args = get_implemented_arguments(command)
@@ -414,16 +434,19 @@ def check_command(command, args):
     implemented = get_implemented_commands()
     is_impl = args['--implemented']
     is_unimpl = args['--unimplemented']
-    help, commands, options, arguments = get_command_details(command)
+    usage_str, help_str, commands, options, arguments = get_command_details(command)
     print(textwrap.dedent('''
     Command: [docker] {command}
     Help: {help}
+    {usage}
     Subcommands: {subs}
     Implemented: {implemented}'''.format(
         command=command,
         implemented='Yes' if command in implemented else 'No',
         subs=len(commands) if commands else 'No',
-        help=help)))
+        help=help_str,
+        usage=usage_str
+    )))
 
     if commands:
         print('''
@@ -439,7 +462,7 @@ def check_command(command, args):
 def main():
     """
     Display information on implemented commands and options.
-    :param command: string command name
+    :param command: str command name
     """
     global usage
     args = docopt(usage)
