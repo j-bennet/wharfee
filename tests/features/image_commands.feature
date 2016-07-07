@@ -26,7 +26,7 @@ Feature: call image-related commands
       when we run wharfee
       and we wait for prompt
       when we inspect hello-world
-      then we see "hello-world:latest" output
+      then we see "/hello" output
 
   Scenario: log in as user wharfee
      Given we have wharfee installed
