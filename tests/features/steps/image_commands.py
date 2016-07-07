@@ -52,7 +52,7 @@ def step_see_log_in_success(context):
     """
     Expect to see login succeeded.
     """
-    context.cli.expect_exact('Login Succeeded')
+    context.cli.expect_exact('Login Succeeded', timeout=30)
 
 
 @when('we tag {image_name} into {repo_name}')
