@@ -40,12 +40,12 @@ def step_see_image_pulled(context, image_name):
     ])
 
 
-@when('we log in as {user} with {password}')
-def step_log_in(context, user, password):
+@when('we log in as {user}, {email} with {password}')
+def step_log_in(context, user, email, password):
     """
     Send "login" command.
     """
-    context.cli.sendline('login -u {0} -p {1}'.format(user, password))
+    context.cli.sendline('login -u {0} -e {1} -p {2}'.format(user, email, password))
 
 
 @then('we see login success')

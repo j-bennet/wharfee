@@ -32,7 +32,7 @@ Feature: call image-related commands
      Given we have wharfee installed
       when we run wharfee
       and we wait for prompt
-      and we log in as wharfee with docker.me
+      and we log in as wharfee, wharfee.cli@gmail.com with docker.me
       then we see login success
 
   Scenario: tag an image
