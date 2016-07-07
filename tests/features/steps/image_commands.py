@@ -9,7 +9,7 @@ def step_build_dockerfile(context, image_name):
     """
     Send "build -t test-image ./tests/features/fixture_data/".
     """
-    context.cli.sendline('build -t {} {}'.format(image_name, context.data_dir))
+    context.cli.sendline('build -t {0} {1}'.format(image_name, context.data_dir))
 
 
 @then('we see image built')
@@ -44,7 +44,7 @@ def step_log_in(context, user, password):
     """
     Send "login" command.
     """
-    context.cli.sendline('login -u {} -p {}'.format(user, password))
+    context.cli.sendline('login -u {0} -p {1}'.format(user, password))
 
 
 @then('we see login success')
@@ -60,7 +60,7 @@ def step_tag_image(context, image_name, repo_name):
     """
     Send "tag" command.
     """
-    context.cli.sendline('tag {} {}'.format(image_name, repo_name))
+    context.cli.sendline('tag {0} {1}'.format(image_name, repo_name))
 
 
 @then('we see {image_name} tagged into {repo_name}')
@@ -68,7 +68,7 @@ def step_see_image_tagged(context, image_name, repo_name):
     """
     Expect to see image tagged.
     """
-    context.cli.expect_exact('Tagged {} into {}'.format(image_name, repo_name))
+    context.cli.expect_exact('Tagged {0} into {1}'.format(image_name, repo_name))
 
 
 @when('we remove image {image_name}')
@@ -76,7 +76,7 @@ def step_remove_image(context, image_name):
     """
     Send "rmi" command.
     """
-    context.cli.sendline('rmi {}'.format(image_name))
+    context.cli.sendline('rmi {0}'.format(image_name))
 
 
 @then('we see image {image_name} removed')
@@ -108,7 +108,7 @@ def step_inspect(context, name):
     """
     Send "inspect" command.
     """
-    context.cli.sendline('inspect {}'.format(name))
+    context.cli.sendline('inspect {0}'.format(name))
 
 
 @when('we search for {name}')
@@ -116,7 +116,7 @@ def step_search(context, name):
     """
     Send "search" command.
     """
-    context.cli.sendline('search {}'.format(name))
+    context.cli.sendline('search {0}'.format(name))
 
 
 @then('we see {text} output')
