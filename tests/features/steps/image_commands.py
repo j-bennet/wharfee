@@ -1,6 +1,7 @@
 # -*- coding: utf-8
 from __future__ import unicode_literals
 
+import wrappers
 from behave import when, then
 
 
@@ -17,7 +18,7 @@ def step_see_image_built(context):
     """
     Expect to see image built.
     """
-    context.cli.expect_exact('Successfully built')
+    wrappers.expect_exact(context, 'Successfully built')
 
 
 @when('we pull {image_name} image')
@@ -33,7 +34,7 @@ def step_see_image_pulled(context, image_name):
     """
     Expect to see image pulled.
     """
-    context.cli.expect_exact([
+    wrappers.expect_exact(context, [
         'Downloaded newer image for ' + image_name,
         'Image is up to date for ' + image_name
     ])
@@ -52,7 +53,7 @@ def step_see_log_in_success(context):
     """
     Expect to see login succeeded.
     """
-    context.cli.expect_exact('Login Succeeded', timeout=30)
+    wrappers.expect_exact(context, 'Login Succeeded', 30)
 
 
 @when('we tag {image_name} into {repo_name}')
@@ -68,7 +69,7 @@ def step_see_image_tagged(context, image_name, repo_name):
     """
     Expect to see image tagged.
     """
-    context.cli.expect_exact('Tagged {0} into {1}'.format(image_name, repo_name))
+    wrappers.expect_exact(context, 'Tagged {0} into {1}'.format(image_name, repo_name))
 
 
 @when('we remove image {image_name}')
@@ -84,7 +85,7 @@ def step_see_image_removed(context, image_name):
     """
     Expect to see image removed.
     """
-    context.cli.expect_exact(image_name)
+    wrappers.expect_exact(context, image_name)
 
 
 @when('we list images')
@@ -100,7 +101,7 @@ def step_see_image_listed(context, image_name):
     """
     Expect to see image listed.
     """
-    context.cli.expect_exact('hello-world')
+    wrappers.expect_exact(context, 'hello-world')
 
 
 @when('we inspect {name}')
@@ -124,4 +125,4 @@ def step_see_output(context, text):
     """
     Expect to see ouptut.
     """
-    context.cli.expect_exact([text, text.strip('"')])
+    wrappers.expect_exact(context, [text, text.strip('"')])
