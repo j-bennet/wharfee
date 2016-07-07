@@ -15,6 +15,7 @@ def before_all(context):
     os.environ['COLUMNS'] = "120"
     os.environ['PAGER'] = 'cat'
 
+    context.data_dir = fixutils.get_data_dir()
     context.fixture_lines = fixutils.read_fixture_files()
     context.client = dutils.init_docker_client()
     dutils.pull_required_images(context.client)
