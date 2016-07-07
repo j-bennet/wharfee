@@ -2,7 +2,7 @@
 import re
 
 
-def expect_exact(context, expected, timeout=None):
+def expect_exact(context, expected, timeout=30):
     """
     Wrapper for pexpect's expect exact with clear output logging.
     :param context:
