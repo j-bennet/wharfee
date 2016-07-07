@@ -8,6 +8,7 @@ import pretty
 import re
 import pexpect
 import ssl
+import six
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
@@ -299,7 +300,7 @@ class DockerClient(object):
             if isinstance(names, list):
                 formatted = []
                 for name in names:
-                    if isinstance(name, basestring):
+                    if isinstance(name, six.string_types):
                         formatted.append(name.lstrip('/'))
                     else:
                         formatted.append(name)

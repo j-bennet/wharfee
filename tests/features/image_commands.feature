@@ -7,7 +7,6 @@ Feature: call image-related commands
       and we build image from Dockerfile
       then we see image built
 
-  @wip
   Scenario: pull hello-world image
      Given we have wharfee installed
       when we run wharfee
