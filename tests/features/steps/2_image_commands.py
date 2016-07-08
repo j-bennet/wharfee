@@ -120,9 +120,9 @@ def step_search(context, name):
     context.cli.sendline('search {0}'.format(name))
 
 
-@then('we see {text} output')
+@then('we see {text} printed out')
 def step_see_output(context, text):
     """
-    Expect to see ouptut.
+    Expect to see exact text.
     """
     wrappers.expect_exact(context, [text, text.strip('"')])

@@ -26,7 +26,7 @@ Feature: call image-related commands
       when we run wharfee
       and we wait for prompt
       when we inspect hello-world
-      then we see "/hello" output
+      then we see "/hello" printed out
 
   Scenario: log in as user wharfee
      Given we have wharfee installed
@@ -56,4 +56,4 @@ Feature: call image-related commands
       when we run wharfee
       and we wait for prompt
       when we search for nginx
-      then we see "Official build of Nginx" output
+      then we see "Official build of Nginx" printed out

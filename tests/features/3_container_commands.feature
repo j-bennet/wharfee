@@ -5,7 +5,7 @@ Feature: call container-related commands
       when we run wharfee
       and we wait for prompt
       when we run container hello with image hello-world
-      then we see "Hello from Docker!" output
+      then we see "Hello from Docker!" printed out
 
   @wip
   Scenario: remove container
