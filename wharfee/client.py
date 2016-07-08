@@ -481,6 +481,9 @@ class DockerClient(object):
         if kwargs['remove'] and kwargs['detach']:
             return ['Use either --rm or --detach.']
 
+        # Always call external cli for this, rather than figuring out
+        # why docker-py throws "jack is incompatible with use of CloseNotifier in same ServeHTTP call"
+        kwargs['force'] = True
         called, args, kwargs = self.call_external_cli('run', *args, **kwargs)
         if not called:
             kwargs['image'] = args[0]
@@ -1117,6 +1120,7 @@ class DockerClient(object):
         """
         called = False
 
+        is_force = kwargs.pop('force', False)
         is_interactive = kwargs.get('interactive', None)
         is_tty = kwargs.get('tty', None)
         is_attach = kwargs.get('attach', None)
@@ -1142,7 +1146,7 @@ class DockerClient(object):
             self.is_refresh_running = True
             return ['Container exited.\r']
 
-        if is_interactive or is_tty or (is_attach and not is_attach_bool):
+        if is_force or is_interactive or is_tty or (is_attach and not is_attach_bool):
             self.after = on_after_attach if is_attach else on_after_interactive
             called = True
             execute_external()

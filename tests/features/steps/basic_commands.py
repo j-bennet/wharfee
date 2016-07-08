@@ -29,7 +29,7 @@ def step_expect_prompt(context):
     """
     Expect to see prompt.
     """
-    context.cli.expect('wharfee> ')
+    context.cli.expect_exact('wharfee> ')
 
 
 @when('we send "help" command')
