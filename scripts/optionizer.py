@@ -13,6 +13,7 @@ Usage:
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import os
 import re
 import pexpect
 import textwrap
@@ -41,6 +42,23 @@ OptInfo = namedtuple(
         'nargs',
     ]
 )
+
+
+def is_in_steps(command):
+    """See if command is mentioned in step files.
+    :return: boolean
+    """
+    current_dir = os.path.dirname(__file__)
+    step_dir = os.path.abspath(os.path.join(current_dir, '../tests/features/steps/'))
+    search_str = ['sendline("{0}'.format(command),
+                  "sendline('{0}".format(command)]
+    for file_name in os.listdir(step_dir):
+        if file_name.endswith('.py'):
+            with open(os.path.join(step_dir, file_name), 'r') as f:
+                for line in f:
+                    if any([s in line for s in search_str]):
+                        return True
+    return False
 
 
 def get_all_commands():
@@ -227,9 +245,9 @@ def check_commands(args):
     else:
         result = all_commands
 
-    info = [(c, 'Y' if c in implemented else 'N')
+    info = [(c, 'Y' if c in implemented else 'N', 'Y' if is_in_steps(c) else 'N')
             for c in sorted(result)]
-    print(tabulate(info, headers=('Command', 'Implemented')))
+    print(tabulate(info, headers=('Command', 'Implemented', 'Tested')))
 
 
 def format_subcommands(commands):
