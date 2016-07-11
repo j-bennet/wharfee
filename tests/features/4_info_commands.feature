@@ -5,7 +5,7 @@ Feature: call info commands
       when we run wharfee
       and we wait for prompt
       when we ask for docker info
-      then we see "SystemStatus: None" printed out
+      then we see "SystemTime:" printed out
 
   Scenario: check version
      Given we have wharfee installed
