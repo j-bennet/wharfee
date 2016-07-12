@@ -515,6 +515,10 @@ COMMAND_OPTIONS = {
                       help='Shortcut to remove all containers.',
                       api_match=False,
                       cli_match=False),
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-f', '--force',
+                      action='store_true',
+                      dest='force',
+                      help='Force the removal of a running container (uses SIGKILL).'),
     ],
     'rmi': [
         CommandOption(CommandOption.TYPE_IMAGE_TAGGED, 'image',

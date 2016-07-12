@@ -77,7 +77,6 @@ class WharfeeCli(object):
             long_option_names=self.get_long_options(),
             fuzzy=self.get_fuzzy_match())
         self.set_completer_options()
-        print('Completer disabled:', no_completion)
         self.completer.set_enabled(not no_completion)
         self.saved_less_opts = self.set_less_opts()
 
