@@ -60,7 +60,6 @@ Feature: call container-related commands
       when we remove container hello
       then we see hello at line end
 
-  @wip
   Scenario: remove stopped containers
      Given we have wharfee installed
       when we run wharfee
