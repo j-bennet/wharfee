@@ -43,12 +43,44 @@ def step_stop_container(context, container_name):
     context.cli.sendline('stop {0}'.format(container_name))
 
 
-@when('we remove container {name}')
-def step_remove_container(context, name):
+@when('we force remove container {name}')
+def step_force_remove_container(context, name):
+    """
+    Send "rm -f" command.
+    """
+    context.cli.sendline('rm -f {0}'.format(name))
+
+
+@when('we see logs for container {name}')
+def step_see_logs(context, name):
+    """
+    Send "logs" command.
+    """
+    context.cli.sendline('logs {0}'.format(name))
+
+
+@when('we remove stopped containers')
+def step_remove_stopped(context):
     """
     Send "rm" command.
     """
-    context.cli.sendline('rm {0}'.format(name))
+    context.cli.sendline('rm --all-stopped')
+
+
+@when('we list containers')
+def step_list_containers(context):
+    """
+    Send "ps" command.
+    """
+    context.cli.sendline('ps')
+
+
+@then('we see id string')
+def step_see_id_string(context):
+    """
+    Expect to see [a-zA-Z0-9]+ and line end.
+    """
+    wrappers.expect(context, '[a-zA-Z0-9]+\r\n')
 
 
 @then('we see {text} at line end')

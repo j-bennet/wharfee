@@ -6,11 +6,16 @@ import os
 import fixture_utils as fixutils
 import docker_utils as dutils
 
+DEBUG_ON_ERROR = False
+
 
 def before_all(context):
     """
     Set env parameters.
     """
+    global DEBUG_ON_ERROR
+    DEBUG_ON_ERROR = context.config.userdata.getbool('DEBUG_ON_ERROR')
+
     os.environ['LINES'] = "50"
     os.environ['COLUMNS'] = "120"
     os.environ['PAGER'] = 'cat'
@@ -30,3 +35,9 @@ def after_scenario(context, _):
     if hasattr(context, 'cli') and not context.exit_sent:
         # Terminate the cli nicely.
         context.cli.terminate()
+
+
+def after_step(_, step):
+    if DEBUG_ON_ERROR and step.status == 'failed':
+        import ipdb
+        ipdb.post_mortem(step.exc_traceback)

@@ -54,7 +54,7 @@ class WharfeeCli(object):
     config_template = 'wharfeerc'
     config_name = '~/.wharfeerc'
 
-    def __init__(self):
+    def __init__(self, no_completion=False):
         """
         Initialize class members.
         Should read the config here at some point.
@@ -77,6 +77,8 @@ class WharfeeCli(object):
             long_option_names=self.get_long_options(),
             fuzzy=self.get_fuzzy_match())
         self.set_completer_options()
+        print('Completer disabled:', no_completion)
+        self.completer.set_enabled(not no_completion)
         self.saved_less_opts = self.set_less_opts()
 
     def read_configuration(self):
@@ -339,12 +341,13 @@ class WharfeeCli(object):
 
 
 @click.command()
-def cli():
+@click.option('--no-completion', is_flag=True, default=False, help='Disable autocompletion.')
+def cli(no_completion):
     """
     Create and call the CLI
     """
     try:
-        dcli = WharfeeCli()
+        dcli = WharfeeCli(no_completion)
         dcli.run_cli()
     except DockerTimeoutException as ex:
         click.secho(ex.message, fg='red')

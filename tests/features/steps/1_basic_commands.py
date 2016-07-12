@@ -21,7 +21,7 @@ def step_run_cli(context):
     """
     Run the process using pexpect.
     """
-    context.cli = pexpect.spawnu('wharfee')
+    context.cli = pexpect.spawnu('wharfee --no-completion')
 
 
 @when('we wait for prompt')
