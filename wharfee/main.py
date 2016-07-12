@@ -285,7 +285,7 @@ class WharfeeCli(object):
                 if isinstance(self.handler.output, GeneratorType):
                     output_stream(self.handler.command,
                                   self.handler.output,
-                                  self.handler.logs)
+                                  self.handler.log)
 
                 elif self.handler.output is not None:
                     lines = format_data(

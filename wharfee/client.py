@@ -99,7 +99,7 @@ class DockerClient(object):
         self.output = None
         self.after = None
         self.command = None
-        self.logs = None
+        self.log = None
 
         self.is_refresh_containers = False
         self.is_refresh_running = False
@@ -157,7 +157,7 @@ class DockerClient(object):
             self.is_refresh_images = False
             self.is_refresh_volumes = False
             self.after = None
-            self.logs = None
+            self.log = None
             self.exception = None
 
         tokens = shlex_split(text) if text else ['']
@@ -907,7 +907,7 @@ class DockerClient(object):
 
             # Just in case the stream generated no output, let's allow for
             # retrieving the logs. They will be our last resort output.
-            self.logs = lambda: self.instance.logs(kwargs['container'])
+            self.log = lambda: self.instance.logs(kwargs['container'])
 
             self.is_refresh_running = True
             if result:
@@ -951,6 +951,8 @@ class DockerClient(object):
         kwargs['container'] = args[0]
 
         result = self.instance.logs(**kwargs)
+        if isinstance(result, bytes):
+            result = result.decode()
         if not kwargs['stream']:
             result = [result]
         return result
