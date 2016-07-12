@@ -43,6 +43,14 @@ def step_stop_container(context, container_name):
     context.cli.sendline('stop {0}'.format(container_name))
 
 
+@when('we remove container {name}')
+def step_remove_container(context, name):
+    """
+    Send "rm" command.
+    """
+    context.cli.sendline('rm {0}'.format(name))
+
+
 @when('we force remove container {name}')
 def step_force_remove_container(context, name):
     """

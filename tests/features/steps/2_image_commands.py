@@ -125,4 +125,5 @@ def step_see_output(context, text):
     """
     Expect to see exact text.
     """
-    wrappers.expect_exact(context, [text, text.strip('"')])
+    patterns = list(set([text, text.strip('"')]))
+    wrappers.expect_exact(context, patterns)
