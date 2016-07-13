@@ -16,7 +16,7 @@ before_install:
   - apt-cache madison docker-engine
   # update to latest docker version
   - sudo apt-get update
-  - sudo apt-get -y install docker-engine
+  - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine
   - docker --version
 
 install:
