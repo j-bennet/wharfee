@@ -14,6 +14,9 @@ python:
 before_install:
   # show all available docker versions
   - apt-cache madison docker-engine
+  # update to latest docker version
+  - sudo apt-get update
+  - sudo apt-get install docker-engine
   - docker --version
 
 install:
