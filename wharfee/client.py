@@ -406,7 +406,7 @@ class DockerClient(object):
                     self.is_refresh_containers = True
                     self.is_refresh_running = True
                     if truncate_output:
-                        yield "{:.25}".format(container)
+                        yield "{0:.25}".format(container)
                     else:
                         yield container
                 except APIError as ex:
