@@ -71,7 +71,7 @@ class WharfeeCli(object):
         self.handler = DockerClient(
             self.config['main'].as_int('client_timeout'),
             self.clear,
-            self.set_completer_options)
+            self.refresh_completions_force)
 
         self.completer = DockerCompleter(
             long_option_names=self.get_long_options(),
@@ -217,6 +217,11 @@ class WharfeeCli(object):
         :return: boolean
         """
         return self.config['main'].as_bool('suggest_long_option_names')
+
+    def refresh_completions_force(self):
+        """Force refresh and make it visible."""
+        self.set_completer_options()
+        click.echo('Refreshed completions.')
 
     def refresh_completions(self):
         """

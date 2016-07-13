@@ -107,11 +107,3 @@ def step_see_id_string(context):
     Expect to see [a-zA-Z0-9]+ and line end.
     """
     wrappers.expect(context, '[a-zA-Z0-9]+\r\n')
-
-
-@then('we see {text} at line end')
-def step_see_line_end(context, text):
-    """
-    Expect to see text and line end.
-    """
-    wrappers.expect_exact(context, text + '\r\n')
