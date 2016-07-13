@@ -64,7 +64,7 @@ def step_attach_container(context, name):
     """
     Send "attach" command.
     """
-    context.cli.sendline('attach --detach-keys ctrl-q {0}'.format(name))
+    context.cli.sendline('attach --detach-keys=ctrl-q {0}'.format(name))
 
 
 @when('we detach from container {name}')

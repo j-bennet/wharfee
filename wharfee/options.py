@@ -272,7 +272,8 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_STRING, None, '--detach-keys',
                       action='store',
                       dest='detach_keys',
-                      help='Override the key sequence for detaching a container.'),
+                      help='Override the key sequence for detaching a container.',
+                      api_match=False),
     ],
     'build': [
         CommandOption(CommandOption.TYPE_IMAGE, '-t', '--tag',

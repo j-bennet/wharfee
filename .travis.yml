@@ -12,6 +12,8 @@ python:
   - "3.4"
 
 before_install:
+  # show all available docker versions
+  - apt-cache madison docker-engine
   - docker --version
 
 install:
