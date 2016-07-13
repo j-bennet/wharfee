@@ -37,6 +37,14 @@ def step_start_container(context, container_name):
     context.cli.sendline('start {0}'.format(container_name))
 
 
+@when('we check ports for container {container_name}')
+def step_ports_container(context, container_name):
+    """
+    Send "port".
+    """
+    context.cli.sendline('port {0}'.format(container_name))
+
+
 @when('we run container {container_name} with image {image_name}')
 def step_run_container(context, container_name, image_name):
     """
