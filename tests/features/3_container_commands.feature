@@ -7,6 +7,15 @@ Feature: call container-related commands
       when we run container hello with image hello-world
       then we see "Hello from Docker!" printed out
 
+  Scenario: create and start container
+     Given we have wharfee installed
+      when we run wharfee
+      and we wait for prompt
+      when we create container hello with image hello-world
+      then we see id string
+      when we start container hello
+      then we see hello at line end
+
   Scenario: remove container
      Given we have wharfee installed
       when we run wharfee

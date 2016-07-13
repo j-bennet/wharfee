@@ -18,6 +18,25 @@ def step_run_container_with_command(context, container_name, image_name, command
     context.has_containers = True
 
 
+@when('we create container {container_name} with image {image_name}')
+def step_create_container(context, container_name, image_name):
+    """
+    Send "create".
+    """
+    context.cli.sendline('create --name {0} {1}'.format(
+        container_name,
+        image_name))
+    context.has_containers = True
+
+
+@when('we start container {container_name}')
+def step_start_container(context, container_name):
+    """
+    Send "start".
+    """
+    context.cli.sendline('start {0}'.format(container_name))
+
+
 @when('we run container {container_name} with image {image_name}')
 def step_run_container(context, container_name, image_name):
     """

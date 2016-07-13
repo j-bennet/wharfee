@@ -528,7 +528,24 @@ class DockerClient(object):
             kwargs['image'] = args[0]
             kwargs['command'] = args[1:] if len(args) > 1 else []
 
-            # TODO
+            kwargs = self._add_port_bindings(kwargs)
+            kwargs = self._add_exposed_ports(kwargs)
+            kwargs = self._add_link_bindings(kwargs)
+            kwargs = self._add_volumes_from(kwargs)
+            kwargs = self._add_volumes(kwargs)
+            kwargs = self._add_network_mode(kwargs)
+
+            create_args = allowed_args('create', **kwargs)
+            result = self.instance.create_container(**create_args)
+
+            if result:
+                if "Warnings" in result and result['Warnings']:
+                    return [result['Warnings']]
+                if "Id" in result and result['Id']:
+                    self.is_refresh_containers = True
+                    return [result['Id']]
+
+            return ['There was a problem creating the container.']
 
     def restart(self, *args, **kwargs):
         """
@@ -1116,7 +1133,7 @@ class DockerClient(object):
 
     def call_external_cli(self, cmd, *args, **kwargs):
         """
-        Call the "officia" CLI if needed.
+        Call the "official" CLI if needed.
         :param args:
         :param kwargs:
         :return:
