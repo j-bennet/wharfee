@@ -59,6 +59,22 @@ def step_force_remove_container(context, name):
     context.cli.sendline('rm -f {0}'.format(name))
 
 
+@when('we attach to container {name}')
+def step_attach_container(context, name):
+    """
+    Send "attach" command.
+    """
+    context.cli.sendline('attach --detach-keys "ctrl-q" {0}'.format(name))
+
+
+@when('we detach from container {name}')
+def step_detach_container(context, name):
+    """
+    Send detach keys command.
+    """
+    context.cli.sendcontrol('q')
+
+
 @when('we see logs for container {name}')
 def step_see_logs(context, name):
     """
