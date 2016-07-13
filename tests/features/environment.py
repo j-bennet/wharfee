@@ -5,6 +5,8 @@ from __future__ import print_function
 import os
 import fixture_utils as fixutils
 import docker_utils as dutils
+import steps.wrappers as wrappers
+
 
 DEBUG_ON_ERROR = False
 
@@ -25,16 +27,26 @@ def before_all(context):
     context.client = dutils.init_docker_client()
     dutils.pull_required_images(context.client)
     context.exit_sent = False
+    context.has_containers = False
 
 
 def after_scenario(context, _):
     """
     Cleans up after each test complete.
     """
+    if hasattr(context, 'cli'):
+        if context.has_containers:
+            # force remove all containers that are still running.
+            wrappers.expect_exact(context, 'wharfee> ')
+            print('\nCleaning up containers...',)
+            context.cli.sendline('rm -f --all')
+            wrappers.expect_exact(context, ['Removed: ', 'There are no'])
+            print('Cleaned up.')
+            context.has_containers = False
 
-    if hasattr(context, 'cli') and not context.exit_sent:
-        # Terminate the cli nicely.
-        context.cli.terminate()
+        if not context.exit_sent:
+            # Terminate the cli nicely.
+            context.cli.terminate()
 
 
 def after_step(_, step):

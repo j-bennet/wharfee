@@ -386,7 +386,7 @@ class DockerClient(object):
             if args and len(args) > 0:
                 return ['Provide either --all, or container name(s).']
 
-            containers = self.instance.containers(quiet=True)
+            containers = self.instance.containers(quiet=True, all=True)
 
             if not containers or len(containers) == 0:
                 return ['There are no containers.']
@@ -411,6 +411,7 @@ class DockerClient(object):
                         yield container
                 except APIError as ex:
                     yield '{0:.25}: {1}'.format(container, ex.explanation)
+                yield 'Removed: {0} container(s).'.format(len(containers) if containers else 0)
 
         return stream()
 

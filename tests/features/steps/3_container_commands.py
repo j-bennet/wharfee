@@ -15,6 +15,7 @@ def step_run_container_with_command(context, container_name, image_name, command
         image_name,
         command,
         options))
+    context.has_containers = True
 
 
 @when('we run container {container_name} with image {image_name}')
@@ -25,6 +26,7 @@ def step_run_container(context, container_name, image_name):
     context.cli.sendline('run --name {0} {1}'.format(
         container_name,
         image_name))
+    context.has_containers = True
 
 
 @when('we execute {command_name} in container {container_name}')
