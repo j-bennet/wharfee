@@ -35,7 +35,6 @@ Feature: call container-related commands
       when we check ports for container foo
       then we see "There are no port mappings" printed out
 
-  @wip
   Scenario: pause and unpause
      Given we have wharfee installed
       when we run wharfee
@@ -59,6 +58,18 @@ Feature: call container-related commands
       then we see total 36 at line end
       when we stop container foo
       then we see foo at line end
+
+  Scenario: run container, shell to container
+     Given we have wharfee installed
+      when we run wharfee
+      and we wait for prompt
+      when we run container foo with image busybox and command /bin/sh and options -d -i -t
+      and we wait for prompt
+      then we see "Interactive terminal is closed" printed out
+      when we open shell to container foo and /bin/sh
+      then we see # printed out
+      when we send "ctrl + d"
+      then we see "Shell to foo is closed" printed out
 
   Scenario: list containers with nothing running
      Given we have wharfee installed

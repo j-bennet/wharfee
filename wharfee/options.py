@@ -473,6 +473,7 @@ COMMAND_OPTIONS = {
                           'bash',
                           'sh',
                           'zsh',
+                          '/bin/sh',
                           '/usr/bin/bash',
                           '/usr/bin/sh',
                           '/usr/bin/zsh',

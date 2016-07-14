@@ -45,6 +45,14 @@ def step_pause_container(context, container_name):
     context.cli.sendline('pause {0}'.format(container_name))
 
 
+@when('we open shell to container {name} and {path_to_shell}')
+def step_shell_to_container(context, name, path_to_shell):
+    """
+    Send "shell".
+    """
+    context.cli.sendline('shell {0} {1}'.format(name, path_to_shell))
+
+
 @then('we see container {container_name} paused')
 def step_see_container_paused(context, container_name):
     """
