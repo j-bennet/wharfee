@@ -268,18 +268,25 @@ class DockerClient(object):
         if not args or len(args) == 0:
             yield 'Container or image ID is required.'
 
+        cids, cnames, imids, imnames = set(), set(), set(), set()
+
         cs = self.containers(all=True)
-        cids = set([])
-        cnames = set([])
         if cs and len(cs) > 0 and isinstance(cs[0], dict):
             cids = set([c['Id'] for c in cs])
             cnames = set([name for c in cs for name in c['Names']])
 
-        for cid in args:
-            if cid in cids or cid in cnames:
-                info = self.instance.inspect_container(cid)
+        ims = self.images(all=True)
+        if ims and len(ims) > 0 and isinstance(ims[0], dict):
+            imids = set([i['Id'] for i in ims])
+            imnames = set([i['Repository'] for i in ims])
+
+        for name in args:
+            if name in cids or name in cnames:
+                info = self.instance.inspect_container(name)
+            elif name in imids or name in imnames:
+                info = self.instance.inspect_image(name)
             else:
-                info = self.instance.inspect_image(cid)
+                info = 'Container or image ID is required.'
             yield info
 
     def containers(self, *_, **kwargs):

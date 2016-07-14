@@ -104,8 +104,8 @@ def step_see_image_listed(context, image_name):
     wrappers.expect_exact(context, 'hello-world')
 
 
-@when('we inspect {name}')
-def step_inspect(context, name):
+@when('we inspect image {name}')
+def step_inspect_image(context, name):
     """
     Send "inspect" command.
     """

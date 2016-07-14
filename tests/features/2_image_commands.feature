@@ -25,7 +25,7 @@ Feature: call image-related commands
      Given we have wharfee installed
       when we run wharfee
       and we wait for prompt
-      when we inspect hello-world
+      when we inspect image hello-world
       then we see "/hello" printed out
 
   Scenario: log in as user wharfee
