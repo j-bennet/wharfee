@@ -37,6 +37,42 @@ def step_start_container(context, container_name):
     context.cli.sendline('start {0}'.format(container_name))
 
 
+@when('we pause container {container_name}')
+def step_pause_container(context, container_name):
+    """
+    Send "pause".
+    """
+    context.cli.sendline('pause {0}'.format(container_name))
+
+
+@then('we see container {container_name} paused')
+def step_see_container_paused(context, container_name):
+    """
+    Check container is paused.
+    """
+    wrappers.expect_exact(context, container_name + '\r\n')
+    context.cli.sendline('ps')
+    wrappers.expect_exact(context, ' (Paused)')
+
+
+@when('we unpause container {container_name}')
+def step_unpause_container(context, container_name):
+    """
+    Send "unpause".
+    """
+    context.cli.sendline('unpause {0}'.format(container_name))
+
+
+@then('we see container {container_name} unpaused')
+def step_see_container_unpaused(context, container_name):
+    """
+    Check container is running.
+    """
+    wrappers.expect_exact(context, container_name + '\r\n')
+    context.cli.sendline('ps')
+    wrappers.expect(context, r'Up [a-zA-Z0-9\s]+\s{2,}')
+
+
 @when('we check ports for container {container_name}')
 def step_ports_container(context, container_name):
     """
