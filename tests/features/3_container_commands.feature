@@ -71,6 +71,16 @@ Feature: call container-related commands
       when we send "ctrl + d"
       then we see "Shell to foo is closed" printed out
 
+  Scenario: run container, see top
+     Given we have wharfee installed
+      when we run wharfee
+      and we wait for prompt
+      when we run container foo with image busybox and command /bin/sh and options -d -i -t
+      and we wait for prompt
+      then we see "Interactive terminal is closed" printed out
+      when we view top for container foo
+      then we see top processes
+
   Scenario: list containers with nothing running
      Given we have wharfee installed
       when we run wharfee
