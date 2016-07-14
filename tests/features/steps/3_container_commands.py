@@ -194,3 +194,11 @@ def step_see_top(context):
     Expect to see [a-zA-Z0-9]+ and line end.
     """
     wrappers.expect(context, 'PID\s+USER\s+TIME\s+COMMAND')
+
+
+@when('we restart container {name}')
+def step_restart_container(context, name):
+    """
+    Send "restart" command.
+    """
+    context.cli.sendline('restart {0}'.format(name))
