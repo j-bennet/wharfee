@@ -22,6 +22,15 @@ def read_fixture_lines(filename):
     return lines
 
 
+def get_data_dir():
+    """
+    Return absolute path to fixture_data directory.
+    """
+    current_dir = os.path.dirname(__file__)
+    fixture_dir = os.path.abspath(os.path.join(current_dir, 'fixture_data/'))
+    return fixture_dir
+
+
 def read_fixture_files():
     """
     Read all files inside fixture_data directory.

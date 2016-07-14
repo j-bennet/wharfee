@@ -35,7 +35,7 @@ setup(
     entry_points={
         'console_scripts': [
             'wharfee = wharfee.main:cli',
-            'optionizer = scripts.optionizer:main',
+            'wharfee-ops = scripts.optionizer:main',
         ]
     },
     packages=['wharfee'],

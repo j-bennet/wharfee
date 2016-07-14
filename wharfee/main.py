@@ -54,7 +54,7 @@ class WharfeeCli(object):
     config_template = 'wharfeerc'
     config_name = '~/.wharfeerc'
 
-    def __init__(self):
+    def __init__(self, no_completion=False):
         """
         Initialize class members.
         Should read the config here at some point.
@@ -71,12 +71,13 @@ class WharfeeCli(object):
         self.handler = DockerClient(
             self.config['main'].as_int('client_timeout'),
             self.clear,
-            self.set_completer_options)
+            self.refresh_completions_force)
 
         self.completer = DockerCompleter(
             long_option_names=self.get_long_options(),
             fuzzy=self.get_fuzzy_match())
         self.set_completer_options()
+        self.completer.set_enabled(not no_completion)
         self.saved_less_opts = self.set_less_opts()
 
     def read_configuration(self):
@@ -217,6 +218,11 @@ class WharfeeCli(object):
         """
         return self.config['main'].as_bool('suggest_long_option_names')
 
+    def refresh_completions_force(self):
+        """Force refresh and make it visible."""
+        self.set_completer_options()
+        click.echo('Refreshed completions.')
+
     def refresh_completions(self):
         """
         After processing the command, refresh the lists of
@@ -284,7 +290,7 @@ class WharfeeCli(object):
                 if isinstance(self.handler.output, GeneratorType):
                     output_stream(self.handler.command,
                                   self.handler.output,
-                                  self.handler.logs)
+                                  self.handler.log)
 
                 elif self.handler.output is not None:
                     lines = format_data(
@@ -339,12 +345,13 @@ class WharfeeCli(object):
 
 
 @click.command()
-def cli():
+@click.option('--no-completion', is_flag=True, default=False, help='Disable autocompletion.')
+def cli(no_completion):
     """
     Create and call the CLI
     """
     try:
-        dcli = WharfeeCli()
+        dcli = WharfeeCli(no_completion)
         dcli.run_cli()
     except DockerTimeoutException as ex:
         click.secho(ex.message, fg='red')

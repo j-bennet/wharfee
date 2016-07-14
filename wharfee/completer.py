@@ -30,6 +30,14 @@ class DockerCompleter(Completer):
         self.volumes = set(volumes) if volumes else set()
         self.long_option_mode = long_option_names
         self.fuzzy = fuzzy
+        self.enabled = True
+
+    def set_enabled(self, enabled):
+        """
+        Setter for enabled/disabled property.
+        :param enabled: boolean
+        """
+        self.enabled = enabled
 
     def set_volumes(self, volumes):
         """
@@ -99,8 +107,8 @@ class DockerCompleter(Completer):
         :param document:
         :param _: complete_event
         """
-
-        # Unused parameters.
+        if not self.enabled:
+            return []
 
         if DockerCompleter.in_quoted_string(document.text):
             return []

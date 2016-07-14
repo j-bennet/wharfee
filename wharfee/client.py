@@ -8,6 +8,7 @@ import pretty
 import re
 import pexpect
 import ssl
+import six
 
 from docker import AutoVersionClient
 from docker.utils import kwargs_from_env
@@ -98,7 +99,7 @@ class DockerClient(object):
         self.output = None
         self.after = None
         self.command = None
-        self.logs = None
+        self.log = None
 
         self.is_refresh_containers = False
         self.is_refresh_running = False
@@ -156,7 +157,7 @@ class DockerClient(object):
             self.is_refresh_images = False
             self.is_refresh_volumes = False
             self.after = None
-            self.logs = None
+            self.log = None
             self.exception = None
 
         tokens = shlex_split(text) if text else ['']
@@ -267,18 +268,25 @@ class DockerClient(object):
         if not args or len(args) == 0:
             yield 'Container or image ID is required.'
 
+        cids, cnames, imids, imnames = set(), set(), set(), set()
+
         cs = self.containers(all=True)
-        cids = set([])
-        cnames = set([])
         if cs and len(cs) > 0 and isinstance(cs[0], dict):
             cids = set([c['Id'] for c in cs])
             cnames = set([name for c in cs for name in c['Names']])
 
-        for cid in args:
-            if cid in cids or cid in cnames:
-                info = self.instance.inspect_container(cid)
+        ims = self.images(all=True)
+        if ims and len(ims) > 0 and isinstance(ims[0], dict):
+            imids = set([i['Id'] for i in ims])
+            imnames = set([i['Repository'] for i in ims])
+
+        for name in args:
+            if name in cids or name in cnames:
+                info = self.instance.inspect_container(name)
+            elif name in imids or name in imnames:
+                info = self.instance.inspect_image(name)
             else:
-                info = self.instance.inspect_image(cid)
+                info = 'Container or image ID is required.'
             yield info
 
     def containers(self, *_, **kwargs):
@@ -299,7 +307,7 @@ class DockerClient(object):
             if isinstance(names, list):
                 formatted = []
                 for name in names:
-                    if isinstance(name, basestring):
+                    if isinstance(name, six.string_types):
                         formatted.append(name.lstrip('/'))
                     else:
                         formatted.append(name)
@@ -351,7 +359,9 @@ class DockerClient(object):
 
         result = self.instance.inspect_container(port_args[0])
         if result:
-            return result.get('NetworkSettings', {}).get('Ports', None)
+            result = result.get('NetworkSettings', {}).get('Ports', None)
+            if result:
+                return result
 
         return ['There are no port mappings for {0}.'.format(args[0])]
 
@@ -385,7 +395,7 @@ class DockerClient(object):
             if args and len(args) > 0:
                 return ['Provide either --all, or container name(s).']
 
-            containers = self.instance.containers(quiet=True)
+            containers = self.instance.containers(quiet=True, all=True)
 
             if not containers or len(containers) == 0:
                 return ['There are no containers.']
@@ -405,11 +415,12 @@ class DockerClient(object):
                     self.is_refresh_containers = True
                     self.is_refresh_running = True
                     if truncate_output:
-                        yield "{:.25}".format(container)
+                        yield "{0:.25}".format(container)
                     else:
                         yield container
                 except APIError as ex:
                     yield '{0:.25}: {1}'.format(container, ex.explanation)
+                yield 'Removed: {0} container(s).'.format(len(containers) if containers else 0)
 
         return stream()
 
@@ -480,6 +491,9 @@ class DockerClient(object):
         if kwargs['remove'] and kwargs['detach']:
             return ['Use either --rm or --detach.']
 
+        # Always call external cli for this, rather than figuring out
+        # why docker-py throws "jack is incompatible with use of CloseNotifier in same ServeHTTP call"
+        kwargs['force'] = True
         called, args, kwargs = self.call_external_cli('run', *args, **kwargs)
         if not called:
             kwargs['image'] = args[0]
@@ -523,7 +537,24 @@ class DockerClient(object):
             kwargs['image'] = args[0]
             kwargs['command'] = args[1:] if len(args) > 1 else []
 
-            # TODO
+            kwargs = self._add_port_bindings(kwargs)
+            kwargs = self._add_exposed_ports(kwargs)
+            kwargs = self._add_link_bindings(kwargs)
+            kwargs = self._add_volumes_from(kwargs)
+            kwargs = self._add_volumes(kwargs)
+            kwargs = self._add_network_mode(kwargs)
+
+            create_args = allowed_args('create', **kwargs)
+            result = self.instance.create_container(**create_args)
+
+            if result:
+                if "Warnings" in result and result['Warnings']:
+                    return [result['Warnings']]
+                if "Id" in result and result['Id']:
+                    self.is_refresh_containers = True
+                    return [result['Id']]
+
+            return ['There was a problem creating the container.']
 
     def restart(self, *args, **kwargs):
         """
@@ -903,7 +934,7 @@ class DockerClient(object):
 
             # Just in case the stream generated no output, let's allow for
             # retrieving the logs. They will be our last resort output.
-            self.logs = lambda: self.instance.logs(kwargs['container'])
+            self.log = lambda: self.instance.logs(kwargs['container'])
 
             self.is_refresh_running = True
             if result:
@@ -947,6 +978,8 @@ class DockerClient(object):
         kwargs['container'] = args[0]
 
         result = self.instance.logs(**kwargs)
+        if isinstance(result, bytes):
+            result = result.decode()
         if not kwargs['stream']:
             result = [result]
         return result
@@ -1109,13 +1142,14 @@ class DockerClient(object):
 
     def call_external_cli(self, cmd, *args, **kwargs):
         """
-        Call the "officia" CLI if needed.
+        Call the "official" CLI if needed.
         :param args:
         :param kwargs:
         :return:
         """
         called = False
 
+        is_force = kwargs.pop('force', False)
         is_interactive = kwargs.get('interactive', None)
         is_tty = kwargs.get('tty', None)
         is_attach = kwargs.get('attach', None)
@@ -1141,7 +1175,7 @@ class DockerClient(object):
             self.is_refresh_running = True
             return ['Container exited.\r']
 
-        if is_interactive or is_tty or (is_attach and not is_attach_bool):
+        if is_force or is_interactive or is_tty or (is_attach and not is_attach_bool):
             self.after = on_after_attach if is_attach else on_after_interactive
             called = True
             execute_external()

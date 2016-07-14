@@ -13,6 +13,7 @@ Usage:
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import os
 import re
 import pexpect
 import textwrap
@@ -41,6 +42,34 @@ OptInfo = namedtuple(
         'nargs',
     ]
 )
+
+
+def is_in_files(dir_name, file_ext, search_str):
+    """
+    If any of the given strings present in files.
+    :param dir_name: str
+    :param file_ext: str
+    :param search_str: list
+    :return: boolean
+    """
+    for file_name in os.listdir(dir_name):
+        if file_name.endswith(file_ext):
+            with open(os.path.join(dir_name, file_name), 'r') as f:
+                for line in f:
+                    if any([s in line for s in search_str]):
+                        return True
+    return False
+
+
+def is_in_steps(command):
+    """See if command is mentioned in step files.
+    :return: boolean
+    """
+    current_dir = os.path.dirname(__file__)
+    step_dir = os.path.abspath(os.path.join(current_dir, '../tests/features/steps/'))
+    feature_dir = os.path.abspath(os.path.join(current_dir, '../tests/features/'))
+    return is_in_files(step_dir, '.py', ['sendline("{0}'.format(command), "sendline('{0}".format(command)]) or \
+           is_in_files(feature_dir, '.feature', ['docker {0}'.format(command)])
 
 
 def get_all_commands():
@@ -227,9 +256,9 @@ def check_commands(args):
     else:
         result = all_commands
 
-    info = [(c, 'Y' if c in implemented else 'N')
+    info = [(c, 'Y' if c in implemented else 'N', 'Y' if is_in_steps(c) else 'N')
             for c in sorted(result)]
-    print(tabulate(info, headers=('Command', 'Implemented')))
+    print(tabulate(info, headers=('Command', 'Implemented', 'Tested')))
 
 
 def format_subcommands(commands):

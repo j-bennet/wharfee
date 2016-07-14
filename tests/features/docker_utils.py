@@ -20,7 +20,8 @@ def init_docker_client(timeout=2):
             or sys.platform.startswith('win32'):
         # mac or win
         kwargs = kwargs_from_env()
-        kwargs['tls'].assert_hostname = False
+        if 'tls' in kwargs:
+            kwargs['tls'].assert_hostname = False
         kwargs['timeout'] = timeout
         client = AutoVersionClient(**kwargs)
     else:

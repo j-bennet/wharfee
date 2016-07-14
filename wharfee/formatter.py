@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import json
 import click
+import six
 from tabulate import tabulate
 from pygments import highlight
 from pygments.lexers.data import JsonLexer
@@ -55,7 +56,7 @@ class JsonStreamDumper(StreamFormatter):
         """
         for obj in self.stream:
             self.counter += 1
-            if isinstance(obj, basestring):
+            if isinstance(obj, six.string_types):
                 click.echo(obj)
             else:
                 text = json.dumps(obj, indent=4)
@@ -99,7 +100,7 @@ class JsonStreamFormatter(StreamFormatter):
         """
         for line in self.stream:
             self.counter += 1
-            parts = line.strip().split('\r\n')
+            parts = line.strip().decode('utf8').split('\r\n')
             for part in parts:
                 data = json.loads(part)
                 if self.is_progress(data):
@@ -198,7 +199,7 @@ def format_data(command, data):
                 data = truncate_rows(data)
                 text = tabulate(data, headers='keys')
                 return text.split('\n')
-        elif isinstance(data[0], basestring):
+        elif isinstance(data[0], six.string_types):
             if len(data) == 1:
                 return data
             elif is_plain_list(data):
@@ -272,7 +273,7 @@ def is_plain_list(lst):
     :return: boolean
     """
     for item in lst:
-        if not isinstance(item, basestring) and \
+        if not isinstance(item, six.string_types) and \
                 not isinstance(item, (int, long, float, complex)):
             return False
     return True
@@ -293,7 +294,7 @@ def flatten_dict(data):
     :param data:
     :return:
     """
-    return ', '.join(["{0}: {1}".format(x, y) for x, y in data.iteritems()])
+    return ', '.join(["{0}: {1}".format(x, y) for x, y in data.items()])
 
 
 def format_port_lines(ports):
@@ -397,7 +398,7 @@ def truncate_rows(rows, length=30, length_id=10):
         :param s: string to trim
         :param l: length
         """
-        if isinstance(s, basestring):
+        if isinstance(s, six.string_types):
             return s[:l + 1]
         return s
 
@@ -411,7 +412,7 @@ def truncate_rows(rows, length=30, length_id=10):
                 else:
                     updated[k] = trimto(v, length)
             result.append(updated)
-        elif isinstance(row, basestring):
+        elif isinstance(row, six.string_types):
             result.append(trimto(row, length))
         else:
             result.append(row)

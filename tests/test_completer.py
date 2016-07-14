@@ -300,7 +300,7 @@ def test_options_container_running_completion(completer, complete_event,
 
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
-    ("rm ", ['--all', '--all-stopped', ('--help', '-h/--help')] + cs2, 0),
+    ("rm ", ['--all', '--all-stopped', ('--force', '-f/--force'), ('--help', '-h/--help')] + cs2, 0),
     ("rm spe", ['--all-stopped', 'desperate_hodgkin', 'desperate_torvalds',
                 'some-percona'], -3),
 ])

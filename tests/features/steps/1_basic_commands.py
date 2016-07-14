@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import pip
 import pexpect
+import wrappers
 
 from behave import given, when, then
 
@@ -21,7 +22,7 @@ def step_run_cli(context):
     """
     Run the process using pexpect.
     """
-    context.cli = pexpect.spawnu('wharfee')
+    context.cli = pexpect.spawnu('wharfee --no-completion')
 
 
 @when('we wait for prompt')
@@ -29,7 +30,7 @@ def step_expect_prompt(context):
     """
     Expect to see prompt.
     """
-    context.cli.expect('wharfee> ')
+    context.cli.expect_exact('wharfee> ')
 
 
 @when('we send "help" command')
@@ -49,6 +50,39 @@ def step_send_ctrld(context):
     context.exit_sent = True
 
 
+@when('we clear screen')
+def step_send_clear(context):
+    """
+    Send clear.
+    """
+    context.cli.sendline('clear')
+
+
+@when('we refresh completions')
+def step_refresh(context):
+    """
+    Send refresh.
+    """
+    context.cli.sendline('refresh')
+
+
+@then('we see {text} printed out')
+def step_see_output(context, text):
+    """
+    Expect to see exact text.
+    """
+    patterns = list(set([text, text.strip('"')]))
+    wrappers.expect_exact(context, patterns)
+
+
+@then('we see {text} at line end')
+def step_see_line_end(context, text):
+    """
+    Expect to see text and line end.
+    """
+    wrappers.expect_exact(context, text + '\r\n')
+
+
 @then('wharfee exits')
 def step_expect_exit(context):
     """
@@ -62,7 +96,7 @@ def step_see_prompt(context):
     """
     Expect to see prompt.
     """
-    context.cli.expect('wharfee> ')
+    wrappers.expect_exact(context, 'wharfee> ')
 
 
 @then('we see help output')

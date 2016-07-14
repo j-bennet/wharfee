@@ -82,3 +82,7 @@ Additionally, there are integration tests, that can be run with:
 To see stdout/stderr, use the following command:
 
     $ behave --no-capture
+    
+To enter debugger on error, use the following command:
+ 
+    $ behave -D DEBUG_ON_ERROR
