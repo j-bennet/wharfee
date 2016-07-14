@@ -193,7 +193,7 @@ def step_see_top(context):
     """
     Expect to see [a-zA-Z0-9]+ and line end.
     """
-    wrappers.expect(context, 'PID\s+USER\s+TIME\s+COMMAND')
+    wrappers.expect_exact(context, 'PID')
 
 
 @when('we restart container {name}')
