@@ -109,7 +109,7 @@ if __name__ == '__main__':
     if choice.lower() != 'y':
         sys.exit(1)
 
-    commit_for_release('pgcli/__init__.py', ver)
+    commit_for_release('wharfee/__init__.py', ver)
     create_git_tag('v%s' % ver)
     register_with_pypi()
     create_source_tarball()
