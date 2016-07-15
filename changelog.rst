@@ -1,3 +1,20 @@
+0.9
+===
+
+A lot of fixes, thanks to finally added integration tests.
+
+* Fix exception in py3 when printing out "pull" output.
+* Fix exception in py3 when printing out "logs" output.
+* Fix exception in py2.6 when printing out "rm" output.
+* Fix bug in "rm --all" shortcut, which did not really remove stopped containers.
+* Fix bug in "start", which was not called unless interactive flag was set.
+* Fix output of "port" command with no port mappings.
+* Handle exception in "inspect" when argument is not a container or image name.
+* "run" now uses pexpect to call external cli, because new version of docker-py was throwing "jack is incompatible with use of CloseNotifier in same ServeHTTP call".
+* Add "-f/--force" flag to "rm" command.
+* Add "--detach-keys" option to "attach" command.
+
+
 0.8.1
 =====
 
