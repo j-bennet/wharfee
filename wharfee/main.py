@@ -71,7 +71,8 @@ class WharfeeCli(object):
         self.handler = DockerClient(
             self.config['main'].as_int('client_timeout'),
             self.clear,
-            self.refresh_completions_force)
+            self.refresh_completions_force,
+            self.logger)
 
         self.completer = DockerCompleter(
             long_option_names=self.get_long_options(),
