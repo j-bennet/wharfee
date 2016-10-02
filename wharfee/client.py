@@ -83,6 +83,8 @@ class DockerClient(object):
                                    "server (defaut "
                                    "\"https://index.docker.io/v1/\").")),
             'logs': (self.logs, "Fetch the logs of a container."),
+            'network create': (self.network_create, 'Create a network.'),
+            'network rm': (self.network_rm, 'Remove a network.'),
             'refresh': (refresh_handler, "Refresh autocompletions."),
             'rename': (self.rename, "Rename a container."),
             'restart': (self.restart, "Restart a running container."),
@@ -210,6 +212,7 @@ class DockerClient(object):
                 self.output = handler()
         elif cmd:
             self.output = self.help()
+            self.after = lambda: ['Not implemented: "{}"'.format(cmd)]
 
     def attach(self, *args, **kwargs):
         """
@@ -240,7 +243,8 @@ class DockerClient(object):
         """
 
         help_rows = [(key, self.handlers[key][1])
-                     for key in COMMAND_NAMES]
+                     for key in COMMAND_NAMES
+                     if key in self.handlers]
         return help_rows
 
     def not_implemented(self, *_, **kw):
@@ -336,6 +340,36 @@ class DockerClient(object):
             return csdict
         else:
             return ['There are no containers to list.']
+
+    def network_create(self, *args, **kwargs):
+        """
+        Create network. Equivalent of docker network create.
+        :param args:
+        :param kwargs:
+        :return: Network ID
+        """
+        if not args:
+            return ['Network name is required.']
+        kwargs = self._add_dict_params(kwargs, 'labels', False)
+        # from pprint import pformat
+        # return [pformat(kwargs)]
+        response = self.instance.create_network(args[0], **kwargs)
+        return [response['Id']]
+
+    def network_rm(self, *args, **_):
+        """
+        Remove network. Equivalent of docker network rm.
+        :param args:
+        :param kwargs:
+        :return: Network name
+        """
+        if not args:
+            yield 'Network name is required.'
+            return
+
+        for network_name in args:
+            self.instance.remove_network(network_name)
+            yield network_name
 
     def pause(self, *args, **kwargs):
         """
@@ -607,7 +641,7 @@ class DockerClient(object):
 
         allowed = allowed_args('volume create', **kwargs)
 
-        allowed = self._add_opts(allowed)
+        allowed = self._add_dict_params(allowed, 'driver_opts', False)
 
         result = self.instance.create_volume(**allowed)
         self.is_refresh_volumes = True
@@ -622,7 +656,7 @@ class DockerClient(object):
         """
         quiet = kwargs.pop('quiet', False)
 
-        kwargs = self._add_filters(kwargs)
+        kwargs = self._add_dict_params(kwargs, 'filters', True)
 
         vdict = self.instance.volumes(**kwargs)
         result = vdict.get('Volumes', None)
@@ -699,26 +733,16 @@ class DockerClient(object):
         else:
             return ['Error tagging {0} into {1}.'.format(*args)]
 
-    def _add_filters(self, params):
+    def _add_dict_params(self, params, param_name, convert_boolean=False):
         """
         Update kwargs if filters are present.
         :param params: dict
+        :param param_name: string parameter name
         :return dict
         """
-        if params.get('filters', None):
-            filters = parse_kv_as_dict(params['filters'], True)
-            params['filters'] = filters
-        return params
-
-    def _add_opts(self, params):
-        """
-        Update kwargs if opts are present.
-        :param params: dict
-        :return dict
-        """
-        if params.get('driver_opts', None):
-            opts = parse_kv_as_dict(params['driver_opts'], False)
-            params['driver_opts'] = opts
+        if params.get(param_name, None):
+            parsed = parse_kv_as_dict(params[param_name], convert_boolean)
+            params[param_name] = parsed
         return params
 
     def _add_volumes(self, params):
