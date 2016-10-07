@@ -420,6 +420,8 @@ COMMAND_OPTIONS = {
                       default=None,
                       help='Set metadata on a network (default []).'),
     ],
+    'network inspect': [
+    ],
     'pause': [
         OPTION_CONTAINER_RUNNING,
     ],

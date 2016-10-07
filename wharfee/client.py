@@ -84,6 +84,8 @@ class DockerClient(object):
                                    "\"https://index.docker.io/v1/\").")),
             'logs': (self.logs, "Fetch the logs of a container."),
             'network create': (self.network_create, 'Create a network.'),
+            'network inspect': (self.network_inspect, 'Display detailed information on one or more networks.'),
+            'network ls': (self.network_ls, 'List networks.'),
             'network rm': (self.network_rm, 'Remove a network.'),
             'refresh': (refresh_handler, "Refresh autocompletions."),
             'rename': (self.rename, "Rename a container."),
@@ -355,6 +357,39 @@ class DockerClient(object):
         # return [pformat(kwargs)]
         response = self.instance.create_network(args[0], **kwargs)
         return [response['Id']]
+
+    def network_inspect(self, *args, **_):
+        """
+        Return network. Equivalent of docker network inspect.
+        :return: dict
+        """
+
+        if not args or len(args) == 0:
+            yield 'Network name or ID is required.'
+
+        for name in args:
+            info = self.instance.inspect_network(name)
+            yield info
+
+    def network_ls(self, *args, **kwargs):
+        """
+        List networks. Equivalent of docker network ls.
+        :param kwargs:
+        :return: Iterable.
+        """
+        quiet = kwargs.pop('quiet', False)
+
+        kwargs = self._add_dict_params(kwargs, 'filters', True)
+
+        values = self.instance.networks(**kwargs)
+        result = values.get('Networks', None)
+
+        if result:
+            if quiet:
+                result = [v['Name'] for v in result]
+            return result
+        else:
+            return ['There are no networks to list.']
 
     def network_rm(self, *args, **_):
         """
