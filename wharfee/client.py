@@ -1003,9 +1003,6 @@ class DockerClient(object):
             """
             Drop some keys and change some values to pretty-print image dict.
             """
-            from pprint import pformat
-            self.debug('Image dict:\n' + pformat(a))
-
             b = {}
             for k, v in a.items():
                 if k not in ['RepoTags', 'RepoDigests', 'Labels', 'Size']:
@@ -1016,6 +1013,9 @@ class DockerClient(object):
                     b[k] = filesize(v)
 
             # If we have more than one repo tag, return as many dicts
+
+            if a.get('RepoTags', None) is None:
+                a['RepoTags'] = ['<none>:<none>']
 
             for rt in a['RepoTags']:
                 repo, tag = rt.rsplit(':', 1)
