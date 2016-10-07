@@ -1,3 +1,10 @@
+0.9.1
+=====
+
+* Fixed a bug in ``images`` that would cause wharfee to crash on
+  start if docker API returned an image without repo tags.
+* Fixed a typo in requirements.
+
 0.9
 ===
 
