@@ -36,17 +36,19 @@ class DockerClient(object):
     is named "limit", some parameters are not implemented at all, etc.
     """
 
-    def __init__(self, timeout=None, clear_handler=None, refresh_handler=None):
+    def __init__(self, timeout=None, clear_handler=None, refresh_handler=None, logger=None):
         """
         Initialize the Docker wrapper.
         :param timeout: int
         :param clear_handler: callable
         :param refresh_handler: callable
+        :param logger: logger
         """
 
         assert callable(clear_handler)
         assert callable(refresh_handler)
 
+        self.logger = logger
         self.exception = None
 
         self.handlers = {
@@ -135,6 +137,11 @@ class DockerClient(object):
                 assert_hostname=False)
             kwargs['timeout'] = timeout
             self.instance = AutoVersionClient(**kwargs)
+
+    def debug(self, message):
+        """Log a debug message if logger is passed in."""
+        if self.logger is not None:
+            self.logger.debug(message)
 
     def handle_input(self, text):
         """
@@ -1006,6 +1013,10 @@ class DockerClient(object):
                     b[k] = filesize(v)
 
             # If we have more than one repo tag, return as many dicts
+
+            if a.get('RepoTags', None) is None:
+                a['RepoTags'] = ['<none>:<none>']
+
             for rt in a['RepoTags']:
                 repo, tag = rt.rsplit(':', 1)
                 c = {}
