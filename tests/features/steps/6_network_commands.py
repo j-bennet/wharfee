@@ -13,6 +13,14 @@ def step_create_network(context, name):
     context.cli.sendline('network create {0}'.format(name))
 
 
+@when('we list networks')
+def step_list_networks(context):
+    """
+    Send "network ls".
+    """
+    context.cli.sendline('network ls')
+
+
 @when('we remove network {name}')
 def step_remove_network(context, name):
     """

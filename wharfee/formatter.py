@@ -433,6 +433,11 @@ def filter_ps(data):
     return filter_dict(data, display_keys)
 
 
+def filter_network_ls(data):
+    display_keys = set(['id', 'name', 'driver', 'scope'])
+    return filter_dict(data, display_keys)
+
+
 def filter_volume_ls(data):
     display_keys = set(['driver', 'name'])
     return filter_dict(data, display_keys)
@@ -441,6 +446,7 @@ def filter_volume_ls(data):
 DATA_FILTERS = {
     'ps': filter_ps,
     'volume ls': filter_volume_ls,
+    'network ls': filter_network_ls
 }
 
 

@@ -378,16 +378,13 @@ class DockerClient(object):
         :return: Iterable.
         """
         quiet = kwargs.pop('quiet', False)
-
         kwargs = self._add_dict_params(kwargs, 'filters', True)
-
-        values = self.instance.networks(**kwargs)
-        result = values.get('Networks', None)
-
+        result = self.instance.networks(**kwargs)
         if result:
             if quiet:
-                result = [v['Name'] for v in result]
-            return result
+                return [n['Name'] for n in result]
+            else:
+                return result
         else:
             return ['There are no networks to list.']
 
