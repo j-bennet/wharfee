@@ -620,6 +620,9 @@ class DockerClient(object):
         if not args:
             return ['Image name is required.']
 
+        # Always call external cli for this, rather than figuring out
+        # why docker-py throws "jack is incompatible with use of CloseNotifier in same ServeHTTP call"
+        kwargs['force'] = True
         called, args, kwargs = self.call_external_cli('create', *args, **kwargs)
         if not called:
             kwargs['image'] = args[0]
