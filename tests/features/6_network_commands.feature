@@ -12,7 +12,7 @@ Feature: call network commands
       when we run wharfee
       and we wait for prompt
       when we list networks
-      and we see -- at line end
+      then we see -- at line end
       and we see id string
 
   Scenario: remove network
