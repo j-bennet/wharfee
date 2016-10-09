@@ -12,7 +12,6 @@ Feature: call network commands
       when we run wharfee
       and we wait for prompt
       when we list networks
-      then we see Id at line end
       and we see -- at line end
       and we see id string
 
