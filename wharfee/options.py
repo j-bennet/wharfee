@@ -269,6 +269,11 @@ OPTION_HOST_CONFIG = CommandOption(
     action='store',
     dest='host_config')
 
+OPTION_NETWORKING_CONFIG = CommandOption(
+    CommandOption.TYPE_OBJECT, None, 'networking_config',
+    action='store',
+    dest='networking_config')
+
 OPTION_PORTS = CommandOption(
     CommandOption.TYPE_NUMERIC, None, 'ports',
     action='append',
@@ -422,6 +427,42 @@ COMMAND_OPTIONS = {
                       action='store',
                       dest='name',
                       help='Name of the network.'),
+        CommandOption(CommandOption.TYPE_STRING, None, '--aux-address',
+                      action='append',
+                      dest='aux_address',
+                      help='Auxiliary IPv4 or IPv6 addresses used by Network driver (default map[]).',
+                      nargs='*',
+                      api_match=False),
+        CommandOption(CommandOption.TYPE_STRING, None, '--subnet',
+                      action='append',
+                      dest='subnet',
+                      help='Subnet in CIDR format that represents a network segment (default []).',
+                      nargs='*',
+                      api_match=False),
+        CommandOption(CommandOption.TYPE_STRING, None, '--ipam-opt',
+                      action='append',
+                      dest='ipam_opt',
+                      help='Set IPAM driver specific options (default map[]).',
+                      nargs='*',
+                      api_match=False),
+        CommandOption(CommandOption.TYPE_STRING, None, '--ipam-driver',
+                      action='store',
+                      dest='ipam_driver',
+                      default='default',
+                      help='IP Address Management Driver (default "default").',
+                      api_match=False),
+        CommandOption(CommandOption.TYPE_STRING, None, '--ip-range',
+                      action='append',
+                      dest='ip_range',
+                      help='Allocate container ip from a sub-range (default []).',
+                      nargs='*',
+                      api_match=False),
+        CommandOption(CommandOption.TYPE_STRING, None, '--gateway',
+                      action='append',
+                      dest='gateway',
+                      help='IPv4 or IPv6 Gateway for the master subnet (default []).',
+                      nargs='*',
+                      api_match=False),
         CommandOption(CommandOption.TYPE_BOOLEAN, None, '--internal',
                       action='store_true',
                       dest='internal',
@@ -434,17 +475,17 @@ COMMAND_OPTIONS = {
                       action='append',
                       dest='labels',
                       default=None,
+                      nargs='*',
                       help='Set metadata on a network (default []).'),
         CommandOption(CommandOption.TYPE_STRING, '-d', '--driver',
                       action='store',
                       dest='driver',
                       default='bridge',
                       help='Driver to manage the Network (default "bridge").'),
-
         CommandOption(CommandOption.TYPE_STRING, '-o', '--opt',
                       action='append',
                       dest='options',
-                      nargs='+',
+                      nargs='*',
                       help='Set driver specific options (default map[]).')
     ],
     'network ls': [],
@@ -688,11 +729,13 @@ HIDDEN_OPTIONS = {
     'run': [
         OPTION_PORTS,
         OPTION_HOST_CONFIG,
+        OPTION_NETWORKING_CONFIG,
         OPTION_STDIN_OPEN
     ],
     'create': [
         OPTION_PORTS,
         OPTION_HOST_CONFIG,
+        OPTION_NETWORKING_CONFIG,
         OPTION_STDIN_OPEN
     ]
 }

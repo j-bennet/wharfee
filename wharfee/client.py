@@ -16,7 +16,7 @@ if docker_version_info >= (2, 0, 0):
     from docker.api import APIClient as DockerAPIClient
 else:
     from docker import AutoVersionClient as DockerAPIClient
-from docker.utils import kwargs_from_env
+from docker.utils import kwargs_from_env, create_ipam_config, create_ipam_pool
 from docker.errors import APIError
 from docker.errors import DockerException, InvalidVersion
 from requests.exceptions import ConnectionError
@@ -357,6 +357,22 @@ class DockerClient(object):
         allowed = allowed_args('network create', **kwargs)
         allowed = self._add_dict_params(allowed, 'options', False)
         allowed = self._add_dict_params(allowed, 'labels', False)
+
+        ipam_pool = create_ipam_pool(
+            subnet=kwargs.get('subnet', None),
+            iprange=kwargs.get('ip_range', None),
+            gateway=kwargs.get('gateway', None),
+            aux_addresses=kwargs.get('aux_address', None)
+        )
+
+        # TODO: handle --ipam-opt
+
+        ipam_config = create_ipam_config(
+            driver=kwargs.get('ipam_driver', None),
+            pool_configs=[ipam_pool]
+        )
+
+        allowed['ipam'] = ipam_config
         response = self.instance.create_network(args[0], **allowed)
         return [response['Id']]
 
