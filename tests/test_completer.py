@@ -373,12 +373,19 @@ def test_options_image_completion_fuzzy(completer, complete_event, command,
 
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
-    ('volume create ', [('--name',), ('--help', '-h/--help'),
-                        ('--opt', '-o/--opt'), ('--driver', '-d/--driver')], 0),
-    ('volume rm ', [('--help', '-h/--help'), ('abc',), ('def',)], 0),
-    ('volume ls ', [('--help', '-h/--help'), ('--filter',),
+    ('volume create ', [('--name',),
+                        ('--help', '-h/--help'),
+                        ('--opt', '-o/--opt'),
+                        ('--driver', '-d/--driver')], 0),
+    ('volume rm ', [('--help', '-h/--help'),
+                    ('abc',),
+                    ('def',)], 0),
+    ('volume ls ', [('--help', '-h/--help'),
+                    ('--filter',),
                     ('--quiet', '-q/--quiet')], 0),
-    ('volume inspect ', [('--help', '-h/--help'), ('abc',), ('def',)], 0),
+    ('volume inspect ', [('--help', '-h/--help'),
+                         ('abc',),
+                         ('def',)], 0),
 ])
 def test_options_volume_completion(completer, complete_event, command,
                                    expected, expected_pos):
@@ -402,9 +409,11 @@ def test_options_volume_completion(completer, complete_event, command,
 
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
-    ('network create ', [('--internal',),
+    ('network create ', [('--driver', '-d/--driver'),
+                         ('--internal',),
                          ('--ipv6',),
                          ('--label',),
+                         ('--opt', '-o/--opt'),
                          ('--help', '-h/--help'),
                          ('abc',),
                          ('def',)], 0),

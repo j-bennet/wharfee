@@ -353,10 +353,11 @@ class DockerClient(object):
         """
         if not args:
             return ['Network name is required.']
-        kwargs = self._add_dict_params(kwargs, 'labels', False)
-        # from pprint import pformat
-        # return [pformat(kwargs)]
-        response = self.instance.create_network(args[0], **kwargs)
+
+        allowed = allowed_args('network create', **kwargs)
+        allowed = self._add_dict_params(allowed, 'options', False)
+        allowed = self._add_dict_params(allowed, 'labels', False)
+        response = self.instance.create_network(args[0], **allowed)
         return [response['Id']]
 
     @if_exception_return(InvalidVersion, None)
@@ -589,6 +590,7 @@ class DockerClient(object):
             kwargs = self._add_volumes_from(kwargs)
             kwargs = self._add_volumes(kwargs)
             kwargs = self._add_network_mode(kwargs)
+            # TODO: add network config: https://docker-py.readthedocs.io/en/stable/networks/
 
             create_args = allowed_args('create', **kwargs)
             result = self.instance.create_container(**create_args)
@@ -627,6 +629,7 @@ class DockerClient(object):
             kwargs = self._add_volumes_from(kwargs)
             kwargs = self._add_volumes(kwargs)
             kwargs = self._add_network_mode(kwargs)
+            # TODO: add network config: https://docker-py.readthedocs.io/en/stable/networks/
 
             create_args = allowed_args('create', **kwargs)
             result = self.instance.create_container(**create_args)
@@ -679,9 +682,7 @@ class DockerClient(object):
             return ['Volume name is required.']
 
         allowed = allowed_args('volume create', **kwargs)
-
         allowed = self._add_dict_params(allowed, 'driver_opts', False)
-
         result = self.instance.create_volume(**allowed)
         self.is_refresh_volumes = True
         return [result['Name']]

@@ -205,6 +205,13 @@ OPTION_NET = CommandOption(
     choices=['bridge', 'none', 'container:', 'host'],
     api_match=False)
 
+OPTION_NETWORK_NAME = CommandOption(
+    CommandOption.TYPE_NETWORK, None, '--network',
+    action='store',
+    dest='network',
+    help='Connect a container to a network (default "default").',
+    api_match=False)
+
 OPTION_FILTERS = CommandOption(
     CommandOption.TYPE_STRING, None, '--filter',
     action='append',
@@ -212,14 +219,14 @@ OPTION_FILTERS = CommandOption(
     nargs='+',
     help='Provide filter values (i.e. "dangling=true").')
 
-OPTION_OPT = CommandOption(
+OPTION_VOLUME_OPT = CommandOption(
     CommandOption.TYPE_STRING, '-o', '--opt',
     action='append',
     dest='driver_opts',
     nargs='+',
     help='Set driver specific options (e.g. "tardis=blue").')
 
-OPTION_DRIVER = CommandOption(
+OPTION_VOLUME_DRIVER = CommandOption(
     CommandOption.TYPE_STRING, '-d', '--driver',
     action='store',
     help='Specify volume driver name (--driver local).')
@@ -325,6 +332,7 @@ COMMAND_OPTIONS = {
         OPTION_LINK,
         OPTION_CONTAINER_HOSTNAME,
         OPTION_CONTAINER_NAME,
+        OPTION_NETWORK_NAME,
         OPTION_PUBLISH_ALL,
         OPTION_PUBLISH,
         OPTION_TTY,
@@ -427,6 +435,17 @@ COMMAND_OPTIONS = {
                       dest='labels',
                       default=None,
                       help='Set metadata on a network (default []).'),
+        CommandOption(CommandOption.TYPE_STRING, '-d', '--driver',
+                      action='store',
+                      dest='driver',
+                      default='bridge',
+                      help='Driver to manage the Network (default "bridge").'),
+
+        CommandOption(CommandOption.TYPE_STRING, '-o', '--opt',
+                      action='append',
+                      dest='options',
+                      nargs='+',
+                      help='Set driver specific options (default map[]).')
     ],
     'network ls': [],
     'network inspect': [
@@ -510,6 +529,7 @@ COMMAND_OPTIONS = {
         OPTION_CONTAINER_HOSTNAME,
         OPTION_CONTAINER_NAME,
         OPTION_LINK,
+        OPTION_NETWORK_NAME,
         OPTION_PUBLISH_ALL,
         OPTION_PUBLISH,
         OPTION_INTERACTIVE,
@@ -639,8 +659,8 @@ COMMAND_OPTIONS = {
     ],
     'volume create': [
         OPTION_VOLUME_NAME,
-        OPTION_DRIVER,
-        OPTION_OPT
+        OPTION_VOLUME_DRIVER,
+        OPTION_VOLUME_OPT
     ],
     'volume inspect': [
         OPTION_VOLUME_NAME_POS
