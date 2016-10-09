@@ -592,7 +592,7 @@ class DockerClient(object):
             kwargs = self._add_volumes_from(kwargs)
             kwargs = self._add_volumes(kwargs)
             kwargs = self._add_network_mode(kwargs)
-            # TODO: add network config: https://docker-py.readthedocs.io/en/stable/networks/
+            kwargs = self._add_networking_config(kwargs)
 
             create_args = allowed_args('create', **kwargs)
             result = self.instance.create_container(**create_args)
@@ -634,7 +634,7 @@ class DockerClient(object):
             kwargs = self._add_volumes_from(kwargs)
             kwargs = self._add_volumes(kwargs)
             kwargs = self._add_network_mode(kwargs)
-            # TODO: add network config: https://docker-py.readthedocs.io/en/stable/networks/
+            kwargs = self._add_networking_config(kwargs)
 
             create_args = allowed_args('create', **kwargs)
             result = self.instance.create_container(**create_args)
@@ -800,7 +800,7 @@ class DockerClient(object):
             binds = parse_volume_bindings(params['volumes'])
             params['volumes'] = [x['bind'] for x in binds.values()]
             conf = self.instance.create_host_config(binds=binds)
-            self._update_host_config(params, conf)
+            self._update_kwarg_config('host_config', params, conf)
         return params
 
     def _add_volumes_from(self, params):
@@ -813,7 +813,7 @@ class DockerClient(object):
             cs = ','.join(params['volumes_from'])
             cs = [x.strip() for x in cs.split(',') if x]
             conf = self.instance.create_host_config(volumes_from=cs)
-            self._update_host_config(params, conf)
+            self._update_kwarg_config('host_config', params, conf)
         return params
 
     def _add_network_mode(self, params):
@@ -824,7 +824,21 @@ class DockerClient(object):
         """
         if 'net' in params:
             conf = self.instance.create_host_config(network_mode=params['net'])
-            self._update_host_config(params, conf)
+            self._update_kwarg_config('host_config', params, conf)
+        return params
+
+    def _add_networking_config(self, params):
+        """
+        Update kwargs if --network is present.
+        :param params: dict
+        :return: dict
+        """
+        if 'network' in params:
+            network_name = params['network']
+            conf = self.instance.create_networking_config({
+                network_name: self.instance.create_endpoint_config()
+            })
+            self._update_kwarg_config('networking_config', params, conf)
         return params
 
     def _add_link_bindings(self, params):
@@ -839,7 +853,7 @@ class DockerClient(object):
                 link_name, link_alias = link.split(':', 1)
                 links[link_name] = link_alias
             link_conf = self.instance.create_host_config(links=links)
-            self._update_host_config(params, link_conf)
+            self._update_kwarg_config('host_config', params, link_conf)
         return params
 
     def _add_port_bindings(self, params):
@@ -858,7 +872,7 @@ class DockerClient(object):
             port_conf = self.instance.create_host_config(
                 port_bindings=port_bindings)
 
-            self._update_host_config(params, port_conf)
+            self._update_kwarg_config('host_config', params, port_conf)
 
         return params
 
@@ -878,21 +892,22 @@ class DockerClient(object):
             port_conf = self.instance.create_host_config(
                 port_bindings=ports)
 
-            self._update_host_config(params, port_conf)
+            self._update_kwarg_config('host_config', params, port_conf)
 
         return params
 
-    def _update_host_config(self, params, config_to_merge):
+    def _update_kwarg_config(self, config_name, params, config_to_merge):
         """
         Update config dictionary in kwargs with another dictionary.
+        :param config_name: kwarg name to update
         :param params: dict
         :param config_to_merge: dict with new values
         :return dict
         """
-        if params.get('host_config', None):
-            params['host_config'].update(config_to_merge)
+        if params.get(config_name, None):
+            params[config_name].update(config_to_merge)
         else:
-            params['host_config'] = config_to_merge
+            params[config_name] = config_to_merge
         return params
 
     def _is_repo_tag_valid(self, repo):
