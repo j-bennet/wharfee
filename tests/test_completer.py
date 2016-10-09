@@ -399,3 +399,39 @@ def test_options_volume_completion(completer, complete_event, command,
         expected))
 
     assert result == expected
+
+
+@pytest.mark.parametrize("command, expected, expected_pos", [
+    ('network create ', [('--internal',),
+                         ('--ipv6',),
+                         ('--label',),
+                         ('--help', '-h/--help'),
+                         ('abc',),
+                         ('def',)], 0),
+    ('network inspect ', [('--help', '-h/--help'),
+                          ('abc',),
+                          ('def',)], 0),
+    ('network ls ', [('--help', '-h/--help')], 0),
+    ('network rm ', [('--help', '-h/--help'),
+                     ('abc',),
+                     ('def',)], 0),
+])
+def test_options_network_completion(completer, complete_event, command,
+                                    expected, expected_pos):
+    """
+    Suggest options in network commands
+    """
+    position = len(command)
+    completer.set_networks(['abc', 'def'])
+
+    completer.set_fuzzy_match(True)
+
+    result = set(completer.get_completions(
+        Document(text=command, cursor_position=position), complete_event))
+
+    expected = set(map(
+        lambda t: Completion(t[0], expected_pos, t[1] if len(t) > 1 else t[0]),
+        expected))
+
+    assert result == expected
+
