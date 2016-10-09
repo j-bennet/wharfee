@@ -1,35 +1,39 @@
---------------  ----------------------------------------------------------------------------------------------------------
-attach          Attach to a running container.
-build           Build a new image from the source code
-clear           Clear the window.
-create          Create a new container.
-exec            Run a command in a running container.
-help            Help on available commands.
-images          List images.
-info            Display system-wide information.
-inspect         Return low-level information on a container or image.
-login           Register or log in to a Docker registry server (defaut "https://index.docker.io/v1/").
-logs            Fetch the logs of a container.
-ps              List containers.
-pull            Pull an image or a repository from the registry.
-pause           Pause all processes within a container.
-port            List port mappings for the container, or lookup the public-facing port that is NAT-ed to the private_port.
-push            Push an image or a repository to the registry.
-refresh         Refresh autocompletions.
-restart         Restart a running container.
-run             Run a command in a new container.
-rm              Remove one or more containers.
-rmi             Remove one or more images.
-search          Search the Docker Hub for images.
-shell           Get shell into a running container.
-start           Restart a stopped container.
-stop            Stop a running container.
-tag             Tag an image into a repository.
-top             Display the running processes of a container.
-unpause         Unpause all processes within a container.
-version         Show the Docker version information.
-volume create   Create a new volume.
-volume inspect  Inspect one or more volumes.
-volume ls       List volumes.
-volume rm       Remove a volume.
---------------  ----------------------------------------------------------------------------------------------------------
+---------------  ----------------------------------------------------------------------------------------------------------
+attach           Attach to a running container.
+build            Build a new image from the source code
+clear            Clear the window.
+create           Create a new container.
+exec             Run a command in a running container.
+help             Help on available commands.
+images           List images.
+info             Display system-wide information.
+inspect          Return low-level information on a container or image.
+login            Register or log in to a Docker registry server (defaut "https://index.docker.io/v1/").
+logs             Fetch the logs of a container.
+network create   Create a network.
+network ls       List networks.
+network rm       Remove a network.
+network inspect  Display detailed information on one or more networks.
+ps               List containers.
+pull             Pull an image or a repository from the registry.
+pause            Pause all processes within a container.
+port             List port mappings for the container, or lookup the public-facing port that is NAT-ed to the private_port.
+push             Push an image or a repository to the registry.
+refresh          Refresh autocompletions.
+restart          Restart a running container.
+run              Run a command in a new container.
+rm               Remove one or more containers.
+rmi              Remove one or more images.
+search           Search the Docker Hub for images.
+shell            Get shell into a running container.
+start            Restart a stopped container.
+stop             Stop a running container.
+tag              Tag an image into a repository.
+top              Display the running processes of a container.
+unpause          Unpause all processes within a container.
+version          Show the Docker version information.
+volume create    Create a new volume.
+volume inspect   Inspect one or more volumes.
+volume ls        List volumes.
+volume rm        Remove a volume.
+---------------  ----------------------------------------------------------------------------------------------------------
