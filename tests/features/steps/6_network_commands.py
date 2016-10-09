@@ -13,6 +13,14 @@ def step_create_network(context, name):
     context.cli.sendline('network create {0}'.format(name))
 
 
+@when('we inspect network {name}')
+def step_inspect_network(context, name):
+    """
+    Send "network inspect".
+    """
+    context.cli.sendline('network inspect {0}'.format(name))
+
+
 @when('we list networks')
 def step_list_networks(context):
     """

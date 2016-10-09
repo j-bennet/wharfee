@@ -17,7 +17,8 @@ class DockerCompleter(Completer):
     """
 
     def __init__(self, containers=None, running=None, images=None, tagged=None,
-                 volumes=None, long_option_names=True, fuzzy=False):
+                 volumes=None, networks=None,
+                 long_option_names=True, fuzzy=False):
         """
         Initialize the completer
         :return:
@@ -28,6 +29,7 @@ class DockerCompleter(Completer):
         self.images = set(images) if images else set()
         self.tagged = set(tagged) if tagged else set()
         self.volumes = set(volumes) if volumes else set()
+        self.networks = set(networks) if networks else set()
         self.long_option_mode = long_option_names
         self.fuzzy = fuzzy
         self.enabled = True
@@ -66,6 +68,13 @@ class DockerCompleter(Completer):
         :param images: list
         """
         self.images = set(images) if images else set()
+
+    def set_networks(self, networks):
+        """
+        Setter for list of available networks.
+        :param networks: list
+        """
+        self.networks = set(networks) if networks else set()
 
     def set_tagged(self, images):
         """
@@ -143,6 +152,7 @@ class DockerCompleter(Completer):
                 self.images,
                 self.tagged,
                 self.volumes,
+                self.networks,
                 self.long_option_mode,
                 self.fuzzy)
         else:
@@ -156,8 +166,8 @@ class DockerCompleter(Completer):
     @staticmethod
     def find_command_matches(command, word='', prev='', params=None,
                              containers=None, running=None, images=None,
-                             tagged=None, volumes=None, long_options=True,
-                             fuzzy=False):
+                             tagged=None, volumes=None, networks=None,
+                             long_options=True, fuzzy=False):
         """
         Find all matches in context of the given command.
         :param command: string: command keyword (such as "ps", "images")
@@ -169,6 +179,7 @@ class DockerCompleter(Completer):
         :param images: list of images
         :param tagged: list of tagged images
         :param volumes: list of volumes
+        :param networks: list of networks
         :param long_options: boolean
         :param fuzzy: boolean
         :return: iterable
@@ -189,6 +200,8 @@ class DockerCompleter(Completer):
                     opt_suggestions = running
                 elif current_opt.is_type_image():
                     opt_suggestions = images
+                elif current_opt.is_type_network():
+                    opt_suggestions = networks
                 elif current_opt.is_type_tagged():
                     opt_suggestions = tagged
                 elif current_opt.is_type_volume():
@@ -244,6 +257,8 @@ class DockerCompleter(Completer):
                         positionals = chain(positionals, containers)
                     elif opt.is_type_image():
                         positionals = chain(positionals, images)
+                    elif opt.is_type_network():
+                        positionals = chain(positionals, networks)
                     elif opt.is_type_running():
                         positionals = chain(positionals, running)
                     elif opt.is_type_tagged():

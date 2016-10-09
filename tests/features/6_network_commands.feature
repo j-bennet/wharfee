@@ -15,6 +15,13 @@ Feature: call network commands
       then we see -- at line end
       and we see id string
 
+  Scenario: inspect network
+     Given we have wharfee installed
+      when we run wharfee
+      and we wait for prompt
+      when we inspect network simple-network
+      then we see Name printed out
+
   Scenario: remove network
      Given we have wharfee installed
       when we run wharfee

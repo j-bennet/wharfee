@@ -10,7 +10,7 @@ class CommandOption(object):
 
     choices = None
 
-    OPTION_VALUES = range(18)
+    OPTION_VALUES = range(19)
 
     TYPE_FILEPATH, \
         TYPE_DIRPATH, \
@@ -29,7 +29,8 @@ class CommandOption(object):
         TYPE_PORT_RANGE, \
         TYPE_OBJECT, \
         TYPE_STRING,\
-        TYPE_VOLUME = \
+        TYPE_VOLUME, \
+        TYPE_NETWORK = \
         OPTION_VALUES
 
     def __init__(self, option_type, short_name, long_name=None, **kwargs):
@@ -127,6 +128,13 @@ class CommandOption(object):
         :return: boolean
         """
         return self.option_type == CommandOption.TYPE_IMAGE
+
+    def is_type_network(self):
+        """
+        Should this option suggest network name?
+        :return: boolean
+        """
+        return self.option_type == CommandOption.TYPE_NETWORK
 
     def is_type_tagged(self):
         """

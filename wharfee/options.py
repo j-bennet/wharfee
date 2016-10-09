@@ -102,13 +102,21 @@ OPTION_CONTAINER_NAME = CommandOption(
     CommandOption.TYPE_CONTAINER, None, '--name',
     action='store',
     dest='name',
-    help='Specify volume name.')
+    help='Assign a name to the container.')
 
 OPTION_VOLUME_NAME = CommandOption(
     CommandOption.TYPE_VOLUME, None, '--name',
     action='store',
     dest='name',
-    help='Assign a name to the container.')
+    help='Specify volume name.')
+
+OPTION_NETWORK = CommandOption(
+    CommandOption.TYPE_NETWORK, None, 'network',
+    action='append',
+    dest='network',
+    help='Name of the network.',
+    nargs='*'
+)
 
 OPTION_VOLUME_NAME_POS = CommandOption(
     CommandOption.TYPE_VOLUME, 'name',
@@ -421,6 +429,10 @@ COMMAND_OPTIONS = {
                       help='Set metadata on a network (default []).'),
     ],
     'network inspect': [
+        OPTION_NETWORK
+    ],
+    'network rm': [
+        OPTION_NETWORK
     ],
     'pause': [
         OPTION_CONTAINER_RUNNING,

@@ -343,6 +343,7 @@ class DockerClient(object):
         else:
             return ['There are no containers to list.']
 
+    @if_exception_return(InvalidVersion, None)
     def network_create(self, *args, **kwargs):
         """
         Create network. Equivalent of docker network create.
@@ -358,20 +359,25 @@ class DockerClient(object):
         response = self.instance.create_network(args[0], **kwargs)
         return [response['Id']]
 
+    @if_exception_return(InvalidVersion, None)
     def network_inspect(self, *args, **_):
         """
         Return network. Equivalent of docker network inspect.
         :return: dict
         """
-
         if not args or len(args) == 0:
             yield 'Network name or ID is required.'
 
+        names = self.network_ls(quiet=True)
         for name in args:
-            info = self.instance.inspect_network(name)
-            yield info
+            if name in names:
+                info = self.instance.inspect_network(name)
+                yield info
+            else:
+                yield 'Network not found: {}'.format(name)
 
-    def network_ls(self, *args, **kwargs):
+    @if_exception_return(InvalidVersion, None)
+    def network_ls(self, *_, **kwargs):
         """
         List networks. Equivalent of docker network ls.
         :param kwargs:
@@ -388,6 +394,7 @@ class DockerClient(object):
         else:
             return ['There are no networks to list.']
 
+    @if_exception_return(InvalidVersion, None)
     def network_rm(self, *args, **_):
         """
         Remove network. Equivalent of docker network rm.

@@ -465,6 +465,7 @@ STREAM_FORMATTERS = {
     'build': JsonStreamFormatter,
     'inspect': JsonStreamDumper,
     'volume inspect': JsonStreamDumper,
+    'network inspect': JsonStreamDumper,
 }
 
 
