@@ -427,7 +427,7 @@ class DockerClient(object):
                         yield container
                 except APIError as ex:
                     yield '{0:.25}: {1}'.format(container, ex.explanation)
-                yield 'Removed: {0} container(s).'.format(len(containers) if containers else 0)
+            yield 'Removed: {0} container(s).'.format(len(containers) if containers else 0)
 
         return stream()
 
