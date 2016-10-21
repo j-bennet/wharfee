@@ -59,6 +59,18 @@ Feature: call container-related commands
       when we stop container foo
       then we see foo at line end
 
+  Scenario: run, exec, kill
+     Given we have wharfee installed
+      when we run wharfee
+      and we wait for prompt
+      when we run container foo with image busybox and command /bin/sh and options -d -i -t
+      and we wait for prompt
+      then we see "Interactive terminal is closed" printed out
+      when we execute ls -l / in container foo
+      then we see total 36 at line end
+      when we kill container foo
+      then we see foo at line end
+
   Scenario: shell to container
      Given we have wharfee installed
       when we run wharfee

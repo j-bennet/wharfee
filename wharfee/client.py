@@ -73,6 +73,7 @@ class DockerClient(object):
             'info': (self.info, "Display system-wide information."),
             'inspect': (self.inspect, "Return low-level information on a " +
                         "container or image."),
+            'kill': (self.kill, "Kill one or more running containers"),
             'login': (self.login, ("Register or log in to a Docker registry "
                                    "server (defaut "
                                    "\"https://index.docker.io/v1/\").")),
@@ -1072,6 +1073,26 @@ class DockerClient(object):
             for container in args:
                 try:
                     self.instance.stop(container, **kwargs)
+                    self.is_refresh_running = True
+                    yield container
+                except APIError as ex:
+                    yield '{0:.25}: {1}'.format(container, ex.explanation)
+
+        return stream()
+
+    def kill(self, *args, **kwargs):
+        """
+        Kill a running container. Equivalent of docker kill.
+        :param kwargs:
+        :return: Container ID or iterable output.
+        """
+        if not args:
+            return ['Container name is required.']
+
+        def stream():
+            for container in args:
+                try:
+                    self.instance.kill(container, **kwargs)
                     self.is_refresh_running = True
                     yield container
                 except APIError as ex:
