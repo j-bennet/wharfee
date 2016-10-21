@@ -1,3 +1,10 @@
+0.10
+====
+
+* Add "kill" command. (Thanks: `r-m-n`_).
+* Fix output when using ``rm`` with multiple containers.
+
+
 0.9.1
 =====
 
@@ -207,4 +214,5 @@ Not supported:
 .. _`Arthur Skowronek`: https://github.com/eisensheng
 .. _`Sean`: https://github.com/seanch87
 .. _`achied`: https://github.com/achied
+.. _`r-m-n`: https://github.com/r-m-n
 .. _`Python Prompt Toolkit`: http://github.com/jonathanslenders/python-prompt-toolkit
