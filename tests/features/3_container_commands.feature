@@ -153,3 +153,14 @@ Feature: call container-related commands
       when we wait for prompt
       and we remove stopped containers
       then we see id string
+
+  Scenario: rename container
+     Given we have wharfee installed
+     when we run wharfee
+     and we wait for prompt
+     when we run container foo with image busybox and command /bin/sh and options -d -i -t
+     and we wait for prompt
+     then we see "Interactive terminal is closed" printed out
+     when we rename container foo to bar
+     and we list containers
+     then we see container bar unpaused

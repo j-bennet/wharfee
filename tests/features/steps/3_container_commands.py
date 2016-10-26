@@ -210,3 +210,11 @@ def step_restart_container(context, name):
     Send "restart" command.
     """
     context.cli.sendline('restart {0}'.format(name))
+
+
+@when('we rename container {name} to {new_name}')
+def step_rename_container(context, name, new_name):
+    """
+    Send "rename" command.
+    """
+    context.cli.sendline('rename {0} {1}'.format(name, new_name))

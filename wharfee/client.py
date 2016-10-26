@@ -79,6 +79,7 @@ class DockerClient(object):
                                    "\"https://index.docker.io/v1/\").")),
             'logs': (self.logs, "Fetch the logs of a container."),
             'refresh': (refresh_handler, "Refresh autocompletions."),
+            'rename': (self.rename, "Rename a container."),
             'restart': (self.restart, "Restart a running container."),
             'run': (self.run, "Run a command in a new container."),
             'rm': (self.rm, "Remove one or more containers."),
@@ -563,6 +564,18 @@ class DockerClient(object):
                     return [result['Id']]
 
             return ['There was a problem creating the container.']
+
+    def rename(self, *args, **kwargs):
+        """
+        Rename a container. Equivalent of docker rename.
+        :param kwargs:
+        :return: None.
+        """
+        if not args or len(args) < 2:
+            return ['Container name and new name are required.']
+
+        self.instance.rename(*args)
+        self.is_refresh_containers = True
 
     def restart(self, *args, **kwargs):
         """

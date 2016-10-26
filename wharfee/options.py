@@ -23,6 +23,7 @@ COMMAND_NAMES = [
     'port',
     'push',
     'refresh',
+    'rename',
     'restart',
     'run',
     'rm',
@@ -454,6 +455,9 @@ COMMAND_OPTIONS = {
                       help='Only show numeric IDs.')
     ],
     'refresh': [],
+    'rename': [
+        OPTION_CONTAINER
+    ],
     'run': [
         CommandOption(CommandOption.TYPE_BOOLEAN, '-d', '--detach',
                       action='store_true',
