@@ -81,6 +81,16 @@ def step_see_container_unpaused(context, container_name):
     wrappers.expect(context, r'Up [a-zA-Z0-9\s]+\s{2,}')
 
 
+@then('we see container {container_name} running')
+def step_see_container_running(context, container_name):
+    """
+    Check container is running.
+    """
+    context.cli.sendline('ps')
+    wrappers.expect(context,
+                    r'({0}[\w \t/]*Up|Up[\w \t/]*{0})'.format(container_name))
+
+
 @when('we check ports for container {container_name}')
 def step_ports_container(context, container_name):
     """

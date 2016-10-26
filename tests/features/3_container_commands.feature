@@ -162,5 +162,5 @@ Feature: call container-related commands
      and we wait for prompt
      then we see "Interactive terminal is closed" printed out
      when we rename container foo to bar
-     and we list containers
-     then we see container bar unpaused
+     and we wait for prompt
+     then we see container bar running
