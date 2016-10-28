@@ -570,6 +570,12 @@ COMMAND_OPTIONS = {
                       help='A term to search for.'),
     ],
     'stop': [
+        CommandOption(CommandOption.TYPE_NUMERIC, '-t', '--time',
+                      dest='timeout',
+                      default=10,
+                      type='int',
+                      help=('Seconds to wait for stop before killing it '
+                            '(default 10).')),
         OPTION_CONTAINER_RUNNING,
     ],
     'tag': [
