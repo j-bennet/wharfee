@@ -1,4 +1,4 @@
-Copyright (c) 2015, Iryna Cherniavska
+Copyright (c) 2015, Irina Truong
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
