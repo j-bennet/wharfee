@@ -86,3 +86,7 @@ To see stdout/stderr, use the following command:
 To enter debugger on error, use the following command:
  
     $ behave -D DEBUG_ON_ERROR
+
+## Thanks
+
+[![I develop with PyCharm](screenshots/icon_PyCharm.png)](https://www.jetbrains.com/pycharm/)
