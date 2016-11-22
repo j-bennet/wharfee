@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     description='Wharfee: a shell for Docker',
-    author='Iryna Cherniavska',
+    author='Irina Truong',
     url='http://wharfee.com',
     download_url='http://github.com/j-bennet/wharfee',
     author_email='i[dot]chernyavska[at]gmail[dot]com',
