@@ -192,7 +192,7 @@ class DockerClient(object):
 
                 except APIError as ex:
                     reset_output()
-                    self.output = [ex.explanation]
+                    self.output = [str(ex.explanation)]
 
                 except OptionError as ex:
                     reset_output()
