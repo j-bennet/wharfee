@@ -768,6 +768,8 @@ def format_command_line(cmd, is_long, args, kwargs):
     def kv(o, v):
         if o.dest == 'environment':
             return kve(o, v)
+        elif o.dest == 'volumes' and ' ' in v:
+            return '{0}="{1}"'.format(o.get_name(is_long), v)
         return '{0}={1}'.format(o.get_name(is_long), v)
 
     for opt_dest, opt_value in kwargs.items():
