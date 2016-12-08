@@ -1221,7 +1221,7 @@ class DockerClient(object):
             return ['Container exited.\r']
 
         if is_force or is_interactive or is_tty or (is_attach and not is_attach_bool):
-            self.after = on_after_attach if is_attach else on_after_interactive
+            self.after = on_after_attach if is_attach or (not is_interactive and not is_tty) else on_after_interactive
             called = True
             execute_external()
 
