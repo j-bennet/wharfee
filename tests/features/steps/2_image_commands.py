@@ -36,9 +36,8 @@ def step_see_image_pulled(context, image_name):
     """
     wrappers.expect_exact(context, [
         'Downloaded newer image for ' + image_name,
-        'Image is up to date for ' + image_name
-    ],
-    timeout=180)
+        'Image is up to date for ' + image_name],
+        timeout=180)
 
 
 @when('we log in as {user}, {email} with {password}')
