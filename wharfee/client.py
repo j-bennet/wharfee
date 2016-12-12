@@ -126,9 +126,9 @@ class DockerClient(object):
                 self.instance = AutoVersionClient(**kwargs)
 
             except DockerException as x:
-                if 'CERTIFICATE_VERIFY_FAILED' in x.message:
+                if 'CERTIFICATE_VERIFY_FAILED' in str(x):
                     raise DockerSslException(x)
-                elif 'ConnectTimeoutError' in x.message:
+                elif 'ConnectTimeoutError' in str(x):
                     raise DockerTimeoutException(x)
                 else:
                     raise x
