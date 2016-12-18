@@ -101,7 +101,7 @@ Feature: call container-related commands
       and we wait for prompt
       then we see "Interactive terminal is closed" printed out
       when we restart container foo
-      then we see foo at line end
+      then we see foo restarted
 
   Scenario: list containers with nothing running
      Given we have wharfee installed

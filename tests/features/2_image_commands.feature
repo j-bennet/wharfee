@@ -13,6 +13,7 @@ Feature: call image-related commands
       and we wait for prompt
       and we pull hello-world image
       then we see hello-world pulled
+      and we see wharfee prompt
 
   Scenario: list images
      Given we have wharfee installed

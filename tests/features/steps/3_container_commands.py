@@ -198,6 +198,14 @@ def step_see_id_string(context):
     wrappers.expect(context, '[a-zA-Z0-9]+\r\n')
 
 
+@then('we see {name} restarted')
+def step_see_restarted(context, name):
+    """
+    Expect to see container name and line end.
+    """
+    wrappers.expect(context, '{0}\r\n'.format(name), 60)
+
+
 @when('we view top for container {name}')
 def step_see_top_for_container(context, name):
     """
