@@ -327,7 +327,7 @@ class WharfeeCli(object):
             except DockerPermissionException as ex:
                 self.logger.debug('Permission exception: %r.', ex)
                 self.logger.error("traceback: %r", traceback.format_exc())
-                click.secho(ex.message, fg='red')
+                click.secho(str(ex), fg='red')
 
             except EOFError:
                 # exit out of the CLI
@@ -337,8 +337,7 @@ class WharfeeCli(object):
             except Exception as ex:
                 self.logger.debug('Exception: %r.', ex)
                 self.logger.error("traceback: %r", traceback.format_exc())
-                click.secho("{0}".format(ex), fg='red')
-                break
+                click.secho(str(ex), fg='red')
 
         self.revert_less_opts()
         self.write_config_file()
