@@ -405,7 +405,7 @@ class DockerClient(object):
         result = self.instance.networks(**kwargs)
         if result:
             if quiet:
-                return [n['Name'] for n in result]
+                return [n['Id'] for n in result]
             else:
                 return result
         else:

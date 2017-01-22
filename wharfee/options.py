@@ -488,7 +488,12 @@ COMMAND_OPTIONS = {
                       nargs='*',
                       help='Set driver specific options (default map[]).')
     ],
-    'network ls': [],
+    'network ls': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-q', '--quiet',
+                      action='store_true',
+                      dest='quiet',
+                      help='Only show network IDs.')
+    ],
     'network inspect': [
         OPTION_NETWORK
     ],
