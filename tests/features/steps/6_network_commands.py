@@ -29,6 +29,14 @@ def step_list_networks(context):
     context.cli.sendline('network ls')
 
 
+@when('we prune networks')
+def step_prune_networks(context):
+    """
+    Send "network prune".
+    """
+    context.cli.sendline('network prune -f')
+
+
 @when('we remove network {name}')
 def step_remove_network(context, name):
     """

@@ -358,22 +358,7 @@ class DockerClient(object):
         allowed = allowed_args('network create', **kwargs)
         allowed = self._add_dict_params(allowed, 'options', False)
         allowed = self._add_dict_params(allowed, 'labels', False)
-
-        ipam_pool = create_ipam_pool(
-            subnet=kwargs.get('subnet', None),
-            iprange=kwargs.get('ip_range', None),
-            gateway=kwargs.get('gateway', None),
-            aux_addresses=kwargs.get('aux_address', None)
-        )
-
-        # TODO: handle --ipam-opt
-
-        ipam_config = create_ipam_config(
-            driver=kwargs.get('ipam_driver', None),
-            pool_configs=[ipam_pool]
-        )
-
-        allowed['ipam'] = ipam_config
+        allowed['ipam'] = self._make_ipam_config_from_args(**kwargs)
         response = self.instance.create_network(args[0], **allowed)
         return [response['Id']]
 
@@ -386,7 +371,7 @@ class DockerClient(object):
         if not args or len(args) == 0:
             yield 'Network name or ID is required.'
 
-        names = self.network_ls(quiet=True)
+        names = [x.get('Name', '') for x in self.network_ls()]
         for name in args:
             if name in names:
                 info = self.instance.inspect_network(name)
@@ -428,7 +413,6 @@ class DockerClient(object):
             return ['There are no networks to list.']
 
     @if_exception_return(InvalidVersion, None)
-    @if_exception_return(APIError, ['Pre-defined network cannot be removed.'])
     def network_prune(self, *args, **kwargs):
         """
         Remove unused networks. Equivalent of docker network prune.
@@ -827,6 +811,26 @@ class DockerClient(object):
             if v is not None and not isinstance(v, list):
                 v = [v]
         return v
+
+    def _make_ipam_config_from_args(self, **kwargs):
+        """Return ipam driver dict or None."""
+        ipam_pool = None
+        ipam_driver = kwargs.get('ipam_driver', 'default')
+        ipam_config = None
+        if any([kwargs.get(k, None) is not None for k in ['subnet', 'ip_range', 'gateway', 'aux_address']]):
+            ipam_pool = create_ipam_pool(
+                subnet=kwargs.get('subnet', None),
+                iprange=kwargs.get('ip_range', None),
+                gateway=kwargs.get('gateway', None),
+                aux_addresses=kwargs.get('aux_address', None)
+            )
+        # TODO: handle --ipam-opt
+        if ipam_pool or ipam_driver != 'default':
+            ipam_config = create_ipam_config(
+                driver=kwargs.get('ipam_driver', None),
+                pool_configs=[ipam_pool]
+            )
+        return ipam_config
 
     def _add_dict_params(self, params, param_name, convert_boolean=False):
         """
@@ -1358,7 +1362,10 @@ class DockerClient(object):
             return ['Container exited.\r']
 
         if force_call or is_interactive or is_tty or (is_attach and not is_attach_bool):
-            self.after = on_after_attach if is_attach or (not is_interactive and not is_tty) else on_after_interactive
+            if is_interactive or is_tty:
+                self.after = on_after_interactive
+            elif is_attach:
+                self.after = on_after_attach
             called = True
             execute_external()
 
