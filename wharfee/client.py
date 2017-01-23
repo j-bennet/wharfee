@@ -401,13 +401,28 @@ class DockerClient(object):
         :return: Iterable.
         """
         quiet = kwargs.pop('quiet', False)
-        kwargs = self._add_dict_params(kwargs, 'filters', True)
+        kwargs = self._add_dict_params(kwargs, 'filter', True)
+        filters = kwargs.get('filter', {})
+
+        # TODO: docker-py can only filter by name and ids in 1.10.6
+        kwargs['ids'] = self._make_list(filters, 'id')
+        kwargs['names'] = self._make_list(filters, 'name')
+        cli_filters = {k: v for k, v in filters.items() if k in ['driver', 'label']}
+
+        def matches_filters(nw):
+            for k in nw.keys():
+                if k.lower() in cli_filters:
+                    if not cli_filters[k.lower()] in nw[k]:
+                        return False
+            return True
+
+        kwargs = allowed_args('network ls', **kwargs)
         result = self.instance.networks(**kwargs)
         if result:
             if quiet:
-                return [n['Id'] for n in result]
+                return [n['Id'] for n in result if matches_filters(n)]
             else:
-                return result
+                return [n for n in result if matches_filters(n)]
         else:
             return ['There are no networks to list.']
 
@@ -793,6 +808,15 @@ class DockerClient(object):
             return ['Tagged {0} into {1}.'.format(*args)]
         else:
             return ['Error tagging {0} into {1}.'.format(*args)]
+
+    def _make_list(self, params, param_name):
+        """Return list of values or None from dict by key."""
+        v = None
+        if param_name in params:
+            v = params[param_name]
+            if v is not None and not isinstance(v, list):
+                v = [v]
+        return v
 
     def _add_dict_params(self, params, param_name, convert_boolean=False):
         """

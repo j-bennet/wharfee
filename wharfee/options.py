@@ -492,7 +492,13 @@ COMMAND_OPTIONS = {
         CommandOption(CommandOption.TYPE_BOOLEAN, '-q', '--quiet',
                       action='store_true',
                       dest='quiet',
-                      help='Only show network IDs.')
+                      help='Only show network IDs.'),
+        CommandOption(CommandOption.TYPE_STRING, '-f', '--filter',
+                      action='store',
+                      dest='filter',
+                      nargs='*',
+                      help='Provide filter values (e.g. "driver=bridge").',
+                      api_match=False),
     ],
     'network inspect': [
         OPTION_NETWORK
@@ -742,6 +748,16 @@ HIDDEN_OPTIONS = {
         OPTION_HOST_CONFIG,
         OPTION_NETWORKING_CONFIG,
         OPTION_STDIN_OPEN
+    ],
+    'network ls': [
+        CommandOption(CommandOption.TYPE_STRING, 'ids',
+                      action='store',
+                      dest='ids',
+                      help='IDs to filter on (hidden option).'),
+        CommandOption(CommandOption.TYPE_STRING, 'names',
+                      action='store',
+                      dest='names',
+                      help='Names to filter on (hidden option).'),
     ]
 }
 
