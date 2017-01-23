@@ -478,9 +478,9 @@ def check_command(command, args):
     )))
 
     if commands:
-        print('''
+        print(textwrap.dedent('''
         Subcommands:
-        ------------------------------''')
+        ------------------------------'''))
         print(format_subcommands(commands))
         print()
 

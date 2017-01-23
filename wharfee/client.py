@@ -420,7 +420,7 @@ class DockerClient(object):
         :param kwargs:
         :return: Network names
         """
-        called, args, kwargs = self.call_external_cli('network prune', True, *args, **kwargs)
+        _, _, _ = self.call_external_cli('network prune', True, *args, **kwargs)
 
     @if_exception_return(InvalidVersion, None)
     @if_exception_return(APIError, ['Pre-defined network cannot be removed.'])
