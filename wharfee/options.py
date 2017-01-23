@@ -19,10 +19,11 @@ COMMAND_NAMES = [
     'logs',
     'network create',
     'network connect',
-    'network ls',
-    'network rm',
     'network disconnect',
     'network inspect',
+    'network ls',
+    'network prune',
+    'network rm',
     'ps',
     'pull',
     'pause',
@@ -502,6 +503,12 @@ COMMAND_OPTIONS = {
     ],
     'network inspect': [
         OPTION_NETWORK
+    ],
+    'network prune': [
+        CommandOption(CommandOption.TYPE_BOOLEAN, '-f', '--force',
+                      action='store_true',
+                      dest='force',
+                      help='Do not prompt for confirmation.'),
     ],
     'network rm': [
         OPTION_NETWORK

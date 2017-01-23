@@ -86,6 +86,7 @@ class DockerClient(object):
             'network create': (self.network_create, 'Create a network.'),
             'network inspect': (self.network_inspect, 'Display detailed information on one or more networks.'),
             'network ls': (self.network_ls, 'List networks.'),
+            'network prune': (self.network_prune, 'Remove all unused networks'),
             'network rm': (self.network_rm, 'Remove a network.'),
             'refresh': (refresh_handler, "Refresh autocompletions."),
             'rename': (self.rename, "Rename a container."),
@@ -428,6 +429,17 @@ class DockerClient(object):
 
     @if_exception_return(InvalidVersion, None)
     @if_exception_return(APIError, ['Pre-defined network cannot be removed.'])
+    def network_prune(self, *args, **kwargs):
+        """
+        Remove unused networks. Equivalent of docker network prune.
+        :param args:
+        :param kwargs:
+        :return: Network names
+        """
+        called, args, kwargs = self.call_external_cli('network prune', True, *args, **kwargs)
+
+    @if_exception_return(InvalidVersion, None)
+    @if_exception_return(APIError, ['Pre-defined network cannot be removed.'])
     def network_rm(self, *args, **_):
         """
         Remove network. Equivalent of docker network rm.
@@ -611,8 +623,7 @@ class DockerClient(object):
 
         # Always call external cli for this, rather than figuring out
         # why docker-py throws "jack is incompatible with use of CloseNotifier in same ServeHTTP call"
-        kwargs['force'] = True
-        called, args, kwargs = self.call_external_cli('run', *args, **kwargs)
+        called, args, kwargs = self.call_external_cli('run', True, *args, **kwargs)
         if not called:
             kwargs['image'] = args[0]
             kwargs['command'] = args[1:] if len(args) > 1 else []
@@ -653,8 +664,7 @@ class DockerClient(object):
 
         # Always call external cli for this, rather than figuring out
         # why docker-py throws "jack is incompatible with use of CloseNotifier in same ServeHTTP call"
-        kwargs['force'] = True
-        called, args, kwargs = self.call_external_cli('create', *args, **kwargs)
+        called, args, kwargs = self.call_external_cli('create', True, *args, **kwargs)
         if not called:
             kwargs['image'] = args[0]
             kwargs['command'] = args[1:] if len(args) > 1 else []
@@ -977,7 +987,7 @@ class DockerClient(object):
         if not args or len(args) < 2:
             return ['Container ID and command is required.']
 
-        called, args, kwargs = self.call_external_cli('exec', *args, **kwargs)
+        called, args, kwargs = self.call_external_cli('exec', False, *args, **kwargs)
         if not called:
             kwargs['container'] = args[0]
             kwargs['cmd'] = args[1:]
@@ -1046,7 +1056,7 @@ class DockerClient(object):
         if not kwargs['container']:
             return ['Container name is required.']
 
-        called, args, kwargs = self.call_external_cli('start', *args, **kwargs)
+        called, args, kwargs = self.call_external_cli('start', False, *args, **kwargs)
         if not called:
 
             if 'remove' in kwargs and kwargs['remove']:
@@ -1311,16 +1321,17 @@ class DockerClient(object):
 
         return [kwargs['container']]
 
-    def call_external_cli(self, cmd, *args, **kwargs):
+    def call_external_cli(self, cmd, force_call, *args, **kwargs):
         """
         Call the "official" CLI if needed.
+
+        :param force_call: always call
         :param args:
         :param kwargs:
         :return:
         """
         called = False
 
-        is_force = kwargs.pop('force', False)
         is_interactive = kwargs.get('interactive', None)
         is_tty = kwargs.get('tty', None)
         is_attach = kwargs.get('attach', None)
@@ -1346,7 +1357,7 @@ class DockerClient(object):
             self.is_refresh_running = True
             return ['Container exited.\r']
 
-        if is_force or is_interactive or is_tty or (is_attach and not is_attach_bool):
+        if force_call or is_interactive or is_tty or (is_attach and not is_attach_bool):
             self.after = on_after_attach if is_attach or (not is_interactive and not is_tty) else on_after_interactive
             called = True
             execute_external()
