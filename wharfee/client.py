@@ -10,7 +10,12 @@ import pexpect
 import ssl
 import six
 
-from docker import AutoVersionClient
+# make sure docker-py client API class according to docker-py version
+from docker import version_info as docker_version_info
+if docker_version_info >= (2, 0, 0):
+    from docker.api import APIClient as DockerAPIClient
+else:
+    from docker import AutoVersionClient as DockerAPIClient
 from docker.utils import kwargs_from_env
 from docker.errors import APIError
 from docker.errors import DockerException, InvalidVersion
@@ -138,7 +143,7 @@ class DockerClient(object):
                 ssl_version=ssl.PROTOCOL_TLSv1,
                 assert_hostname=False)
             kwargs['timeout'] = timeout
-            self.instance = AutoVersionClient(**kwargs)
+            self.instance = DockerAPIClient(**kwargs)
 
     def debug(self, message):
         """Log a debug message if logger is passed in."""
