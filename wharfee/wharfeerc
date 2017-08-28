@@ -1,7 +1,7 @@
 [main]
 
 # timeout to connect to client, in seconds
-client_timeout = 5
+client_timeout = 10
 
 # Visual theme. Possible values: manni, igor, xcode, vim, autumn, vs, rrt,
 # native, perldoc, borland, tango, emacs, friendly, monokai, paraiso-dark,
