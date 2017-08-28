@@ -93,6 +93,7 @@ Feature: call container-related commands
       when we view top for container foo
       then we see top processes
 
+  @slow
   Scenario: restart container
      Given we have wharfee installed
       when we run wharfee

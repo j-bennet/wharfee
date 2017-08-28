@@ -12,11 +12,7 @@ python:
   - "3.4"
 
 before_install:
-  # show all available docker versions
-  - apt-cache madison docker-engine
-  # update to latest docker version
-  - sudo apt-get update
-  - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine
+  # show docker version
   - docker --version
 
 install:
@@ -28,7 +24,7 @@ install:
 script:
   - coverage run --source wharfee -m py.test
   - cd tests
-  - behave
+  - behave --tags ~@slow
 
 after_success:
   - codecov
