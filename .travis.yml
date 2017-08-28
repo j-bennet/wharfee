@@ -24,7 +24,7 @@ install:
 script:
   - coverage run --source wharfee -m py.test
   - cd tests
-  - behave
+  - behave --tags ~@slow
 
 after_success:
   - codecov
