@@ -47,7 +47,7 @@ def step_log_in(context, user, email, password):
     """
     Send "login" command.
     """
-    context.cli.sendline('login -u {} -p {}'.format(user, password))
+    context.cli.sendline('login -u {0} -p {1}'.format(user, password))
 
 
 @then('we see login success')
