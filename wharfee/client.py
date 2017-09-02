@@ -128,7 +128,7 @@ class DockerClient(object):
                 if 'tls' in kwargs:
                     kwargs['tls'].assert_hostname = False
                 kwargs['timeout'] = timeout
-                self.instance = AutoVersionClient(**kwargs)
+                self.instance = DockerAPIClient(**kwargs)
 
             except DockerException as x:
                 if 'CERTIFICATE_VERIFY_FAILED' in str(x):
