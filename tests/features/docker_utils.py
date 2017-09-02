@@ -28,10 +28,10 @@ def init_docker_client(timeout=2):
         if 'tls' in kwargs:
             kwargs['tls'].assert_hostname = False
         kwargs['timeout'] = timeout
-        client = DockerClientAPI(**kwargs)
+        client = DockerAPIClient(**kwargs)
     else:
         # unix-based
-        client = DockerClientAPI(
+        client = DockerAPIClient(
             timeout=timeout,
             base_url='unix://var/run/docker.sock')
     return client
