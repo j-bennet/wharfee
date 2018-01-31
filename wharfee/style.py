@@ -2,7 +2,7 @@
 from pygments.token import Token
 from pygments.util import ClassNotFound
 from prompt_toolkit.styles import merge_styles
-from prompt_toolkit.styles.pygments import style_from_pygments, style_from_pygments_dict
+from prompt_toolkit.styles.pygments import style_from_pygments_cls, style_from_pygments_dict
 import pygments.styles
 
 
@@ -13,7 +13,7 @@ def style_factory(name):
         pygments_style = pygments.styles.get_style_by_name('native')
 
     return merge_styles([
-        style_from_pygments(pygments_style),
+        style_from_pygments_cls(pygments_style),
         style_from_pygments_dict({
             Token.Menu.Completions.Completion.Current: 'bg:#00aaaa #000000',
             Token.Menu.Completions.Completion: 'bg:#008888 #ffffff',

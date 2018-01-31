@@ -14,9 +14,9 @@ from prompt_toolkit.layout.processors import (
     HighlightMatchingBracketProcessor,
     ConditionalProcessor
 )
-from prompt_toolkit.shortcuts import Prompt
+from prompt_toolkit.shortcuts import PromptSession
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.layout.lexers import PygmentsLexer
+from prompt_toolkit.lexers import PygmentsLexer
 
 from .client import DockerClient
 from .client import DockerPermissionException
@@ -247,19 +247,19 @@ class WharfeeCli(object):
             self.set_fuzzy_match,
             self.get_fuzzy_match)
 
-        prompt = Prompt(
+        prompt = PromptSession(
             message='wharfee> ',
             lexer=PygmentsLexer(CommandLexer),
             bottom_toolbar=toolbar_handler,
-            extra_input_processor=ConditionalProcessor(
+            input_processors=[ConditionalProcessor(
                     processor=HighlightMatchingBracketProcessor(
                         chars='[](){}'),
-                    filter=HasFocus(DEFAULT_BUFFER) & ~IsDone()),
+                    filter=HasFocus(DEFAULT_BUFFER) & ~IsDone())],
             history=history,
             completer=self.completer,
             complete_while_typing=True,
             style=style_factory(self.theme),
-            extra_key_bindings=key_bindings,
+            key_bindings=key_bindings,
             enable_system_prompt=True,
             enable_suspend=True,
             enable_open_in_editor=True,
