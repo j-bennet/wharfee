@@ -12,6 +12,7 @@ from tabulate import tabulate
 from pygments import highlight
 from pygments.lexers.data import JsonLexer
 from pygments.formatters.terminal import TerminalFormatter
+from yaml import dump
 
 # Python 3 has no 'basestring' or 'long' type we're checking for.
 try:
@@ -181,13 +182,12 @@ def format_data(command, data):
     if command and command in DATA_FILTERS:
         data = DATA_FILTERS[command](data)
 
+    if isinstance(data, dict):
+        return format_struct(data)
     if isinstance(data, list) and len(data) > 0:
         if isinstance(data[0], tuple):
-            if is_plain_lists(data):
-                text = tabulate(data)
-                return text.split('\n')
-            else:
-                return format_struct(data)
+            text = tabulate(data)
+            return text.split('\n')
         elif isinstance(data[0], dict):
             if data[0].keys() == ['Id']:
                 # Sometimes our 'quiet' output is a list of dicts but
@@ -211,46 +211,9 @@ def format_data(command, data):
     return data
 
 
-def format_struct(data, spaces=4, indent=0, lines=None):
-
-    if lines is None:
-        lines = []
-
-    if isinstance(data, dict):
-        data = [(k, data[k]) for k in sorted(data.keys())]
-
-    def item_to_line(current_item, current_line, is_last_item, current_list):
-        """ Helper to add item to end of line """
-        if len(current_line) == 0:
-            current_indent = ' ' * (indent * spaces)
-            current_line = current_indent
-
-        current_line += '{0}'.format(current_item)
-
-        if is_last_item:
-            current_list.append(current_line)
-            current_line = ''
-        else:
-            current_line += ': '
-        return current_line, current_list
-
-    for row in data:
-        line = ''
-        l = len(row)
-        for i in range(l):
-            if isinstance(row[i], dict):
-                lines.append(line)
-                lines = format_struct(row[i], spaces, indent + 1, lines)
-            elif isinstance(row[i], list):
-                if is_plain_list(row[i]):
-                    item = flatten_list(row[i])
-                    line, lines = item_to_line(item, line, i == (l - 1), lines)
-                else:
-                    lines.append(line)
-                    lines = format_struct(row[i], spaces, indent + 1, lines)
-            else:
-                line, lines = item_to_line(row[i], line, i == (l - 1), lines)
-
+def format_struct(data, indent=4):
+    text = dump(data, indent=indent, default_flow_style=False)
+    lines = text.split('\n')
     return lines
 
 

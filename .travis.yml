@@ -19,7 +19,7 @@ before_install:
   - docker --version
 
 install:
-  - pip install pip==9.0
+  - pip install pip==9.0.1
   - pip install -r requirements-dev.txt
   - pip install codecov
   - pip install -e .
