@@ -1,5 +1,7 @@
 language: python
 
+dist: xenial
+
 sudo: required
 
 services:
@@ -10,12 +12,14 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
 
 before_install:
   # show docker version
   - docker --version
 
 install:
+  - pip install pip==9.0
   - pip install -r requirements-dev.txt
   - pip install codecov
   - pip install -e .
