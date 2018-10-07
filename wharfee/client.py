@@ -258,8 +258,7 @@ class DockerClient(object):
 
         try:
             verdict = self.instance.version()
-            result = [(k, verdict[k]) for k in sorted(verdict.keys())]
-            return result
+            return verdict
         except ConnectionError as ex:
             raise DockerPermissionException(ex)
 
@@ -268,10 +267,8 @@ class DockerClient(object):
         Return the system info. Equivalent of docker info.
         :return: list of tuples
         """
-
-        rdict = self.instance.info()
-        result = [(k, rdict[k]) for k in sorted(rdict.keys())]
-        return result
+        info_dict = self.instance.info()
+        return info_dict
 
     def inspect(self, *args, **_):
         """

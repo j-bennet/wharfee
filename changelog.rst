@@ -1,3 +1,8 @@
+Upcoming
+========
+
+* Use ``ruamel.yaml`` to format hierarchical info.
+
 0.10
 ====
 

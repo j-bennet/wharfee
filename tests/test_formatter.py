@@ -128,7 +128,7 @@ def test_dict_data_formatting():
         }
     }
 
-    lines = format_struct(data, spaces=2)
+    lines = format_struct(data, indent=2)
 
     print('\n')
     for line in lines:
@@ -183,7 +183,7 @@ def test_info_data_formatting():
         'SystemTime': '2015-04-29T04:58:07.548655766Z'
     }
 
-    lines = format_struct(data, spaces=2)
+    lines = format_struct(data, indent=2)
 
     print('\n')
     for line in lines:
