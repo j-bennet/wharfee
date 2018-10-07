@@ -1,7 +1,7 @@
 Upcoming
 ========
 
-* Use pyyaml to format hierarchical info.
+* Use ``ruamel.yaml`` to format hierarchical info.
 
 0.10
 ====

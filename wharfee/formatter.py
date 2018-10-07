@@ -12,7 +12,12 @@ from tabulate import tabulate
 from pygments import highlight
 from pygments.lexers.data import JsonLexer
 from pygments.formatters.terminal import TerminalFormatter
-from yaml import dump
+from ruamel.yaml import YAML
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 # Python 3 has no 'basestring' or 'long' type we're checking for.
 try:
@@ -212,8 +217,12 @@ def format_data(command, data):
 
 
 def format_struct(data, indent=4):
-    text = dump(data, indent=indent, default_flow_style=False)
-    lines = text.split('\n')
+    output = StringIO()
+    yaml = YAML()
+    yaml.default_flow_style = False
+    yaml.indent = indent
+    yaml.dump(data, stream=output)
+    lines = output.getvalue().split('\n')
     return lines
 
 

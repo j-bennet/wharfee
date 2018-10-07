@@ -24,7 +24,7 @@ setup(
         'configobj>=5.0.6',
         'pexpect>=3.3',
         'fuzzyfinder>=1.0.0',
-        'PyYAML>=3.13'
+        'ruamel.yaml>=0.15.72',
     ],
     extras_require={
         'testing': [
