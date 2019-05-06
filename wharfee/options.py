@@ -423,6 +423,53 @@ COMMAND_OPTIONS = {
                       help='Follow log output.'),
         OPTION_CONTAINER,
     ],
+    'network connect': [
+        CommandOption(
+            CommandOption.TYPE_STRING,
+            None,
+            '--ip',
+            action='store',
+            dest='ipv4_address',
+            help='IPv4 address (e.g., 172.30.100.104).'
+        ),
+        CommandOption(
+            CommandOption.TYPE_STRING,
+            None,
+            '--link',
+            action='store',
+            dest='links',
+            nargs='*',
+            help='Add link to another container.'
+        ),
+        CommandOption(
+            CommandOption.TYPE_STRING,
+            None,
+            '--alias',
+            action='store',
+            dest='aliases',
+            nargs='*',
+            help='Add network-scoped alias for the container.'
+        ),
+        CommandOption(
+            CommandOption.TYPE_STRING,
+            None,
+            '--link-local-ip',
+            action='store',
+            dest='link_local_ips',
+            nargs='*',
+            help='Add a link-local address for the container.'
+        ),
+        CommandOption(
+            CommandOption.TYPE_STRING,
+            None,
+            '--ip6',
+            action='store',
+            dest='ipv6_address',
+            help='IPv6 address (e.g., 2001:db8::33).'
+        ),
+        OPTION_NETWORK,
+        OPTION_CONTAINER,
+    ],
     'network create': [
         CommandOption(CommandOption.TYPE_NETWORK, None, 'network',
                       action='store',

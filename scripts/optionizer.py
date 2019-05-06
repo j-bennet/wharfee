@@ -202,7 +202,10 @@ def get_command_details(command):
     :param command: str main command
     :return: tuple of (usage, help, commands, options, arguments)
     """
-    txt = pexpect.run('docker {} --help'.format(command)).strip().splitlines(False)
+    txt = (pexpect.run('docker {} --help'.format(command))
+                  .strip()
+                  .decode('utf-8')
+                  .splitlines(False))
     in_commands = False
     in_options = False
 
@@ -258,7 +261,10 @@ def check_commands(args):
 
     info = [(c, 'Y' if c in implemented else 'N', 'Y' if is_in_steps(c) else 'N')
             for c in sorted(result)]
-    print(tabulate(info, headers=('Command', 'Implemented', 'Tested')))
+    if info:
+        print(tabulate(info, headers=('Command', 'Implemented', 'Tested')))
+    else:
+        print("No commands found.")
 
 
 def format_subcommands(commands):

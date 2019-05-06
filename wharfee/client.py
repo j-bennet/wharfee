@@ -363,6 +363,25 @@ class DockerClient(object):
         return [response['Id']]
 
     @if_exception_return(InvalidVersion, None)
+    def network_connect(self, *args, **kwargs):
+        """
+        Connect network. Equivalent of docker network connect.
+        :param args:
+        :param kwargs:
+        :return: Network ID
+        """
+        if not args or len(args) != 2:
+            return ['Network name and container name are required.']
+
+        allowed = allowed_args('network connect', **kwargs)
+        response = self.instance.connect_container_to_network(
+            args[1],
+            args[0],
+            **allowed
+        )
+        return [response['Id']]
+
+    @if_exception_return(InvalidVersion, None)
     def network_inspect(self, *args, **_):
         """
         Return network. Equivalent of docker network inspect.
