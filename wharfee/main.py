@@ -8,18 +8,15 @@ import click
 import traceback
 
 from types import GeneratorType
-from prompt_toolkit import (AbortAction,
-                            Application,
-                            CommandLineInterface)
 from prompt_toolkit.enums import DEFAULT_BUFFER
-from prompt_toolkit.filters import Always, HasFocus, IsDone
+from prompt_toolkit.filters import HasFocus, IsDone
 from prompt_toolkit.layout.processors import (
     HighlightMatchingBracketProcessor,
     ConditionalProcessor
 )
-from prompt_toolkit.buffer import (Buffer, AcceptAction)
-from prompt_toolkit.shortcuts import (create_prompt_layout, create_eventloop)
+from prompt_toolkit.shortcuts import PromptSession
 from prompt_toolkit.history import FileHistory
+from prompt_toolkit.lexers import PygmentsLexer
 
 from .client import DockerClient
 from .client import DockerPermissionException
@@ -31,7 +28,7 @@ from .formatter import format_data
 from .formatter import output_stream
 from .config import write_default_config, read_config
 from .style import style_factory
-from .keys import get_key_manager
+from .keys import get_key_bindings
 from .toolbar import create_toolbar_handler
 from .options import OptionError
 from .logger import create_logger
@@ -244,49 +241,34 @@ class WharfeeCli(object):
         history = FileHistory(os.path.expanduser('~/.wharfee-history'))
         toolbar_handler = create_toolbar_handler(self.get_long_options, self.get_fuzzy_match)
 
-        layout = create_prompt_layout(
-            message='wharfee> ',
-            lexer=CommandLexer,
-            get_bottom_toolbar_tokens=toolbar_handler,
-            extra_input_processors=[
-                ConditionalProcessor(
-                    processor=HighlightMatchingBracketProcessor(
-                        chars='[](){}'),
-                    filter=HasFocus(DEFAULT_BUFFER) & ~IsDone())
-            ]
-        )
-
-        cli_buffer = Buffer(
-            history=history,
-            completer=self.completer,
-            complete_while_typing=Always(),
-            accept_action=AcceptAction.RETURN_DOCUMENT)
-
-        manager = get_key_manager(
+        key_bindings = get_key_bindings(
             self.set_long_options,
             self.get_long_options,
             self.set_fuzzy_match,
             self.get_fuzzy_match)
 
-        application = Application(
+        prompt = PromptSession(
+            message='wharfee> ',
+            lexer=PygmentsLexer(CommandLexer),
+            bottom_toolbar=toolbar_handler,
+            input_processors=[ConditionalProcessor(
+                    processor=HighlightMatchingBracketProcessor(
+                        chars='[](){}'),
+                    filter=HasFocus(DEFAULT_BUFFER) & ~IsDone())],
+            history=history,
+            completer=self.completer,
+            complete_while_typing=True,
             style=style_factory(self.theme),
-            layout=layout,
-            buffer=cli_buffer,
-            key_bindings_registry=manager.registry,
-            on_exit=AbortAction.RAISE_EXCEPTION,
-            on_abort=AbortAction.RETRY,
-            ignore_case=True)
-
-        eventloop = create_eventloop()
-
-        self.dcli = CommandLineInterface(
-            application=application,
-            eventloop=eventloop)
+            key_bindings=key_bindings,
+            enable_system_prompt=True,
+            enable_suspend=True,
+            enable_open_in_editor=True,
+        )
 
         while True:
             try:
-                document = self.dcli.run(True)
-                self.handler.handle_input(document.text)
+                text = prompt.prompt()
+                self.handler.handle_input(text)
 
                 if isinstance(self.handler.output, GeneratorType):
                     output_stream(self.handler.command,
@@ -328,6 +310,10 @@ class WharfeeCli(object):
                 self.logger.debug('Permission exception: %r.', ex)
                 self.logger.error("traceback: %r", traceback.format_exc())
                 click.secho(str(ex), fg='red')
+
+            except KeyboardInterrupt:
+                # Retry.
+                continue
 
             except EOFError:
                 # exit out of the CLI
