@@ -377,12 +377,8 @@ def truncate_rows(rows, length=30, length_id=10):
     result = []
     for row in rows:
         if isinstance(row, dict):
-            updated = {}
-            for k, v in row.items():
-                if k.endswith('Id'):
-                    updated[k] = trimto(v, length_id)
-                else:
-                    updated[k] = trimto(v, length)
+            updated = {k: trimto(v, length_id) 
+                       if k.endswith('Id') else trimto(v, length) for (k, v) in row.items()}
             result.append(updated)
         elif isinstance(row, six.string_types):
             result.append(trimto(row, length))
