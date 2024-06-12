@@ -339,6 +339,9 @@ class WharfeeCli(object):
                 self.logger.error("traceback: %r", traceback.format_exc())
                 click.secho(str(ex), fg='red')
 
+        if '-i' in sys.argv or '-t' in sys.argv:
+            print('Interactive terminal is closed.')
+
         self.revert_less_opts()
         self.write_config_file()
         print('Goodbye!')
