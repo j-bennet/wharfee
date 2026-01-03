@@ -1,25 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8
-from __future__ import unicode_literals
-from __future__ import print_function
-
 import os
 import click
 import traceback
 
 from types import GeneratorType
-from prompt_toolkit import (AbortAction,
-                            Application,
-                            CommandLineInterface)
-from prompt_toolkit.enums import DEFAULT_BUFFER
-from prompt_toolkit.filters import Always, HasFocus, IsDone
-from prompt_toolkit.layout.processors import (
-    HighlightMatchingBracketProcessor,
-    ConditionalProcessor
-)
-from prompt_toolkit.buffer import (Buffer, AcceptAction)
-from prompt_toolkit.shortcuts import (create_prompt_layout, create_eventloop)
+from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
+from prompt_toolkit.lexers import PygmentsLexer
 
 from .client import DockerClient
 from .client import DockerPermissionException
@@ -31,14 +19,11 @@ from .formatter import format_data
 from .formatter import output_stream
 from .config import write_default_config, read_config
 from .style import style_factory
-from .keys import get_key_manager
+from .keys import get_key_bindings
 from .toolbar import create_toolbar_handler
 from .options import OptionError
 from .logger import create_logger
 from .__init__ import __version__
-
-# Added this to avoid the annoying warning: http://click.pocoo.org/5/python3/
-click.disable_unicode_literals_warning = True
 
 
 class WharfeeCli(object):
@@ -46,7 +31,7 @@ class WharfeeCli(object):
     The CLI implementation.
     """
 
-    dcli = None
+    session = None
     keyword_completer = None
     handler = None
     saved_less_opts = None
@@ -244,49 +229,27 @@ class WharfeeCli(object):
         history = FileHistory(os.path.expanduser('~/.wharfee-history'))
         toolbar_handler = create_toolbar_handler(self.get_long_options, self.get_fuzzy_match)
 
-        layout = create_prompt_layout(
-            message='wharfee> ',
-            lexer=CommandLexer,
-            get_bottom_toolbar_tokens=toolbar_handler,
-            extra_input_processors=[
-                ConditionalProcessor(
-                    processor=HighlightMatchingBracketProcessor(
-                        chars='[](){}'),
-                    filter=HasFocus(DEFAULT_BUFFER) & ~IsDone())
-            ]
-        )
-
-        cli_buffer = Buffer(
-            history=history,
-            completer=self.completer,
-            complete_while_typing=Always(),
-            accept_action=AcceptAction.RETURN_DOCUMENT)
-
-        manager = get_key_manager(
+        key_bindings = get_key_bindings(
             self.set_long_options,
             self.get_long_options,
             self.set_fuzzy_match,
             self.get_fuzzy_match)
 
-        application = Application(
+        self.session = PromptSession(
+            message='wharfee> ',
+            history=history,
+            completer=self.completer,
+            complete_while_typing=True,
+            lexer=PygmentsLexer(CommandLexer),
             style=style_factory(self.theme),
-            layout=layout,
-            buffer=cli_buffer,
-            key_bindings_registry=manager.registry,
-            on_exit=AbortAction.RAISE_EXCEPTION,
-            on_abort=AbortAction.RETRY,
-            ignore_case=True)
-
-        eventloop = create_eventloop()
-
-        self.dcli = CommandLineInterface(
-            application=application,
-            eventloop=eventloop)
+            key_bindings=key_bindings,
+            bottom_toolbar=toolbar_handler,
+        )
 
         while True:
             try:
-                document = self.dcli.run(True)
-                self.handler.handle_input(document.text)
+                text = self.session.prompt()
+                self.handler.handle_input(text)
 
                 if isinstance(self.handler.output, GeneratorType):
                     output_stream(self.handler.command,

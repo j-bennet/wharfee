@@ -1,33 +1,40 @@
 # -*- coding: utf-8
-from pygments.token import Token
+"""
+Style configuration for the CLI.
+"""
 from pygments.util import ClassNotFound
-from prompt_toolkit.styles import default_style_extensions, PygmentsStyle
 import pygments.styles
+from prompt_toolkit.styles import Style, merge_styles
+from prompt_toolkit.styles.pygments import style_from_pygments_cls
 
 
 def style_factory(name):
+    """
+    Create a style based on a Pygments style name.
+    :param name: string: Pygments style name
+    :return: Style
+    """
     try:
-        style = pygments.styles.get_style_by_name(name)
+        pygments_style = pygments.styles.get_style_by_name(name)
     except ClassNotFound:
-        style = pygments.styles.get_style_by_name('native')
+        pygments_style = pygments.styles.get_style_by_name('native')
 
-    styles = {}
-
-    styles.update(style.styles)
-    styles.update(default_style_extensions)
-    styles.update({
-        Token.Menu.Completions.Completion.Current: 'bg:#00aaaa #000000',
-        Token.Menu.Completions.Completion: 'bg:#008888 #ffffff',
-        Token.Menu.Completions.ProgressButton: 'bg:#003333',
-        Token.Menu.Completions.ProgressBar: 'bg:#00aaaa',
-        Token.Toolbar: 'bg:#222222 #cccccc',
-        Token.Toolbar.Off: 'bg:#222222 #004444',
-        Token.Toolbar.On: 'bg:#222222 #ffffff',
-        Token.Toolbar.Search: 'noinherit bold',
-        Token.Toolbar.Search.Text: 'nobold',
-        Token.Toolbar.System: 'noinherit bold',
-        Token.Toolbar.Arg: 'noinherit bold',
-        Token.Toolbar.Arg.Text: 'nobold'
+    custom_style = Style.from_dict({
+        'completion-menu.completion.current': 'bg:#00aaaa #000000',
+        'completion-menu.completion': 'bg:#008888 #ffffff',
+        'completion-menu.progress-button': 'bg:#003333',
+        'completion-menu.progress-bar': 'bg:#00aaaa',
+        'bottom-toolbar': 'bg:#222222 #cccccc',
+        'bottom-toolbar.off': 'bg:#222222 #004444',
+        'bottom-toolbar.on': 'bg:#222222 #ffffff',
+        'search': 'noinherit bold',
+        'search.text': 'nobold',
+        'system': 'noinherit bold',
+        'arg': 'noinherit bold',
+        'arg.text': 'nobold',
     })
 
-    return PygmentsStyle.from_defaults(style_dict=styles)
+    return merge_styles([
+        style_from_pygments_cls(pygments_style),
+        custom_style
+    ])
