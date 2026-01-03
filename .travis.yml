@@ -1,6 +1,6 @@
 language: python
 
-dist: xenial
+dist: jammy
 
 sudo: required
 
@@ -8,18 +8,17 @@ services:
   - docker
 
 python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.7"
+  - "3.10"
+  - "3.11"
+  - "3.12"
+  - "3.13"
 
 before_install:
   # show docker version
   - docker --version
 
 install:
-  - pip install pip==9.0.1
+  - pip install --upgrade pip
   - pip install -r requirements-dev.txt
   - pip install codecov
   - pip install -e .
