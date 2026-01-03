@@ -1,21 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8
-from __future__ import unicode_literals
-from __future__ import print_function
-
 import sys
 import pretty
 import re
 import pexpect
-import ssl
-import six
 
-# make sure docker-py client API class according to docker-py version
-from docker import version_info as docker_version_info
-if docker_version_info >= (2, 0, 0):
-    from docker.api import APIClient as DockerAPIClient
-else:
-    from docker import AutoVersionClient as DockerAPIClient
+from docker import APIClient as DockerAPIClient
 from docker.utils import kwargs_from_env
 from docker.errors import APIError
 from docker.errors import DockerException, InvalidVersion
@@ -139,9 +129,7 @@ class DockerClient(object):
                     raise x
         else:
             # unix-based
-            kwargs = kwargs_from_env(
-                ssl_version=ssl.PROTOCOL_TLSv1,
-                assert_hostname=False)
+            kwargs = kwargs_from_env()
             kwargs['timeout'] = timeout
             self.instance = DockerAPIClient(**kwargs)
 
@@ -318,7 +306,7 @@ class DockerClient(object):
             if isinstance(names, list):
                 formatted = []
                 for name in names:
-                    if isinstance(name, six.string_types):
+                    if isinstance(name, str):
                         formatted.append(name.lstrip('/'))
                     else:
                         formatted.append(name)
@@ -864,10 +852,18 @@ class DockerClient(object):
             result = self.instance.exec_create(**exec_args)
 
             if result and 'Id' in result:
-                return self.instance.exec_start(
+                output = self.instance.exec_start(
                     result['Id'],
                     detach=is_detach,
                     stream=True)
+                # Decode bytes to string for Python 3 compatibility
+                def decode_output(stream):
+                    for chunk in stream:
+                        if isinstance(chunk, bytes):
+                            yield chunk.decode('utf-8', errors='replace')
+                        else:
+                            yield chunk
+                return decode_output(output)
 
             return ['There was a problem executing the command.']
 
