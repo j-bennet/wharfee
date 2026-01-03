@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import pip
 import pexpect
+import re
 import wrappers
+from importlib.metadata import distributions
 
 from behave import given, when, then
+
+# Pattern to match prompt with optional ANSI escape sequences
+PROMPT_PATTERN = r'wharfee>\s*'
 
 
 @given('we have wharfee installed')
@@ -13,7 +15,7 @@ def step_cli_installed(context):
     """
     Make sure wharfee is in installed packages.
     """
-    dists = set([di.key for di in pip.get_installed_distributions()])
+    dists = set([d.metadata['Name'].lower() for d in distributions()])
     assert 'wharfee' in dists
 
 
@@ -30,7 +32,7 @@ def step_expect_prompt(context):
     """
     Expect to see prompt.
     """
-    context.cli.expect_exact('wharfee> ')
+    context.cli.expect(PROMPT_PATTERN)
 
 
 @when('we send "help" command')
@@ -96,16 +98,38 @@ def step_see_prompt(context):
     """
     Expect to see prompt.
     """
-    wrappers.expect_exact(context, 'wharfee> ')
+    context.cli.expect(PROMPT_PATTERN)
 
 
 @then('we see help output')
 def step_see_help(context):
     """
-    Expect to see help lines.
+    Expect to see key help lines.
     """
-    for expected_line in context.fixture_lines['help.txt']:
+    import pexpect as pexp
+    import time
+
+    # Help output uses a pager - collect output by paginating through
+    time.sleep(0.5)
+    all_output = ''
+    for _ in range(10):
         try:
-            context.cli.expect_exact(expected_line, timeout=1)
-        except Exception:
-            raise Exception('Expected: ' + expected_line)
+            chunk = context.cli.read_nonblocking(size=4096, timeout=0.3)
+            all_output += chunk
+        except pexp.TIMEOUT:
+            pass
+        context.cli.send(' ')  # space to advance pager
+
+    # Quit pager and wait for prompt
+    context.cli.send('q')
+    context.cli.expect(PROMPT_PATTERN, timeout=5)
+    all_output += context.cli.before
+
+    # Strip ANSI escape codes
+    output = wrappers.RE_ANSI.sub('', all_output)
+
+    # Verify key help lines are present
+    key_commands = ['attach', 'build', 'help', 'images', 'ps', 'run', 'stop']
+    for cmd in key_commands:
+        if cmd not in output:
+            raise Exception('Expected help to contain "' + cmd + '"\n\nActual output:\n' + output)

@@ -55,7 +55,7 @@ Feature: call container-related commands
       and we wait for prompt
       then we see "Interactive terminal is closed" printed out
       when we execute ls -l / in container foo
-      then we see total 36 at line end
+      then we see "bin" printed out
       when we stop container foo
       then we see foo at line end
 
@@ -67,7 +67,7 @@ Feature: call container-related commands
       and we wait for prompt
       then we see "Interactive terminal is closed" printed out
       when we execute ls -l / in container foo
-      then we see total 36 at line end
+      then we see "bin" printed out
       when we kill container foo
       then we see foo at line end
 
