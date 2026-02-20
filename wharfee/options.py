@@ -741,6 +741,10 @@ def parse_command_options(cmd, params):
             if opt.default is not None:
                 popts[opt.dest] = opt.default
 
+    # Check for interactive terminal options
+    if '-i' in params or '-t' in params:
+        print("Interactive terminal is closed.")
+
     return parser, popts, pargs
 
 

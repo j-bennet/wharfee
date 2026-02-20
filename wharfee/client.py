@@ -1211,7 +1211,9 @@ class DockerClient(object):
             # prompt is back to beginning of line
             self.is_refresh_containers = True
             self.is_refresh_running = True
-            return ['\rInteractive terminal is closed.']
+            if is_interactive or is_tty:
+                return ['\rInteractive terminal is closed.']
+            return []
 
         def on_after_attach():
             self.is_refresh_containers = True
