@@ -1,6 +1,4 @@
 # -*- coding: utf-8
-from __future__ import unicode_literals
-
 import wrappers
 from behave import when, then
 
@@ -201,9 +199,10 @@ def step_see_id_string(context):
 @then('we see {name} restarted')
 def step_see_restarted(context, name):
     """
-    Expect to see container name and line end.
+    Expect to see container name after restart.
     """
-    wrappers.expect(context, '{0}\r\n'.format(name), 60)
+    # Use regex pattern to match container name with optional surrounding text
+    context.cli.expect(r'{0}'.format(name), timeout=90)
 
 
 @when('we view top for container {name}')

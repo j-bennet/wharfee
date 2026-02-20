@@ -1,19 +1,11 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
-
 """
 Helpers to connect to docker.
 """
 
 import sys
 
-# make sure docker-py client API class according to docker-py version
-from docker import version_info as docker_version_info
-if docker_version_info >= (2, 0, 0):
-    from docker.api import APIClient as DockerAPIClient
-else:
-    from docker import AutoVersionClient as DockerAPIClient
+from docker import APIClient as DockerAPIClient
 from docker.utils import kwargs_from_env
 
 

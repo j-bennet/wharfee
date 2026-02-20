@@ -10,14 +10,10 @@ Usage:
 -u --unimplemented  Show unimplemented commands only
 <command>           Specify command to review
 """
-from __future__ import unicode_literals
-from __future__ import print_function
-
 import os
 import re
 import pexpect
 import textwrap
-import six
 import wharfee.options as opts
 
 from docopt import docopt
@@ -308,7 +304,7 @@ def maybe_quote(x):
     :param x: object
     :return: object
     """
-    if not isinstance(x, six.string_types):
+    if not isinstance(x, str):
         return x
     if x.lower() in ['true', 'false', 'none']:
         return x

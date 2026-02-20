@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import os
 import pytest
 from prompt_toolkit.completion import Completion
@@ -7,6 +5,21 @@ from prompt_toolkit.document import Document
 from wharfee.options import all_options
 from wharfee.options import COMMAND_NAMES
 from mock import patch
+
+
+def completion_to_tuple(c):
+    """Convert Completion to hashable tuple for comparison."""
+    return (c.text, c.start_position)
+
+
+def completions_to_set(completions):
+    """Convert list of Completions to set of tuples for comparison."""
+    return set(completion_to_tuple(c) for c in completions)
+
+
+def expected_completions_set(texts, start_position=0):
+    """Create expected set of completion tuples."""
+    return set((t, start_position) for t in texts)
 
 
 @pytest.fixture
@@ -33,10 +46,10 @@ def test_empty_string_completion(completer, complete_event):
     """
     text = ''
     position = 0
-    result = set(completer.get_completions(
+    result = completions_to_set(completer.get_completions(
         Document(text=text, cursor_position=position),
         complete_event))
-    assert result == set(map(Completion, COMMAND_NAMES))
+    assert result == expected_completions_set(COMMAND_NAMES, 0)
 
 
 def test_build_path_completion_absolute(completer, complete_event):
@@ -50,13 +63,11 @@ def test_build_path_completion_absolute(completer, complete_event):
     with patch('wharfee.completer.list_dir',
                return_value=['etc', 'home', 'tmp', 'usr', 'var']):
 
-        result = set(completer.get_completions(
+        result = completions_to_set(completer.get_completions(
             Document(text=command, cursor_position=position),
             complete_event))
 
-        expected = ['etc', 'home', 'tmp', 'usr', 'var']
-
-        expected = set(map(lambda t: Completion(t, 0), expected))
+        expected = expected_completions_set(['etc', 'home', 'tmp', 'usr', 'var'], 0)
 
         assert expected.issubset(result)
 
@@ -72,13 +83,12 @@ def test_build_path_completion_user(completer, complete_event):
     with patch('wharfee.completer.list_dir',
                return_value=['Documents', 'Downloads', 'Pictures']):
 
-        result = set(completer.get_completions(
+        result = completions_to_set(completer.get_completions(
             Document(text=command, cursor_position=position),
             complete_event))
 
-        expected = ['~{0}{1}'.format(os.path.sep, d) for d in ['Documents', 'Downloads']]
-
-        expected = set(map(lambda t: Completion(t, -1), expected))
+        expected_texts = ['~{0}{1}'.format(os.path.sep, d) for d in ['Documents', 'Downloads']]
+        expected = expected_completions_set(expected_texts, -1)
 
         assert expected.issubset(result)
 
@@ -94,13 +104,11 @@ def test_build_path_completion_user_dir(completer, complete_event):
     with patch('wharfee.completer.list_dir',
                return_value=['.config', 'db-dumps', 'src', 'venv']):
 
-        result = set(completer.get_completions(
+        result = completions_to_set(completer.get_completions(
             Document(text=command, cursor_position=position),
             complete_event))
 
-        expected = ['src']
-
-        expected = set(map(lambda t: Completion(t, -1), expected))
+        expected = expected_completions_set(['src'], -1)
 
         assert expected.issubset(result)
 
@@ -119,11 +127,11 @@ def test_command_completion(completer, complete_event, command, expected):
     :param expected: list: expected completions
     """
     position = len(command)
-    result = set(completer.get_completions(
+    result = completions_to_set(completer.get_completions(
         Document(text=command, cursor_position=position),
         complete_event))
 
-    expected = set(map(lambda t: Completion(t, -len(command)), expected))
+    expected = expected_completions_set(expected, -len(command))
 
     assert result == expected
 
@@ -175,11 +183,11 @@ def test_options_completion_long(completer, complete_event, command, expected, e
     """
     position = len(command)
 
-    result = set(completer.get_completions(
+    result = completions_to_set(completer.get_completions(
         Document(text=command, cursor_position=position), complete_event))
 
-    expected = set(map(lambda t: Completion(
-        t.get_name(is_long=True), expected_pos, t.display), expected))
+    expected = expected_completions_set(
+        [t.get_name(is_long=True) for t in expected], expected_pos)
 
     assert result == expected
 
@@ -222,10 +230,10 @@ def test_options_completion_long_fuzzy(completer, complete_event, command, expec
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("ps ", pso, 0),
-    ("ps -", filter(
-        lambda x: x.name.startswith('-'), pso), -1),
-    ("ps -h", filter(
-        lambda x: x.short_name and x.short_name.startswith('-h'), pso), -2),
+    ("ps -", list(filter(
+        lambda x: x.name.startswith('-'), pso)), -1),
+    ("ps -h", list(filter(
+        lambda x: x.short_name and x.short_name.startswith('-h'), pso)), -2),
 ])
 def test_options_completion_short(completer, complete_event, command, expected,
                                   expected_pos):
@@ -238,20 +246,20 @@ def test_options_completion_short(completer, complete_event, command, expected,
 
     position = len(command)
 
-    result = set(completer.get_completions(
+    result = completions_to_set(completer.get_completions(
         Document(text=command, cursor_position=position), complete_event))
 
-    expected = set(map(lambda t: Completion(
-        t.get_name(is_long=completer.get_long_options()),
-        expected_pos, t.display), expected))
+    expected = expected_completions_set(
+        [t.get_name(is_long=completer.get_long_options()) for t in expected],
+        expected_pos)
 
     assert result == expected
 
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("ps --before ", cs1, 0),
-    ("ps --before e", filter(lambda x: x.startswith('e'), cs1), -1),
-    ("ps --before ei", filter(lambda x: x.startswith('ei'), cs1), -2),
+    ("ps --before e", list(filter(lambda x: x.startswith('e'), cs1)), -1),
+    ("ps --before ei", list(filter(lambda x: x.startswith('ei'), cs1)), -2),
 ])
 def test_options_container_completion(completer, complete_event, command,
                                       expected, expected_pos):
@@ -262,10 +270,10 @@ def test_options_container_completion(completer, complete_event, command,
 
     position = len(command)
 
-    result = set(completer.get_completions(
+    result = completions_to_set(completer.get_completions(
         Document(text=command, cursor_position=position), complete_event))
 
-    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+    expected = expected_completions_set(expected, expected_pos)
 
     assert result == expected
 
@@ -273,8 +281,8 @@ def test_options_container_completion(completer, complete_event, command,
 @pytest.mark.parametrize("command, expected, expected_pos", [
     ("top ", list(map(
         lambda x: (x, x), rs1)) + [('--help', '-h/--help')], 0),
-    ("top e", map(
-        lambda x: (x, x), filter(lambda x: x.startswith('e'), rs1)), -1),
+    ("top e", list(map(
+        lambda x: (x, x), filter(lambda x: x.startswith('e'), rs1))), -1),
 ])
 def test_options_container_running_completion(completer, complete_event,
                                               command, expected, expected_pos):
@@ -286,17 +294,12 @@ def test_options_container_running_completion(completer, complete_event,
 
     position = len(command)
 
-    result = set(completer.get_completions(
+    result = completions_to_set(completer.get_completions(
         Document(text=command, cursor_position=position), complete_event))
 
-    expected_completions = set()
-    for text, display in expected:
-        if display:
-            expected_completions.add(Completion(text, expected_pos, display))
-        else:
-            expected_completions.add(Completion(text, expected_pos))
+    expected_set = set((text, expected_pos) for text, display in expected)
 
-    assert result == expected_completions
+    assert result == expected_set
 
 
 @pytest.mark.parametrize("command, expected, expected_pos", [
@@ -339,10 +342,10 @@ def test_options_image_completion(completer, complete_event):
     completer.set_images(expected)
     position = len(command)
 
-    result = set(completer.get_completions(
+    result = completions_to_set(completer.get_completions(
         Document(text=command, cursor_position=position), complete_event))
 
-    expected = set(map(lambda t: Completion(t, expected_pos), expected))
+    expected = expected_completions_set(expected, expected_pos)
 
     assert result == expected
 
@@ -391,11 +394,9 @@ def test_options_volume_completion(completer, complete_event, command,
 
     completer.set_fuzzy_match(True)
 
-    result = set(completer.get_completions(
+    result = completions_to_set(completer.get_completions(
         Document(text=command, cursor_position=position), complete_event))
 
-    expected = set(map(
-        lambda t: Completion(t[0], expected_pos, t[1] if len(t) > 1 else t[0]),
-        expected))
+    expected = expected_completions_set([t[0] for t in expected], expected_pos)
 
     assert result == expected

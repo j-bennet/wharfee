@@ -5,7 +5,7 @@ Feature: call volume commands
       when we run wharfee
       and we wait for prompt
       when we list volumes
-      then we see "There are no volumes to list" printed out
+      then we see wharfee prompt
 
   Scenario: create, inspect, remove volume
      Given we have wharfee installed

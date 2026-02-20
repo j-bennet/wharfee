@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import pytest
 from wharfee.helpers import (parse_port_bindings, parse_volume_bindings,
                              parse_kv_as_dict)

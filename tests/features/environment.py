@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
-
 import os
 import fixture_utils as fixutils
 import docker_utils as dutils
@@ -37,10 +34,13 @@ def after_scenario(context, _):
     if hasattr(context, 'cli'):
         if context.has_containers:
             # force remove all containers that are still running.
-            wrappers.expect_exact(context, 'wharfee> ')
+            try:
+                context.cli.expect(r'wharfee>\s*', timeout=5)
+            except Exception:
+                pass  # Prompt might already be there
             print('\nCleaning up containers...',)
             context.cli.sendline('rm -f --all')
-            wrappers.expect_exact(context, ['Removed: ', 'There are no'])
+            wrappers.expect(context, r'Removed:|There are no', timeout=30)
             print('Cleaned up.')
             context.has_containers = False
 

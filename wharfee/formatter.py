@@ -2,30 +2,14 @@
 """
 Helper functions to format output for CLI.
 """
-from __future__ import unicode_literals
-from __future__ import print_function
-
 import json
 import click
-import six
+from io import StringIO
 from tabulate import tabulate
 from pygments import highlight
 from pygments.lexers.data import JsonLexer
 from pygments.formatters.terminal import TerminalFormatter
 from ruamel.yaml import YAML
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
-
-# Python 3 has no 'basestring' or 'long' type we're checking for.
-try:
-    unicode
-except NameError:
-    # Python 3
-    basestring = unicode = str
-    long = int
 
 
 class StreamFormatter(object):
@@ -62,7 +46,7 @@ class JsonStreamDumper(StreamFormatter):
         """
         for obj in self.stream:
             self.counter += 1
-            if isinstance(obj, six.string_types):
+            if isinstance(obj, str):
                 click.echo(obj)
             else:
                 text = json.dumps(obj, indent=4)
@@ -204,7 +188,7 @@ def format_data(command, data):
                 data = truncate_rows(data)
                 text = tabulate(data, headers='keys')
                 return text.split('\n')
-        elif isinstance(data[0], six.string_types):
+        elif isinstance(data[0], str):
             if len(data) == 1:
                 return data
             elif is_plain_list(data):
@@ -245,8 +229,8 @@ def is_plain_list(lst):
     :return: boolean
     """
     for item in lst:
-        if not isinstance(item, six.string_types) and \
-                not isinstance(item, (int, long, float, complex)):
+        if not isinstance(item, str) and \
+                not isinstance(item, (int, float, complex)):
             return False
     return True
 
@@ -370,7 +354,7 @@ def truncate_rows(rows, length=30, length_id=10):
         :param s: string to trim
         :param l: length
         """
-        if isinstance(s, six.string_types):
+        if isinstance(s, str):
             return s[:l + 1]
         return s
 
@@ -384,7 +368,7 @@ def truncate_rows(rows, length=30, length_id=10):
                 else:
                     updated[k] = trimto(v, length)
             result.append(updated)
-        elif isinstance(row, six.string_types):
+        elif isinstance(row, str):
             result.append(trimto(row, length))
         else:
             result.append(row)
