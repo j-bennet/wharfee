@@ -1,9 +1,4 @@
-[![Stories in Ready](https://badge.waffle.io/j-bennet/wharfee.png?label=ready&title=Ready)](https://waffle.io/j-bennet/wharfee)
 [![PyPI version](https://badge.fury.io/py/wharfee.svg)](http://badge.fury.io/py/wharfee)
-[![Join the chat at https://gitter.im/j-bennet/wharfee](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/j-bennet/wharfee?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-## Is this still maintained?
-
-I love wharfee, and I don't want it to die, that's why it's still on github. But the project didn't pick up any new contributors, and I don't currently have the time to maintain it. If you're interested in taking over and maintaining wharfee, let me know. If you want to sponsor maintaining wharfee, let me know as well.
 
 # wharfee
 
@@ -91,6 +86,7 @@ To enter debugger on error, use the following command:
  
     $ behave -D DEBUG_ON_ERROR
 
-## Thanks
+## Who is working on wharfee?
 
-[![I develop with PyCharm](screenshots/icon_PyCharm.png)](https://www.jetbrains.com/pycharm/)
+Author: [Irina Truong](https://github.com/j-bennet)
+Maintainer: [Pratik Singhal](https://github.com/ps06756)

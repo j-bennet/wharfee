@@ -10,3 +10,4 @@ dist/
 .coverage
 .python-version
 .cache/
+.vscode/
